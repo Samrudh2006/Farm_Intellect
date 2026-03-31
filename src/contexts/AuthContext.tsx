@@ -4,6 +4,14 @@ import { FirebaseAuth } from "@/integrations/firebase/client";
 import type { User as SupabaseUser, Session as SupabaseSession } from "@supabase/supabase-js";
 import type { User as FirebaseUser } from "firebase/auth";
 
+const LOCAL_AUTH_SESSION_KEY = "local_auth_session_v1";
+
+interface LocalUser {
+  id: string;
+  email?: string;
+  phone?: string;
+}
+
 interface UserProfile {
   id: string;
   display_name: string;
@@ -15,7 +23,7 @@ interface UserProfile {
 }
 
 interface AuthContextType {
-  user: SupabaseUser | FirebaseUser | null;
+  user: SupabaseUser | FirebaseUser | LocalUser | null;
   session: SupabaseSession | null;
   profile: UserProfile | null;
   loading: boolean;
@@ -31,7 +39,7 @@ interface AuthContextType {
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
-  const [user, setUser] = useState<SupabaseUser | FirebaseUser | null>(null);
+  const [user, setUser] = useState<SupabaseUser | FirebaseUser | LocalUser | null>(null);
   const [session, setSession] = useState<SupabaseSession | null>(null);
   const [profile, setProfile] = useState<UserProfile | null>(null);
   const [loading, setLoading] = useState(true);
@@ -88,6 +96,20 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
           avatar_url: "",
           role: "farmer",
         });
+      } else if ((user as LocalUser).id?.startsWith("local-")) {
+        const localAuthRaw = localStorage.getItem(LOCAL_AUTH_SESSION_KEY);
+        if (localAuthRaw) {
+          const localAuth = JSON.parse(localAuthRaw);
+          setProfile({
+            id: localAuth.id,
+            display_name: localAuth.displayName || "User",
+            email: localAuth.email || "",
+            phone: localAuth.phone || "",
+            location: localAuth.location || "",
+            avatar_url: "",
+            role: localAuth.role || "farmer",
+          });
+        }
       } else {
         await fetchProfile((user as SupabaseUser).id);
       }
@@ -116,8 +138,47 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   }, []);
 
   useEffect(() => {
+    const hydrateLocalAuth = () => {
+      const localAuthRaw = localStorage.getItem(LOCAL_AUTH_SESSION_KEY);
+      if (!localAuthRaw) return;
+
+      try {
+        const localAuth = JSON.parse(localAuthRaw);
+        setUser({
+          id: localAuth.id,
+          email: localAuth.email || "",
+          phone: localAuth.phone || "",
+        });
+        setSession(null);
+        setIsFirebaseUser(false);
+        setProfile({
+          id: localAuth.id,
+          display_name: localAuth.displayName || "User",
+          email: localAuth.email || "",
+          phone: localAuth.phone || "",
+          location: localAuth.location || "",
+          avatar_url: "",
+          role: localAuth.role || "farmer",
+        });
+        setLoading(false);
+      } catch (error) {
+        console.error("Failed to parse local auth session:", error);
+      }
+    };
+
+    hydrateLocalAuth();
+    window.addEventListener("local-auth-changed", hydrateLocalAuth);
+    return () => window.removeEventListener("local-auth-changed", hydrateLocalAuth);
+  }, []);
+
+  useEffect(() => {
     if (isFirebaseUser) return;
     if (!hasSupabaseEnv) {
+      const localAuthRaw = localStorage.getItem(LOCAL_AUTH_SESSION_KEY);
+      if (localAuthRaw) {
+        setLoading(false);
+        return;
+      }
       setLoading(false);
       setSession(null);
       setUser(null);
@@ -220,7 +281,13 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       setSession(null);
       setUser(null);
       setProfile(null);
+    } else {
+      localStorage.removeItem(LOCAL_AUTH_SESSION_KEY);
+      setSession(null);
+      setUser(null);
+      setProfile(null);
     }
+    localStorage.removeItem(LOCAL_AUTH_SESSION_KEY);
   };
 
   return (

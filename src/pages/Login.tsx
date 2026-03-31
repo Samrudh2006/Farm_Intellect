@@ -16,6 +16,44 @@ import merchantImg from "@/assets/roles/merchant-role.jpg";
 import expertImg from "@/assets/roles/expert-role.jpg";
 import adminImg from "@/assets/roles/admin-role.jpg";
 
+const LOCAL_AUTH_SESSION_KEY = "local_auth_session_v1";
+const PASSKEY_STORE_KEY = "passkey_credentials_v1";
+
+interface StoredPasskeyCredential {
+  aadhaar: string;
+  credentialId: string;
+  role: string;
+  phone: string;
+  displayName: string;
+  location: string;
+}
+
+const toBase64Url = (buffer: ArrayBuffer) => {
+  const bytes = new Uint8Array(buffer);
+  let binary = "";
+  bytes.forEach((byte) => {
+    binary += String.fromCharCode(byte);
+  });
+  return btoa(binary).replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/, "");
+};
+
+const fromBase64Url = (value: string) => {
+  const base64 = value.replace(/-/g, "+").replace(/_/g, "/");
+  const padded = base64 + "=".repeat((4 - (base64.length % 4)) % 4);
+  const binary = atob(padded);
+  const bytes = new Uint8Array(binary.length);
+  for (let i = 0; i < binary.length; i += 1) {
+    bytes[i] = binary.charCodeAt(i);
+  }
+  return bytes.buffer;
+};
+
+const randomChallenge = (length = 32) => {
+  const challenge = new Uint8Array(length);
+  crypto.getRandomValues(challenge);
+  return challenge;
+};
+
 const Login = () => {
   const { t } = useLanguage();
   const { toast } = useToast();
@@ -33,7 +71,6 @@ const Login = () => {
     location: "",
     aadhaar: "",
   });
-  const [confirmationResult, setConfirmationResult] = useState<any>(null);
   const otpRefs = useRef<(HTMLInputElement | null)[]>([]);
 
   useEffect(() => {
@@ -49,7 +86,187 @@ const Login = () => {
     setOtpSent(false);
     setFormData({ phone: "", name: "", location: "", aadhaar: "" });
     setOtp(["", "", "", "", "", ""]);
-    setConfirmationResult(null);
+  };
+
+  const aadhaarDigits = formData.aadhaar.replace(/\D/g, "");
+
+  const getStoredCredentials = (): StoredPasskeyCredential[] => {
+    const raw = localStorage.getItem(PASSKEY_STORE_KEY);
+    if (!raw) return [];
+    try {
+      const parsed = JSON.parse(raw);
+      return Array.isArray(parsed) ? parsed : [];
+    } catch {
+      return [];
+    }
+  };
+
+  const saveStoredCredentials = (credentials: StoredPasskeyCredential[]) => {
+    localStorage.setItem(PASSKEY_STORE_KEY, JSON.stringify(credentials));
+  };
+
+  const completeLocalLogin = (method: "passkey" | "sms-otp", roleOverride?: string) => {
+    const activeRole = roleOverride || selectedRole || "farmer";
+    const session = {
+      id: `local-${aadhaarDigits || formData.phone}`,
+      role: activeRole,
+      displayName: formData.name || `Farmer ${formData.phone.slice(-4)}`,
+      phone: formData.phone ? `+91${formData.phone}` : "",
+      location: formData.location || "",
+      aadhaar: aadhaarDigits,
+      authMethod: method,
+    };
+
+    localStorage.setItem(LOCAL_AUTH_SESSION_KEY, JSON.stringify(session));
+    window.dispatchEvent(new Event("local-auth-changed"));
+
+    const routes: Record<string, string> = {
+      farmer: "/farmer/dashboard",
+      merchant: "/merchant/dashboard",
+      expert: "/expert/dashboard",
+      admin: "/admin/dashboard",
+    };
+
+    navigate(routes[activeRole] || "/farmer/dashboard");
+  };
+
+  const createPasskey = async () => {
+    if (!("credentials" in navigator) || !window.PublicKeyCredential) {
+      toast({
+        title: "Passkeys not supported",
+        description: "This browser or device does not support passkeys yet.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    if (aadhaarDigits.length !== 12) {
+      toast({
+        title: "Aadhaar required",
+        description: "Please enter a valid 12-digit Aadhaar number before creating passkey.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    if (!selectedRole || !formData.phone || !formData.name || !formData.location) {
+      toast({
+        title: "Missing details",
+        description: "Name, location, phone, and role are required to create your passkey.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setLoading(true);
+    try {
+      const challenge = randomChallenge();
+      const userId = new TextEncoder().encode(`aadhaar:${aadhaarDigits}`);
+      const credential = await navigator.credentials.create({
+        publicKey: {
+          rp: { name: "Smart Crop Advisory" },
+          user: {
+            id: userId,
+            name: `${aadhaarDigits}@farmer.local`,
+            displayName: formData.name,
+          },
+          challenge,
+          pubKeyCredParams: [{ type: "public-key", alg: -7 }, { type: "public-key", alg: -257 }],
+          authenticatorSelection: {
+            residentKey: "preferred",
+            userVerification: "preferred",
+          },
+          timeout: 60000,
+          attestation: "none",
+        },
+      });
+
+      if (!credential || !(credential instanceof PublicKeyCredential)) {
+        throw new Error("Passkey creation was cancelled.");
+      }
+
+      const nextCredential: StoredPasskeyCredential = {
+        aadhaar: aadhaarDigits,
+        credentialId: toBase64Url(credential.rawId),
+        role: selectedRole,
+        phone: formData.phone,
+        displayName: formData.name,
+        location: formData.location,
+      };
+
+      const existing = getStoredCredentials().filter((item) => item.aadhaar !== aadhaarDigits);
+      saveStoredCredentials([...existing, nextCredential]);
+      toast({ title: "Passkey created", description: "You can now login securely with Aadhaar + passkey." });
+      completeLocalLogin("passkey");
+    } catch (error: any) {
+      toast({
+        title: "Could not create passkey",
+        description: error?.message || "Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const loginWithPasskey = async () => {
+    if (!("credentials" in navigator) || !window.PublicKeyCredential) {
+      toast({
+        title: "Passkeys not supported",
+        description: "This browser or device does not support passkeys yet.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    if (aadhaarDigits.length !== 12) {
+      toast({
+        title: "Aadhaar required",
+        description: "Enter your 12-digit Aadhaar to find your passkey.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    const credential = getStoredCredentials().find((item) => item.aadhaar === aadhaarDigits);
+    if (!credential) {
+      toast({
+        title: "No passkey found",
+        description: "Create a passkey first using Sign up mode for this Aadhaar number.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setLoading(true);
+    try {
+      await navigator.credentials.get({
+        publicKey: {
+          challenge: randomChallenge(),
+          allowCredentials: [{ id: new Uint8Array(fromBase64Url(credential.credentialId)), type: "public-key" }],
+          userVerification: "preferred",
+          timeout: 60000,
+        },
+      });
+
+      setFormData((prev) => ({
+        ...prev,
+        phone: prev.phone || credential.phone,
+        name: prev.name || credential.displayName,
+        location: prev.location || credential.location,
+      }));
+      setSelectedRole(credential.role);
+      toast({ title: "Passkey verified", description: "Welcome back!" });
+      completeLocalLogin("passkey", credential.role);
+    } catch (error: any) {
+      toast({
+        title: "Passkey login failed",
+        description: error?.message || "Please try again or use OTP fallback.",
+        variant: "destructive",
+      });
+    } finally {
+      setLoading(false);
+    }
   };
 
   const sendOTP = async () => {
@@ -67,7 +284,7 @@ const Login = () => {
       setResendTimer(30);
       toast({ 
         title: t("auth.otp_sent"), 
-        description: loginMethod === "whatsapp" ? "OTP sent via WhatsApp" : "OTP sent via SMS" 
+        description: loginMethod === "whatsapp" ? "OTP requested via WhatsApp fallback (currently delivered through phone OTP provider)." : "OTP sent via SMS" 
       });
     } catch (error: any) {
       console.error("OTP Error:", error);
@@ -99,26 +316,8 @@ const Login = () => {
       const user = await FirebaseAuth.verifyOTP(otpCode);
       
       if (user) {
-        const userData = {
-          uid: user.uid,
-          phone: user.phoneNumber,
-          role: selectedRole,
-          displayName: formData.name || user.phoneNumber,
-          aadhaar: formData.aadhaar,
-          location: formData.location,
-        };
-        
-        localStorage.setItem("farmer_user", JSON.stringify(userData));
-        
-        const routes: Record<string, string> = {
-          farmer: "/farmer/dashboard",
-          merchant: "/merchant/dashboard",
-          expert: "/expert/dashboard",
-          admin: "/admin/dashboard",
-        };
-        
+        completeLocalLogin("sms-otp");
         toast({ title: t("auth.login_success"), description: t("auth.welcome_back") });
-        navigate(routes[selectedRole || "farmer"] || "/farmer/dashboard");
       }
     } catch (error: any) {
       console.error("OTP Verification Error:", error);
@@ -459,7 +658,17 @@ const Login = () => {
                       <span className="h-4 w-4 border-2 border-primary-foreground/30 border-t-primary-foreground rounded-full animate-spin" />
                       {t("common.loading")}
                     </span>
-                  ) : isLogin ? t("auth.signin") : t("auth.signup")}
+                  ) : isLogin ? "Continue with OTP" : "Send OTP for verification"}
+                </Button>
+
+                <Button
+                  type="button"
+                  variant="secondary"
+                  className="w-full"
+                  disabled={loading}
+                  onClick={isLogin ? loginWithPasskey : createPasskey}
+                >
+                  {isLogin ? "Login with Passkey + Aadhaar" : "Create Passkey + Save Login"}
                 </Button>
               </form>
 
