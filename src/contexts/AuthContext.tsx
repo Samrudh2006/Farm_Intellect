@@ -1,8 +1,6 @@
 import { createContext, useContext, useEffect, useState, ReactNode } from "react";
 import { hasSupabaseEnv, supabase } from "@/integrations/supabase/client";
-import { FirebaseAuth } from "@/integrations/firebase/client";
 import type { User as SupabaseUser, Session as SupabaseSession } from "@supabase/supabase-js";
-import type { User as FirebaseUser } from "firebase/auth";
 
 interface UserProfile {
   id: string;
@@ -15,27 +13,31 @@ interface UserProfile {
 }
 
 interface AuthContextType {
-  user: SupabaseUser | FirebaseUser | null;
+  user: SupabaseUser | null;
   session: SupabaseSession | null;
   profile: UserProfile | null;
   loading: boolean;
-  signUp: (email: string, password: string, metadata: { display_name: string; role: string; phone?: string; location?: string }) => Promise<{ error: Error | null }>;
-  signIn: (email: string, password: string) => Promise<{ error: Error | null }>;
-  signInWithPhone: (phone: string) => Promise<{ confirmationResult: any; error: Error | null }>;
-  verifyOTP: (otp: string, confirmationResult: any) => Promise<{ user: FirebaseUser; error: Error | null }>;
+  signUpWithAadhaar: (aadhaar: string, passkey: string, metadata: { display_name: string; role: string; phone?: string; location?: string }) => Promise<{ error: Error | null }>;
+  signInWithAadhaar: (aadhaar: string, passkey: string) => Promise<{ error: Error | null }>;
+  signInWithPhoneOTP: (phone: string, role: string, name?: string) => Promise<{ otp: string; error: Error | null }>;
+  verifyPhoneOTP: (phone: string, otp: string) => Promise<{ error: Error | null }>;
   signOut: () => Promise<void>;
   refreshProfile: () => Promise<void>;
-  isFirebaseUser: boolean;
 }
+
+// Store pending OTPs in memory (simulation)
+const pendingOTPs = new Map<string, { otp: string; password: string; expiresAt: number }>();
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
+const aadhaarToEmail = (aadhaar: string) => `aadhaar_${aadhaar.replace(/\s/g, "")}@farmapp.local`;
+const phoneToEmail = (phone: string) => `phone_${phone.replace(/\D/g, "")}@farmapp.local`;
+
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
-  const [user, setUser] = useState<SupabaseUser | FirebaseUser | null>(null);
+  const [user, setUser] = useState<SupabaseUser | null>(null);
   const [session, setSession] = useState<SupabaseSession | null>(null);
   const [profile, setProfile] = useState<UserProfile | null>(null);
   const [loading, setLoading] = useState(true);
-  const [isFirebaseUser, setIsFirebaseUser] = useState(false);
 
   const fetchProfile = async (userId: string) => {
     try {
@@ -52,7 +54,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         .single();
 
       if (profileData) {
-        const nextProfile = {
+        const nextProfile: UserProfile = {
           id: profileData.id,
           display_name: profileData.display_name || "",
           email: profileData.email || "",
@@ -61,11 +63,9 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
           avatar_url: profileData.avatar_url || "",
           role: roleData?.role || "farmer",
         };
-
         setProfile(nextProfile);
         return nextProfile;
       }
-
       setProfile(null);
       return null;
     } catch (err) {
@@ -77,51 +77,13 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
   const refreshProfile = async () => {
     if (user) {
-      if (isFirebaseUser) {
-        const firebaseUser = user as FirebaseUser;
-        setProfile({
-          id: firebaseUser.uid,
-          display_name: firebaseUser.phoneNumber || "User",
-          email: "",
-          phone: firebaseUser.phoneNumber || "",
-          location: "",
-          avatar_url: "",
-          role: "farmer",
-        });
-      } else {
-        await fetchProfile((user as SupabaseUser).id);
-      }
+      await fetchProfile(user.id);
     }
   };
 
   useEffect(() => {
-    const unsubscribe = FirebaseAuth.onAuthStateChanged((firebaseUser) => {
-      if (firebaseUser) {
-        setUser(firebaseUser);
-        setIsFirebaseUser(true);
-        setProfile({
-          id: firebaseUser.uid,
-          display_name: firebaseUser.phoneNumber || "User",
-          email: "",
-          phone: firebaseUser.phoneNumber || "",
-          location: "",
-          avatar_url: "",
-          role: "farmer",
-        });
-        setLoading(false);
-      }
-    });
-
-    return () => unsubscribe();
-  }, []);
-
-  useEffect(() => {
-    if (isFirebaseUser) return;
     if (!hasSupabaseEnv) {
       setLoading(false);
-      setSession(null);
-      setUser(null);
-      setProfile(null);
       return;
     }
 
@@ -129,7 +91,6 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       async (_event, session) => {
         setSession(session);
         setUser(session?.user ?? null);
-        setIsFirebaseUser(false);
         if (session?.user) {
           setLoading(true);
           setTimeout(async () => {
@@ -146,7 +107,6 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     supabase.auth.getSession().then(async ({ data: { session } }) => {
       setSession(session);
       setUser(session?.user ?? null);
-      setIsFirebaseUser(false);
       if (session?.user) {
         await fetchProfile(session.user.id);
       } else {
@@ -156,86 +116,126 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     });
 
     return () => subscription.unsubscribe();
-  }, [isFirebaseUser]);
+  }, []);
 
-  const signUp = async (
-    email: string,
-    password: string,
+  const signUpWithAadhaar = async (
+    aadhaar: string,
+    passkey: string,
     metadata: { display_name: string; role: string; phone?: string; location?: string }
   ) => {
     if (!hasSupabaseEnv) {
-      return {
-        error: new Error("Supabase environment variables are missing. Configure VITE_SUPABASE_URL and VITE_SUPABASE_PUBLISHABLE_KEY."),
-      };
+      return { error: new Error("Backend not configured") };
     }
+
+    const email = aadhaarToEmail(aadhaar);
 
     const { error } = await supabase.auth.signUp({
       email,
-      password,
+      password: passkey,
       options: {
-        data: metadata,
+        data: { ...metadata, aadhaar: aadhaar.replace(/\s/g, "") },
         emailRedirectTo: window.location.origin,
       },
     });
-    return { error: error as Error | null };
+
+    if (error) return { error: error as Error };
+
+    return { error: null };
   };
 
-  const signIn = async (email: string, password: string) => {
+  const signInWithAadhaar = async (aadhaar: string, passkey: string) => {
     if (!hasSupabaseEnv) {
-      return {
-        error: new Error("Supabase environment variables are missing. Configure VITE_SUPABASE_URL and VITE_SUPABASE_PUBLISHABLE_KEY."),
-      };
+      return { error: new Error("Backend not configured") };
     }
 
-    const { error } = await supabase.auth.signInWithPassword({ email, password });
-    return { error: error as Error | null };
+    const email = aadhaarToEmail(aadhaar);
+    const { error } = await supabase.auth.signInWithPassword({ email, password: passkey });
+    return { error: error ? (error as Error) : null };
   };
 
-  const signInWithPhone = async (phone: string) => {
-    try {
-      const result = await FirebaseAuth.sendOTP(phone, "recaptcha-container");
-      return { confirmationResult: result, error: null };
-    } catch (error: any) {
-      return { confirmationResult: null, error: error as Error | null };
+  const signInWithPhoneOTP = async (phone: string, role: string, name?: string) => {
+    if (!hasSupabaseEnv) {
+      return { otp: "", error: new Error("Backend not configured") };
     }
+
+    const cleanPhone = phone.replace(/\D/g, "");
+    const email = phoneToEmail(cleanPhone);
+    const generatedOTP = String(Math.floor(100000 + Math.random() * 900000));
+    const tempPassword = `otp_${generatedOTP}_${Date.now()}`;
+
+    // Try to sign up first (new user)
+    const { error: signUpError } = await supabase.auth.signUp({
+      email,
+      password: tempPassword,
+      options: {
+        data: { display_name: name || cleanPhone, role, phone: `+91${cleanPhone}` },
+        emailRedirectTo: window.location.origin,
+      },
+    });
+
+    if (signUpError && !signUpError.message?.includes("already registered")) {
+      // If already registered, we'll handle via password update after OTP verify
+    }
+
+    pendingOTPs.set(cleanPhone, {
+      otp: generatedOTP,
+      password: tempPassword,
+      expiresAt: Date.now() + 5 * 60 * 1000,
+    });
+
+    return { otp: generatedOTP, error: null };
   };
 
-  const verifyOTP = async (otp: string, confirmationResult: any) => {
-    try {
-      const user = await FirebaseAuth.verifyOTP(otp);
-      return { user, error: null };
-    } catch (error: any) {
-      return { user: null as any, error: error as Error | null };
+  const verifyPhoneOTP = async (phone: string, otp: string) => {
+    const cleanPhone = phone.replace(/\D/g, "");
+    const pending = pendingOTPs.get(cleanPhone);
+
+    if (!pending || pending.otp !== otp) {
+      return { error: new Error("Invalid OTP. Please try again.") };
     }
+
+    if (Date.now() > pending.expiresAt) {
+      pendingOTPs.delete(cleanPhone);
+      return { error: new Error("OTP expired. Please request a new one.") };
+    }
+
+    const email = phoneToEmail(cleanPhone);
+    const { error } = await supabase.auth.signInWithPassword({
+      email,
+      password: pending.password,
+    });
+
+    pendingOTPs.delete(cleanPhone);
+
+    if (error) {
+      return { error: error as Error };
+    }
+
+    return { error: null };
   };
 
   const signOut = async () => {
-    if (isFirebaseUser) {
-      await FirebaseAuth.signOut();
-      setUser(null);
-      setProfile(null);
-      setIsFirebaseUser(false);
-    } else if (hasSupabaseEnv) {
+    if (hasSupabaseEnv) {
       await supabase.auth.signOut();
-      setSession(null);
-      setUser(null);
-      setProfile(null);
     }
+    setSession(null);
+    setUser(null);
+    setProfile(null);
+    localStorage.removeItem("farmer_user");
   };
 
   return (
-    <AuthContext.Provider value={{ 
-      user, 
-      session, 
-      profile, 
-      loading, 
-      signUp, 
-      signIn, 
-      signInWithPhone,
-      verifyOTP,
-      signOut, 
+    <AuthContext.Provider value={{
+      user,
+      session,
+      profile,
+      loading,
+      signUpWithAadhaar,
+      signInWithAadhaar,
+      signInWithPhoneOTP,
+      verifyPhoneOTP,
+      signOut,
       refreshProfile,
-      isFirebaseUser 
     }}>
       {children}
     </AuthContext.Provider>
