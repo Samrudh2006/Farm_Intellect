@@ -10,29 +10,25 @@ import { LanguageSelector } from "@/components/ui/language-selector";
 import { AshokaChakra } from "@/components/ui/ashoka-chakra";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/contexts/AuthContext";
-import heroImage from "@/assets/hero-farming.jpg";
 import farmerImg from "@/assets/roles/farmer-role.jpg";
 import merchantImg from "@/assets/roles/merchant-role.jpg";
 import expertImg from "@/assets/roles/expert-role.jpg";
 import adminImg from "@/assets/roles/admin-role.jpg";
 
-type LoginMethodType = "aadhaar" | "phone" | "whatsapp";
-
 const Login = () => {
   const { t } = useLanguage();
   const { toast } = useToast();
   const navigate = useNavigate();
-  const { user, profile, signUpWithAadhaar, signInWithAadhaar, signInWithPhoneOTP, verifyPhoneOTP, signOut } = useAuth();
+  const { user, profile, signUpWithAadhaar, signInWithAadhaar, signInWithPhoneOTP, verifyPhoneOTP } = useAuth();
 
   const [selectedRole, setSelectedRole] = useState<string | null>(null);
-  const [isLogin, setIsLogin] = useState(false); // Start with signup
-  const [loginMethod, setLoginMethod] = useState<LoginMethodType>("aadhaar");
+  const [isLogin, setIsLogin] = useState(true);
   const [loading, setLoading] = useState(false);
   const [showPasskey, setShowPasskey] = useState(false);
   const [otpSent, setOtpSent] = useState(false);
+  const [loginMethod, setLoginMethod] = useState<"sms" | "whatsapp">("sms");
   const [otp, setOtp] = useState(["", "", "", "", "", ""]);
   const [resendTimer, setResendTimer] = useState(0);
-  const [generatedOtp, setGeneratedOtp] = useState("");
   const otpRefs = useRef<(HTMLInputElement | null)[]>([]);
 
   const [formData, setFormData] = useState({
@@ -66,27 +62,19 @@ const Login = () => {
 
   const handleRoleSelect = (role: string) => {
     setSelectedRole(role);
-    setIsLogin(false);
+    setIsLogin(true);
     setOtpSent(false);
-    setLoginMethod("aadhaar");
     setFormData({ aadhaar: "", passkey: "", confirmPasskey: "", phone: "", name: "", location: "" });
     setOtp(["", "", "", "", "", ""]);
   };
 
-  const resetForm = () => {
-    setFormData({ aadhaar: "", passkey: "", confirmPasskey: "", phone: "", name: "", location: "" });
-    setOtpSent(false);
-    setOtp(["", "", "", "", "", ""]);
-    setGeneratedOtp("");
-  };
-
-  // ── Aadhaar + Passkey ──
-  const handleAadhaarSubmit = async (e: React.FormEvent) => {
+  // ── Aadhaar + Passkey submit ──
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     const cleanAadhaar = formData.aadhaar.replace(/\s/g, "");
 
     if (cleanAadhaar.length !== 12) {
-      toast({ title: "Invalid Aadhaar", description: "Please enter a valid 12-digit Aadhaar number", variant: "destructive" });
+      toast({ title: t("auth.invalid_phone"), description: "Please enter a valid 12-digit Aadhaar number", variant: "destructive" });
       return;
     }
 
@@ -96,13 +84,12 @@ const Login = () => {
     }
 
     if (!isLogin) {
-      // Signup
       if (formData.passkey !== formData.confirmPasskey) {
         toast({ title: "Passkey Mismatch", description: "Passkeys do not match", variant: "destructive" });
         return;
       }
       if (!formData.name) {
-        toast({ title: "Name Required", description: "Please enter your full name", variant: "destructive" });
+        toast({ title: "Error", description: "Please fill all required fields", variant: "destructive" });
         return;
       }
 
@@ -121,22 +108,21 @@ const Login = () => {
       }
       setLoading(false);
     } else {
-      // Login
       setLoading(true);
       const { error } = await signInWithAadhaar(cleanAadhaar, formData.passkey);
       if (error) {
-        toast({ title: "Login Failed", description: "Invalid Aadhaar or Passkey. Please try again.", variant: "destructive" });
+        toast({ title: "Login Failed", description: "Invalid Aadhaar or Passkey", variant: "destructive" });
       } else {
-        toast({ title: "✅ Welcome Back!", description: "Login successful" });
+        toast({ title: t("auth.login_success"), description: t("auth.welcome_back") });
       }
       setLoading(false);
     }
   };
 
   // ── Phone / WhatsApp OTP ──
-  const sendPhoneOTP = async () => {
+  const sendOTP = async () => {
     if (!formData.phone || formData.phone.length < 10) {
-      toast({ title: "Invalid Phone", description: "Please enter a valid 10-digit phone number", variant: "destructive" });
+      toast({ title: t("auth.invalid_phone"), description: "Please enter a valid 10-digit phone number", variant: "destructive" });
       return;
     }
 
@@ -144,37 +130,40 @@ const Login = () => {
     const { otp: code, error } = await signInWithPhoneOTP(
       formData.phone,
       selectedRole || "farmer",
-      formData.name || undefined
+      formData.name || undefined,
     );
 
     if (error) {
-      toast({ title: "Error", description: error.message, variant: "destructive" });
+      toast({ title: t("auth.error"), description: error.message, variant: "destructive" });
     } else {
       setOtpSent(true);
       setResendTimer(30);
-      setGeneratedOtp(code);
       toast({
-        title: loginMethod === "whatsapp" ? "📱 WhatsApp OTP Sent" : "📲 SMS OTP Sent",
-        description: `Your OTP is: ${code} (Demo mode)`,
-        duration: 15000,
+        title: loginMethod === "whatsapp" ? "OTP sent via WhatsApp" : t("auth.otp_sent"),
+        description: `OTP sent to +91 ${formData.phone}`,
       });
+      // Auto-fill OTP for demo
+      if (code) {
+        const digits = code.split("");
+        setOtp(digits.length === 6 ? digits : ["", "", "", "", "", ""]);
+      }
     }
     setLoading(false);
   };
 
-  const handleVerifyOTP = async () => {
+  const verifyOTPCode = async () => {
     const otpCode = otp.join("");
     if (otpCode.length !== 6) {
-      toast({ title: "Enter OTP", description: "Please enter all 6 digits", variant: "destructive" });
+      toast({ title: t("auth.enter_otp"), description: "Please enter all 6 digits", variant: "destructive" });
       return;
     }
 
     setLoading(true);
     const { error } = await verifyPhoneOTP(formData.phone, otpCode);
     if (error) {
-      toast({ title: "Verification Failed", description: error.message, variant: "destructive" });
+      toast({ title: t("auth.error"), description: error.message, variant: "destructive" });
     } else {
-      toast({ title: "✅ Verified!", description: "Login successful" });
+      toast({ title: t("auth.login_success"), description: t("auth.welcome_back") });
     }
     setLoading(false);
   };
@@ -202,7 +191,7 @@ const Login = () => {
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === "Enter" && otp.join("").length === 6 && otpSent) handleVerifyOTP();
+      if (e.key === "Enter" && otp.join("").length === 6 && otpSent) verifyOTPCode();
     };
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
@@ -215,7 +204,7 @@ const Login = () => {
     { role: "admin", title: t("auth.signin_admin"), image: adminImg, description: t("auth.admin_desc") },
   ];
 
-  // ── Role Selection Screen ──
+  // ── Role Selection ──
   if (!selectedRole) {
     return (
       <div className="min-h-screen bg-background">
@@ -275,26 +264,10 @@ const Login = () => {
             </div>
             <Card className="tricolor-card overflow-hidden">
               <CardHeader className="text-center pb-4">
-                <div className="mx-auto w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center mb-3">
-                  {loginMethod === "whatsapp" ? (
-                    <MessageCircle className="h-8 w-8 text-green-600" />
-                  ) : (
-                    <Phone className="h-8 w-8 text-primary" />
-                  )}
-                </div>
                 <CardTitle className="text-xl">Verify OTP</CardTitle>
-                <CardDescription>
-                  Enter the 6-digit code sent to +91 {formData.phone}
-                  {loginMethod === "whatsapp" && " via WhatsApp"}
-                </CardDescription>
+                <CardDescription>Enter the 6-digit code sent to +91 {formData.phone}</CardDescription>
               </CardHeader>
               <CardContent>
-                {generatedOtp && (
-                  <div className="bg-accent/50 border border-accent rounded-lg p-3 mb-4 text-center">
-                    <p className="text-xs text-muted-foreground mb-1">Demo Mode — Your OTP</p>
-                    <p className="text-2xl font-mono font-bold tracking-widest text-primary">{generatedOtp}</p>
-                  </div>
-                )}
                 <div className="flex justify-center gap-2 mb-6">
                   {otp.map((digit, index) => (
                     <Input
@@ -310,11 +283,15 @@ const Login = () => {
                     />
                   ))}
                 </div>
-                <Button onClick={handleVerifyOTP} className="w-full bg-primary text-primary-foreground hover:bg-primary/90" disabled={loading || otp.join("").length !== 6}>
+                <Button
+                  onClick={verifyOTPCode}
+                  className="w-full bg-primary text-primary-foreground hover:bg-primary/90"
+                  disabled={loading || otp.join("").length !== 6}
+                >
                   {loading ? (
                     <span className="flex items-center gap-2">
                       <span className="h-4 w-4 border-2 border-primary-foreground/30 border-t-primary-foreground rounded-full animate-spin" />
-                      Verifying...
+                      {t("common.loading")}
                     </span>
                   ) : "Verify & Login"}
                 </Button>
@@ -322,7 +299,9 @@ const Login = () => {
                   {resendTimer > 0 ? (
                     <p className="text-sm text-muted-foreground">Resend OTP in {resendTimer}s</p>
                   ) : (
-                    <button onClick={sendPhoneOTP} className="text-sm text-primary hover:underline">Resend OTP</button>
+                    <button onClick={sendOTP} className="text-sm text-primary hover:underline">
+                      Resend OTP
+                    </button>
                   )}
                 </div>
               </CardContent>
@@ -337,13 +316,13 @@ const Login = () => {
     );
   }
 
-  // ── Main Login/Signup Form ──
+  // ── Main Login/Signup Form (original layout) ──
   return (
     <div className="min-h-screen grid lg:grid-cols-2">
       <div className="flex items-center justify-center p-6 bg-background">
         <div className="w-full max-w-md space-y-5">
           <div className="flex items-center justify-between mb-2">
-            <Button variant="ghost" onClick={() => { setSelectedRole(null); resetForm(); }} className="gap-2">
+            <Button variant="ghost" onClick={() => setSelectedRole(null)} className="gap-2">
               <ArrowLeft className="h-4 w-4" /> {t("common.back")}
             </Button>
             <div className="flex items-center gap-2">
@@ -357,100 +336,88 @@ const Login = () => {
               <LanguageSelector />
             </div>
           </div>
-
-          <div className="flex items-center justify-center gap-3 mb-4">
+          <div className="flex items-center justify-center gap-3 mb-6">
             <AshokaChakra size={32} />
             <h1 className="text-xl font-bold text-gradient-tricolor">Smart Crop Advisory</h1>
           </div>
-
-          {/* Login Method Tabs */}
-          <div className="grid grid-cols-3 gap-2">
-            <Button
-              variant={loginMethod === "aadhaar" ? "default" : "outline"}
-              size="sm"
-              className="flex flex-col items-center gap-1 h-auto py-2.5"
-              onClick={() => { setLoginMethod("aadhaar"); resetForm(); }}
-            >
-              <Shield className="h-4 w-4" />
-              <span className="text-xs">Aadhaar</span>
-            </Button>
-            <Button
-              variant={loginMethod === "phone" ? "default" : "outline"}
-              size="sm"
-              className="flex flex-col items-center gap-1 h-auto py-2.5"
-              onClick={() => { setLoginMethod("phone"); resetForm(); }}
-            >
-              <Phone className="h-4 w-4" />
-              <span className="text-xs">Phone OTP</span>
-            </Button>
-            <Button
-              variant={loginMethod === "whatsapp" ? "default" : "outline"}
-              size="sm"
-              className="flex flex-col items-center gap-1 h-auto py-2.5"
-              onClick={() => { setLoginMethod("whatsapp"); resetForm(); }}
-            >
-              <MessageCircle className="h-4 w-4" />
-              <span className="text-xs">WhatsApp</span>
-            </Button>
-          </div>
-
           <Card className="tricolor-card overflow-hidden">
-            <div className="relative h-32 overflow-hidden">
+            <div className="relative h-40 overflow-hidden">
               <img src={currentRole?.image} alt={currentRole?.title} className="w-full h-full object-cover" />
               <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/30 to-transparent" />
               <h3 className="absolute bottom-3 left-4 text-white font-bold text-xl drop-shadow-lg">{currentRole?.title}</h3>
             </div>
-            <CardHeader className="text-center pb-3 pt-4">
-              <CardTitle className="text-lg">
-                {loginMethod === "aadhaar" ? (
-                  isLogin ? "Login with Aadhaar + Passkey" : "Create Account with Aadhaar"
-                ) : loginMethod === "phone" ? (
-                  "Login with Phone OTP"
-                ) : (
-                  "Login with WhatsApp OTP"
-                )}
-              </CardTitle>
-              <CardDescription className="text-xs">
-                {loginMethod === "aadhaar"
-                  ? isLogin
-                    ? "Enter your Aadhaar number and passkey to login"
-                    : "Create your account — your passkey will be used for future logins"
-                  : `OTP will be sent to your ${loginMethod === "whatsapp" ? "WhatsApp" : "phone"} number`}
-              </CardDescription>
+            <CardHeader className="text-center pb-4 pt-4">
+              <CardTitle className="text-xl">{isLogin ? t("auth.signin") : t("auth.signup")}</CardTitle>
+              <CardDescription>{isLogin ? t("auth.signin_desc") : t("auth.signup_desc")}</CardDescription>
             </CardHeader>
             <CardContent>
-              {/* ── Aadhaar + Passkey Form ── */}
-              {loginMethod === "aadhaar" && (
-                <form onSubmit={handleAadhaarSubmit} className="space-y-3.5">
-                  {!isLogin && (
-                    <>
-                      <div className="space-y-1.5">
-                        <Label htmlFor="name" className="text-sm">Full Name *</Label>
-                        <Input id="name" placeholder="Enter your full name" value={formData.name} onChange={(e) => setFormData({ ...formData, name: e.target.value })} required />
-                      </div>
-                      <div className="space-y-1.5">
-                        <Label htmlFor="location" className="text-sm">Village / City</Label>
-                        <Input id="location" placeholder="Your village or city name" value={formData.location} onChange={(e) => setFormData({ ...formData, location: e.target.value })} />
-                      </div>
-                      <div className="space-y-1.5">
-                        <Label htmlFor="signup-phone" className="text-sm">Phone Number</Label>
-                        <div className="flex">
-                          <span className="inline-flex items-center px-3 rounded-l-md border border-r-0 border-input bg-muted text-sm">+91</span>
-                          <Input id="signup-phone" type="tel" placeholder="9876543210" className="rounded-l-none" maxLength={10} value={formData.phone} onChange={(e) => setFormData({ ...formData, phone: e.target.value.replace(/\D/g, "").slice(0, 10) })} />
+              <form onSubmit={handleSubmit} className="space-y-4">
+                {!isLogin && (
+                  <>
+                    <div className="space-y-1.5">
+                      <Label htmlFor="name" className="flex items-center gap-2">
+                        <svg className="h-4 w-4 text-primary" viewBox="0 0 24 24" fill="currentColor">
+                          <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/>
+                        </svg>
+                        {t("auth.fullname")}
+                      </Label>
+                      <div className="relative">
+                        <div className="absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none">
+                          <svg className="h-4 w-4 text-primary" viewBox="0 0 24 24" fill="currentColor">
+                            <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/>
+                          </svg>
                         </div>
+                        <Input id="name" placeholder={t("auth.enter_name")} className="pl-10" value={formData.name} onChange={(e) => setFormData({ ...formData, name: e.target.value })} required />
                       </div>
-                    </>
-                  )}
+                    </div>
+                    <div className="space-y-1.5">
+                      <Label htmlFor="location" className="flex items-center gap-2">
+                        <svg className="h-4 w-4 text-destructive" viewBox="0 0 24 24" fill="currentColor">
+                          <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/>
+                        </svg>
+                        {t("auth.location")}
+                      </Label>
+                      <Input id="location" placeholder="Search your village/city..." value={formData.location} onChange={(e) => setFormData({ ...formData, location: e.target.value })} required />
+                    </div>
+                  </>
+                )}
 
-                  <div className="space-y-1.5">
-                    <Label htmlFor="aadhaar" className="text-sm flex items-center gap-2">
-                      <Shield className="h-3.5 w-3.5 text-orange-500" />
-                      Aadhaar Number *
-                    </Label>
+                {/* Phone Number */}
+                <div className="space-y-1.5">
+                  <Label htmlFor="phone" className="flex items-center gap-2">
+                    <Phone className="h-4 w-4 text-primary" />
+                    {t("auth.phone")}
+                  </Label>
+                  <div className="flex">
+                    <span className="inline-flex items-center px-3 rounded-l-md border border-r-0 border-input bg-muted text-sm">+91</span>
+                    <Input
+                      id="phone"
+                      type="tel"
+                      placeholder="9876543210"
+                      className="rounded-l-none"
+                      maxLength={10}
+                      value={formData.phone}
+                      onChange={(e) => setFormData({ ...formData, phone: e.target.value.replace(/\D/g, "").slice(0, 10) })}
+                      required
+                    />
+                  </div>
+                </div>
+
+                {/* Aadhaar Number */}
+                <div className="space-y-1.5">
+                  <Label htmlFor="aadhaar" className="flex items-center gap-2">
+                    <Shield className="h-4 w-4 text-orange-500" />
+                    Aadhaar Number
+                  </Label>
+                  <div className="relative">
+                    <div className="absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none">
+                      <Shield className="h-4 w-4 text-orange-500" />
+                    </div>
                     <Input
                       id="aadhaar"
                       type="text"
                       placeholder="XXXX XXXX XXXX"
+                      className="pl-10"
                       maxLength={14}
                       value={formData.aadhaar}
                       onChange={(e) => {
@@ -461,111 +428,105 @@ const Login = () => {
                       required
                     />
                   </div>
+                </div>
 
+                {/* Passkey */}
+                <div className="space-y-1.5">
+                  <Label htmlFor="passkey" className="flex items-center gap-2">
+                    <KeyRound className="h-4 w-4 text-primary" />
+                    {isLogin ? "Passkey" : "Create Passkey"}
+                  </Label>
+                  <div className="relative">
+                    <div className="absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none">
+                      <KeyRound className="h-4 w-4 text-primary" />
+                    </div>
+                    <Input
+                      id="passkey"
+                      type={showPasskey ? "text" : "password"}
+                      placeholder={isLogin ? "Enter your passkey" : "Create a passkey (min 4 chars)"}
+                      className="pl-10 pr-10"
+                      value={formData.passkey}
+                      onChange={(e) => setFormData({ ...formData, passkey: e.target.value })}
+                      required
+                      minLength={4}
+                    />
+                    <button type="button" className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground" onClick={() => setShowPasskey(!showPasskey)}>
+                      {showPasskey ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                    </button>
+                  </div>
+                  {!isLogin && (
+                    <p className="text-[11px] text-muted-foreground">Remember this passkey — you'll use it every time you login</p>
+                  )}
+                </div>
+
+                {/* Confirm Passkey (signup only) */}
+                {!isLogin && (
                   <div className="space-y-1.5">
-                    <Label htmlFor="passkey" className="text-sm flex items-center gap-2">
-                      <KeyRound className="h-3.5 w-3.5 text-primary" />
-                      {isLogin ? "Passkey *" : "Create Passkey *"}
+                    <Label htmlFor="confirm-passkey" className="flex items-center gap-2">
+                      <KeyRound className="h-4 w-4 text-primary" />
+                      Confirm Passkey
                     </Label>
                     <div className="relative">
-                      <Input
-                        id="passkey"
-                        type={showPasskey ? "text" : "password"}
-                        placeholder={isLogin ? "Enter your passkey" : "Create a passkey (min 4 chars)"}
-                        value={formData.passkey}
-                        onChange={(e) => setFormData({ ...formData, passkey: e.target.value })}
-                        required
-                        minLength={4}
-                      />
-                      <button type="button" className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground" onClick={() => setShowPasskey(!showPasskey)}>
-                        {showPasskey ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
-                      </button>
-                    </div>
-                    {!isLogin && (
-                      <p className="text-[11px] text-muted-foreground">Remember this passkey — you'll use it every time you login</p>
-                    )}
-                  </div>
-
-                  {!isLogin && (
-                    <div className="space-y-1.5">
-                      <Label htmlFor="confirm-passkey" className="text-sm">Confirm Passkey *</Label>
+                      <div className="absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none">
+                        <KeyRound className="h-4 w-4 text-primary" />
+                      </div>
                       <Input
                         id="confirm-passkey"
                         type={showPasskey ? "text" : "password"}
                         placeholder="Re-enter your passkey"
+                        className="pl-10"
                         value={formData.confirmPasskey}
                         onChange={(e) => setFormData({ ...formData, confirmPasskey: e.target.value })}
                         required
                         minLength={4}
                       />
                     </div>
-                  )}
-
-                  <Button type="submit" className="w-full bg-primary text-primary-foreground hover:bg-primary/90" disabled={loading}>
-                    {loading ? (
-                      <span className="flex items-center gap-2">
-                        <span className="h-4 w-4 border-2 border-primary-foreground/30 border-t-primary-foreground rounded-full animate-spin" />
-                        {t("common.loading")}
-                      </span>
-                    ) : isLogin ? "Login with Aadhaar" : "Create Account"}
-                  </Button>
-                </form>
-              )}
-
-              {/* ── Phone / WhatsApp OTP Form ── */}
-              {(loginMethod === "phone" || loginMethod === "whatsapp") && (
-                <div className="space-y-3.5">
-                  <div className="space-y-1.5">
-                    <Label htmlFor="otp-phone" className="text-sm flex items-center gap-2">
-                      {loginMethod === "whatsapp" ? (
-                        <MessageCircle className="h-3.5 w-3.5 text-green-600" />
-                      ) : (
-                        <Phone className="h-3.5 w-3.5 text-primary" />
-                      )}
-                      Phone Number *
-                    </Label>
-                    <div className="flex">
-                      <span className="inline-flex items-center px-3 rounded-l-md border border-r-0 border-input bg-muted text-sm">+91</span>
-                      <Input
-                        id="otp-phone"
-                        type="tel"
-                        placeholder="9876543210"
-                        className="rounded-l-none"
-                        maxLength={10}
-                        value={formData.phone}
-                        onChange={(e) => setFormData({ ...formData, phone: e.target.value.replace(/\D/g, "").slice(0, 10) })}
-                        required
-                      />
-                    </div>
                   </div>
-                  <div className="space-y-1.5">
-                    <Label htmlFor="otp-name" className="text-sm">Your Name (optional for first login)</Label>
-                    <Input id="otp-name" placeholder="Enter your name" value={formData.name} onChange={(e) => setFormData({ ...formData, name: e.target.value })} />
-                  </div>
-                  <Button onClick={sendPhoneOTP} className="w-full bg-primary text-primary-foreground hover:bg-primary/90" disabled={loading}>
-                    {loading ? (
-                      <span className="flex items-center gap-2">
-                        <span className="h-4 w-4 border-2 border-primary-foreground/30 border-t-primary-foreground rounded-full animate-spin" />
-                        Sending...
-                      </span>
-                    ) : (
-                      <>
-                        {loginMethod === "whatsapp" ? <MessageCircle className="h-4 w-4 mr-2" /> : <Phone className="h-4 w-4 mr-2" />}
-                        Send OTP via {loginMethod === "whatsapp" ? "WhatsApp" : "SMS"}
-                      </>
-                    )}
-                  </Button>
-                </div>
-              )}
+                )}
 
-              {/* Toggle login/signup for Aadhaar method */}
-              {loginMethod === "aadhaar" && (
-                <div className="mt-5 text-center">
-                  <button type="button" onClick={() => { setIsLogin(!isLogin); setFormData({ ...formData, passkey: "", confirmPasskey: "" }); }} className="text-sm text-primary hover:underline">
-                    {isLogin ? "New here? Create an Account" : "Already have an account? Login"}
-                  </button>
+                <Button type="submit" className="w-full bg-primary text-primary-foreground hover:bg-primary/90" disabled={loading}>
+                  {loading ? (
+                    <span className="flex items-center gap-2">
+                      <span className="h-4 w-4 border-2 border-primary-foreground/30 border-t-primary-foreground rounded-full animate-spin" />
+                      {t("common.loading")}
+                    </span>
+                  ) : isLogin ? t("auth.signin") : t("auth.signup")}
+                </Button>
+              </form>
+
+              {/* Or continue with */}
+              <div className="relative my-5">
+                <div className="absolute inset-0 flex items-center">
+                  <span className="w-full border-t" />
                 </div>
-              )}
+                <div className="relative flex justify-center text-xs uppercase">
+                  <span className="bg-card px-2 text-muted-foreground">
+                    {t("auth.or_continue_with")}
+                  </span>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-3">
+                <Button variant="outline" type="button" className="h-14 py-0" onClick={() => { setLoginMethod("sms"); sendOTP(); }}>
+                  <svg className="h-7 w-7 text-primary" viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M20 2H4c-1.1 0-2 .9-2 2v18l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm0 14H6l-2 2V4h16v12z"/>
+                    <path d="M7 9h10v2H7zm0-3h10v2H7zm0 6h7v2H7z"/>
+                  </svg>
+                  <span className="ml-2">SMS OTP</span>
+                </Button>
+                <Button variant="outline" type="button" className="h-14 py-0" onClick={() => { setLoginMethod("whatsapp"); sendOTP(); }}>
+                  <svg className="h-7 w-7" viewBox="0 0 24 24" fill="hsl(var(--primary))">
+                    <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/>
+                  </svg>
+                  <span className="ml-2">WhatsApp</span>
+                </Button>
+              </div>
+
+              <div className="mt-5 text-center">
+                <button type="button" onClick={() => setIsLogin(!isLogin)} className="text-sm text-primary hover:underline">
+                  {isLogin ? t("auth.no_account") : t("auth.have_account")}
+                </button>
+              </div>
             </CardContent>
           </Card>
         </div>
