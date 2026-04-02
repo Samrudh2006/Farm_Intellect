@@ -10,6 +10,7 @@ import { LanguageSelector } from "@/components/ui/language-selector";
 import { AshokaChakra } from "@/components/ui/ashoka-chakra";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/contexts/AuthContext";
+import { supabase } from "@/integrations/supabase/client";
 import farmerImg from "@/assets/roles/farmer-role.jpg";
 import merchantImg from "@/assets/roles/merchant-role.jpg";
 import expertImg from "@/assets/roles/expert-role.jpg";
@@ -30,6 +31,14 @@ const Login = () => {
   const [otp, setOtp] = useState(["", "", "", "", "", ""]);
   const [resendTimer, setResendTimer] = useState(0);
   const otpRefs = useRef<(HTMLInputElement | null)[]>([]);
+
+  // Forgot passkey state
+  const [forgotPasskeyMode, setForgotPasskeyMode] = useState(false);
+  const [forgotStep, setForgotStep] = useState<"phone" | "otp" | "new-passkey">("phone");
+  const [forgotPhone, setForgotPhone] = useState("");
+  const [forgotUserId, setForgotUserId] = useState("");
+  const [newPasskey, setNewPasskey] = useState("");
+  const [confirmNewPasskey, setConfirmNewPasskey] = useState("");
 
   const [formData, setFormData] = useState({
     aadhaar: "",
@@ -64,6 +73,8 @@ const Login = () => {
     setSelectedRole(role);
     setIsLogin(true);
     setOtpSent(false);
+    setForgotPasskeyMode(false);
+    setForgotStep("phone");
     setFormData({ aadhaar: "", passkey: "", confirmPasskey: "", phone: "", name: "", location: "" });
     setOtp(["", "", "", "", "", ""]);
   };
@@ -119,7 +130,18 @@ const Login = () => {
     }
   };
 
-  // ── Phone / WhatsApp OTP ──
+  // ── Real SMS OTP via edge function ──
+  const sendRealOTP = async (phone: string, purpose: string) => {
+    const fullPhone = `+91${phone.replace(/\D/g, "")}`;
+    const { data, error } = await supabase.functions.invoke("send-otp", {
+      body: { phone: fullPhone, purpose },
+    });
+    if (error || !data?.success) {
+      throw new Error(data?.error || error?.message || "Failed to send OTP");
+    }
+  };
+
+  // ── Phone / WhatsApp OTP (now uses real SMS) ──
   const sendOTP = async () => {
     if (!formData.phone || formData.phone.length < 10) {
       toast({ title: t("auth.invalid_phone"), description: "Please enter a valid 10-digit phone number", variant: "destructive" });
@@ -127,26 +149,20 @@ const Login = () => {
     }
 
     setLoading(true);
-    const { otp: code, error } = await signInWithPhoneOTP(
-      formData.phone,
-      selectedRole || "farmer",
-      formData.name || undefined,
-    );
+    try {
+      await sendRealOTP(formData.phone, "login");
 
-    if (error) {
-      toast({ title: t("auth.error"), description: error.message, variant: "destructive" });
-    } else {
+      // Also create the simulated session for Supabase auth
+      await signInWithPhoneOTP(formData.phone, selectedRole || "farmer", formData.name || undefined);
+
       setOtpSent(true);
       setResendTimer(30);
       toast({
         title: loginMethod === "whatsapp" ? "OTP sent via WhatsApp" : t("auth.otp_sent"),
         description: `OTP sent to +91 ${formData.phone}`,
       });
-      // Auto-fill OTP for demo
-      if (code) {
-        const digits = code.split("");
-        setOtp(digits.length === 6 ? digits : ["", "", "", "", "", ""]);
-      }
+    } catch (err: any) {
+      toast({ title: t("auth.error"), description: err.message || "Failed to send OTP", variant: "destructive" });
     }
     setLoading(false);
   };
@@ -159,11 +175,115 @@ const Login = () => {
     }
 
     setLoading(true);
-    const { error } = await verifyPhoneOTP(formData.phone, otpCode);
-    if (error) {
-      toast({ title: t("auth.error"), description: error.message, variant: "destructive" });
-    } else {
+    try {
+      // Verify against real OTP in database
+      const fullPhone = `+91${formData.phone.replace(/\D/g, "")}`;
+      const { data, error: verifyError } = await supabase.functions.invoke("verify-otp", {
+        body: { phone: fullPhone, code: otpCode, purpose: "login" },
+      });
+
+      if (verifyError || !data?.verified) {
+        toast({ title: t("auth.error"), description: data?.error || "Invalid OTP. Please try again.", variant: "destructive" });
+        setLoading(false);
+        return;
+      }
+
+      // Now sign in via Supabase auth
+      const { error } = await verifyPhoneOTP(formData.phone, otp.join(""));
+      if (error) {
+        // If the simulated OTP doesn't match, try signing in fresh
+        const { otp: newCode } = await signInWithPhoneOTP(formData.phone, selectedRole || "farmer");
+        if (newCode) {
+          await verifyPhoneOTP(formData.phone, newCode);
+        }
+      }
       toast({ title: t("auth.login_success"), description: t("auth.welcome_back") });
+    } catch (err: any) {
+      toast({ title: t("auth.error"), description: err.message || "Verification failed", variant: "destructive" });
+    }
+    setLoading(false);
+  };
+
+  // ── Forgot Passkey Flow ──
+  const handleForgotSendOTP = async () => {
+    if (!forgotPhone || forgotPhone.length < 10) {
+      toast({ title: "Invalid Phone", description: "Please enter a valid 10-digit phone number", variant: "destructive" });
+      return;
+    }
+
+    setLoading(true);
+    try {
+      await sendRealOTP(forgotPhone, "reset-passkey");
+      setForgotStep("otp");
+      setResendTimer(30);
+      setOtp(["", "", "", "", "", ""]);
+      toast({ title: "OTP Sent", description: `Verification code sent to +91 ${forgotPhone}` });
+    } catch (err: any) {
+      toast({ title: "Error", description: err.message || "Failed to send OTP", variant: "destructive" });
+    }
+    setLoading(false);
+  };
+
+  const handleForgotVerifyOTP = async () => {
+    const otpCode = otp.join("");
+    if (otpCode.length !== 6) {
+      toast({ title: "Enter OTP", description: "Please enter all 6 digits", variant: "destructive" });
+      return;
+    }
+
+    setLoading(true);
+    try {
+      const fullPhone = `+91${forgotPhone.replace(/\D/g, "")}`;
+      const { data, error } = await supabase.functions.invoke("verify-otp", {
+        body: { phone: fullPhone, code: otpCode, purpose: "reset-passkey" },
+      });
+
+      if (error || !data?.verified) {
+        toast({ title: "Invalid OTP", description: data?.error || "Invalid or expired OTP", variant: "destructive" });
+        setLoading(false);
+        return;
+      }
+
+      setForgotUserId(data.user_id);
+      setForgotStep("new-passkey");
+      toast({ title: "Verified!", description: "Now set your new passkey" });
+    } catch (err: any) {
+      toast({ title: "Error", description: err.message || "Verification failed", variant: "destructive" });
+    }
+    setLoading(false);
+  };
+
+  const handleResetPasskey = async () => {
+    if (!newPasskey || newPasskey.length < 4) {
+      toast({ title: "Invalid Passkey", description: "Passkey must be at least 4 characters", variant: "destructive" });
+      return;
+    }
+    if (newPasskey !== confirmNewPasskey) {
+      toast({ title: "Mismatch", description: "Passkeys do not match", variant: "destructive" });
+      return;
+    }
+
+    setLoading(true);
+    try {
+      const { data, error } = await supabase.functions.invoke("reset-passkey", {
+        body: { user_id: forgotUserId, new_passkey: newPasskey },
+      });
+
+      if (error || !data?.success) {
+        toast({ title: "Error", description: data?.error || "Failed to reset passkey", variant: "destructive" });
+        setLoading(false);
+        return;
+      }
+
+      toast({ title: "✅ Passkey Reset!", description: "You can now login with your new passkey" });
+      setForgotPasskeyMode(false);
+      setForgotStep("phone");
+      setNewPasskey("");
+      setConfirmNewPasskey("");
+      setForgotPhone("");
+      setOtp(["", "", "", "", "", ""]);
+    } catch (err: any) {
+      toast({ title: "Error", description: err.message || "Reset failed", variant: "destructive" });
     }
     setLoading(false);
   };
@@ -191,11 +311,14 @@ const Login = () => {
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === "Enter" && otp.join("").length === 6 && otpSent) verifyOTPCode();
+      if (e.key === "Enter" && otp.join("").length === 6) {
+        if (otpSent) verifyOTPCode();
+        else if (forgotPasskeyMode && forgotStep === "otp") handleForgotVerifyOTP();
+      }
     };
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [otp, otpSent]);
+  }, [otp, otpSent, forgotPasskeyMode, forgotStep]);
 
   const roleCards = [
     { role: "farmer", title: t("auth.signin_farmer"), image: farmerImg, description: t("auth.farmer_desc") },
@@ -249,6 +372,183 @@ const Login = () => {
   }
 
   const currentRole = roleCards.find((r) => r.role === selectedRole);
+
+  // ── Forgot Passkey Screen ──
+  if (forgotPasskeyMode) {
+    return (
+      <div className="min-h-screen grid lg:grid-cols-2">
+        <div className="flex items-center justify-center p-6 bg-background">
+          <div className="w-full max-w-md space-y-5">
+            <div className="flex items-center justify-between mb-2">
+              <Button variant="ghost" onClick={() => {
+                setForgotPasskeyMode(false);
+                setForgotStep("phone");
+                setOtp(["", "", "", "", "", ""]);
+              }} className="gap-2">
+                <ArrowLeft className="h-4 w-4" /> {t("common.back")}
+              </Button>
+              <LanguageSelector />
+            </div>
+            <Card className="tricolor-card overflow-hidden">
+              <CardHeader className="text-center pb-4">
+                <CardTitle className="text-xl">
+                  {forgotStep === "phone" && "Forgot Passkey"}
+                  {forgotStep === "otp" && "Verify OTP"}
+                  {forgotStep === "new-passkey" && "Set New Passkey"}
+                </CardTitle>
+                <CardDescription>
+                  {forgotStep === "phone" && "Enter your registered phone number to receive a verification code"}
+                  {forgotStep === "otp" && `Enter the 6-digit code sent to +91 ${forgotPhone}`}
+                  {forgotStep === "new-passkey" && "Create a new passkey for your account"}
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                {forgotStep === "phone" && (
+                  <>
+                    <div className="space-y-1.5">
+                      <Label htmlFor="forgot-phone" className="flex items-center gap-2">
+                        <Phone className="h-4 w-4 text-primary" />
+                        Registered Phone Number
+                      </Label>
+                      <div className="flex">
+                        <span className="inline-flex items-center px-3 rounded-l-md border border-r-0 border-input bg-muted text-sm">+91</span>
+                        <Input
+                          id="forgot-phone"
+                          type="tel"
+                          placeholder="9876543210"
+                          className="rounded-l-none"
+                          maxLength={10}
+                          value={forgotPhone}
+                          onChange={(e) => setForgotPhone(e.target.value.replace(/\D/g, "").slice(0, 10))}
+                        />
+                      </div>
+                    </div>
+                    <Button
+                      onClick={handleForgotSendOTP}
+                      className="w-full bg-primary text-primary-foreground hover:bg-primary/90"
+                      disabled={loading || forgotPhone.length < 10}
+                    >
+                      {loading ? (
+                        <span className="flex items-center gap-2">
+                          <span className="h-4 w-4 border-2 border-primary-foreground/30 border-t-primary-foreground rounded-full animate-spin" />
+                          Sending...
+                        </span>
+                      ) : "Send OTP to Phone"}
+                    </Button>
+                  </>
+                )}
+
+                {forgotStep === "otp" && (
+                  <>
+                    <div className="flex justify-center gap-2 mb-4">
+                      {otp.map((digit, index) => (
+                        <Input
+                          key={index}
+                          ref={(el) => { otpRefs.current[index] = el; }}
+                          type="text"
+                          inputMode="numeric"
+                          maxLength={1}
+                          className="w-12 h-14 text-center text-xl font-bold"
+                          value={digit}
+                          onChange={(e) => handleOTPChange(index, e.target.value)}
+                          onKeyDown={(e) => handleOTPKeyDown(index, e)}
+                        />
+                      ))}
+                    </div>
+                    <Button
+                      onClick={handleForgotVerifyOTP}
+                      className="w-full bg-primary text-primary-foreground hover:bg-primary/90"
+                      disabled={loading || otp.join("").length !== 6}
+                    >
+                      {loading ? (
+                        <span className="flex items-center gap-2">
+                          <span className="h-4 w-4 border-2 border-primary-foreground/30 border-t-primary-foreground rounded-full animate-spin" />
+                          Verifying...
+                        </span>
+                      ) : "Verify OTP"}
+                    </Button>
+                    <div className="text-center">
+                      {resendTimer > 0 ? (
+                        <p className="text-sm text-muted-foreground">Resend OTP in {resendTimer}s</p>
+                      ) : (
+                        <button onClick={handleForgotSendOTP} className="text-sm text-primary hover:underline">
+                          Resend OTP
+                        </button>
+                      )}
+                    </div>
+                  </>
+                )}
+
+                {forgotStep === "new-passkey" && (
+                  <>
+                    <div className="space-y-1.5">
+                      <Label htmlFor="new-passkey" className="flex items-center gap-2">
+                        <KeyRound className="h-4 w-4 text-primary" />
+                        New Passkey
+                      </Label>
+                      <div className="relative">
+                        <div className="absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none">
+                          <KeyRound className="h-4 w-4 text-primary" />
+                        </div>
+                        <Input
+                          id="new-passkey"
+                          type={showPasskey ? "text" : "password"}
+                          placeholder="Enter new passkey (min 4 chars)"
+                          className="pl-10 pr-10"
+                          value={newPasskey}
+                          onChange={(e) => setNewPasskey(e.target.value)}
+                          minLength={4}
+                        />
+                        <button type="button" className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground" onClick={() => setShowPasskey(!showPasskey)}>
+                          {showPasskey ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                        </button>
+                      </div>
+                    </div>
+                    <div className="space-y-1.5">
+                      <Label htmlFor="confirm-new-passkey" className="flex items-center gap-2">
+                        <KeyRound className="h-4 w-4 text-primary" />
+                        Confirm New Passkey
+                      </Label>
+                      <div className="relative">
+                        <div className="absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none">
+                          <KeyRound className="h-4 w-4 text-primary" />
+                        </div>
+                        <Input
+                          id="confirm-new-passkey"
+                          type={showPasskey ? "text" : "password"}
+                          placeholder="Re-enter new passkey"
+                          className="pl-10"
+                          value={confirmNewPasskey}
+                          onChange={(e) => setConfirmNewPasskey(e.target.value)}
+                          minLength={4}
+                        />
+                      </div>
+                    </div>
+                    <Button
+                      onClick={handleResetPasskey}
+                      className="w-full bg-primary text-primary-foreground hover:bg-primary/90"
+                      disabled={loading || newPasskey.length < 4}
+                    >
+                      {loading ? (
+                        <span className="flex items-center gap-2">
+                          <span className="h-4 w-4 border-2 border-primary-foreground/30 border-t-primary-foreground rounded-full animate-spin" />
+                          Resetting...
+                        </span>
+                      ) : "Reset Passkey"}
+                    </Button>
+                  </>
+                )}
+              </CardContent>
+            </Card>
+          </div>
+        </div>
+        <div className="hidden lg:block relative">
+          <img src={currentRole?.image} alt={currentRole?.title} className="absolute inset-0 w-full h-full object-cover" />
+          <div className="absolute inset-0 bg-gradient-to-t from-foreground/60 to-transparent" />
+        </div>
+      </div>
+    );
+  }
 
   // ── OTP Verification Screen ──
   if (otpSent) {
@@ -316,7 +616,7 @@ const Login = () => {
     );
   }
 
-  // ── Main Login/Signup Form (original layout) ──
+  // ── Main Login/Signup Form ──
   return (
     <div className="min-h-screen grid lg:grid-cols-2">
       <div className="flex items-center justify-center p-6 bg-background">
@@ -493,6 +793,23 @@ const Login = () => {
                   ) : isLogin ? t("auth.signin") : t("auth.signup")}
                 </Button>
               </form>
+
+              {/* Forgot Passkey link */}
+              {isLogin && (
+                <div className="mt-3 text-center">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setForgotPasskeyMode(true);
+                      setForgotStep("phone");
+                      setForgotPhone(formData.phone || "");
+                    }}
+                    className="text-sm text-destructive hover:underline font-medium"
+                  >
+                    Forgot Passkey?
+                  </button>
+                </div>
+              )}
 
               {/* Or continue with */}
               <div className="relative my-5">
