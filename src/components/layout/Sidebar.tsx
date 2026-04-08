@@ -104,7 +104,7 @@ export const Sidebar = ({ isOpen, onClose, userRole = "farmer" }: SidebarProps) 
       {/* Mobile overlay */}
       {isOpen && (
         <div 
-          className="fixed inset-0 z-40 bg-foreground/20 md:hidden" 
+          className="fixed inset-0 z-40 bg-foreground/20 backdrop-blur-sm md:hidden" 
           onClick={onClose}
         />
       )}
@@ -112,16 +112,17 @@ export const Sidebar = ({ isOpen, onClose, userRole = "farmer" }: SidebarProps) 
       {/* Sidebar */}
       <aside
         className={cn(
-          "fixed left-0 top-[calc(1.5rem+4rem)] z-50 h-[calc(100vh-5.5rem)] w-64 transform border-r border-border bg-card transition-transform duration-200 ease-in-out md:translate-x-0",
+          "fixed left-0 top-[calc(1.5rem+4rem)] z-50 h-[calc(100vh-5.5rem)] w-64 transform border-r border-border/50 transition-transform duration-300 ease-in-out md:translate-x-0",
+          "bg-card/80 backdrop-blur-xl dark:bg-card/60",
           isOpen ? "translate-x-0" : "-translate-x-full"
         )}
       >
         {/* Tricolor left edge */}
         <div className="absolute left-0 top-0 bottom-0 w-1 tricolor-bar-vertical" />
         
-        <div className="p-4 overflow-y-auto h-full">
+        <div className="p-4 overflow-y-auto h-full custom-scrollbar">
           {/* Role-specific welcome with Chakra */}
-          <div className="mb-6 p-3 rounded-lg border border-primary/20 bg-gradient-to-r from-accent/5 via-background to-primary/5">
+          <div className="mb-6 p-3 rounded-xl glass-tinted">
             <div className="flex items-center gap-2 mb-1">
               <AshokaChakra size={20} />
               <h3 className="font-semibold text-sm text-foreground">
@@ -141,9 +142,9 @@ export const Sidebar = ({ isOpen, onClose, userRole = "farmer" }: SidebarProps) 
                 onClick={onClose}
                 className={({ isActive }) =>
                   cn(
-                    "flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm transition-all duration-200",
+                    "flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm transition-all duration-200",
                     isActive
-                      ? "bg-primary text-primary-foreground shadow-md"
+                      ? "bg-primary text-primary-foreground shadow-md shadow-primary/20"
                       : "text-muted-foreground hover:bg-accent/10 hover:text-foreground hover:shadow-sm hover:translate-x-1"
                   )
                 }
@@ -155,7 +156,7 @@ export const Sidebar = ({ isOpen, onClose, userRole = "farmer" }: SidebarProps) 
           </nav>
 
           {/* Copyright */}
-          <div className="mt-auto pt-4 border-t border-border">
+          <div className="mt-auto pt-4 border-t border-border/50">
             <p className="text-[10px] text-muted-foreground text-center leading-tight">
               © 2025 Samrudh. All Rights Reserved.
             </p>
