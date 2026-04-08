@@ -11,6 +11,7 @@ import { PageTransition } from "@/components/layout/PageTransition";
 import { AppErrorBoundary } from "@/components/system/AppErrorBoundary";
 import { AmbientMusic } from "@/components/ui/ambient-music";
 import { InstallPrompt } from "@/components/pwa/InstallPrompt";
+import { BrandedSpinner } from "@/components/ui/branded-spinner";
 
 type AppRole = "farmer" | "merchant" | "expert" | "admin";
 
@@ -87,7 +88,7 @@ const queryClient = new QueryClient({
 
 const RouteLoader = () => (
   <div className="min-h-screen flex items-center justify-center">
-    <span className="h-8 w-8 rounded-full border-4 border-primary/30 border-t-primary animate-spin" />
+    <BrandedSpinner size="lg" text="Loading..." />
   </div>
 );
 

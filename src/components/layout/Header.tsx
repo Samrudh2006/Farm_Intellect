@@ -1,3 +1,4 @@
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Bell, User, LogOut, Menu, Sun, Moon } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -13,6 +14,7 @@ import appLogo from "@/assets/krishi-app-logo.png";
 import { LanguageSelector } from "@/components/ui/language-selector";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { useAuth } from "@/contexts/AuthContext";
+import { cn } from "@/lib/utils";
 
 interface HeaderProps {
   user?: {
@@ -28,6 +30,18 @@ export const Header = ({ user, onMenuClick, notificationCount = 0 }: HeaderProps
   const navigate = useNavigate();
   const { t } = useLanguage();
   const { signOut } = useAuth();
+  const [scrolled, setScrolled] = useState(false);
+  const [scrollProgress, setScrollProgress] = useState(0);
+
+  useEffect(() => {
+    const onScroll = () => {
+      setScrolled(window.scrollY > 20);
+      const total = document.documentElement.scrollHeight - window.innerHeight;
+      setScrollProgress(total > 0 ? (window.scrollY / total) * 100 : 0);
+    };
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => window.removeEventListener("scroll", onScroll);
+  }, []);
 
   const handleSignOut = async () => {
     await signOut();
@@ -41,9 +55,25 @@ export const Header = ({ user, onMenuClick, notificationCount = 0 }: HeaderProps
 
   return (
     <>
+      {/* Scroll progress bar */}
+      <div
+        className="scroll-progress"
+        style={{ "--scroll-progress": `${scrollProgress}%` } as React.CSSProperties}
+      />
+
       <div className="tricolor-bar h-1.5" />
-      <header className="sticky top-0 z-50 w-full border-b border-border bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
-        <div className="container flex h-16 items-center justify-between">
+      <header
+        className={cn(
+          "sticky top-0 z-50 w-full border-b border-border/50 transition-all duration-300",
+          scrolled
+            ? "bg-card/70 backdrop-blur-xl shadow-md py-0"
+            : "bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60"
+        )}
+      >
+        <div className={cn(
+          "container flex items-center justify-between transition-all duration-300",
+          scrolled ? "h-14" : "h-16"
+        )}>
           <div className="flex items-center gap-4">
             <Button
               variant="ghost"
@@ -54,8 +84,20 @@ export const Header = ({ user, onMenuClick, notificationCount = 0 }: HeaderProps
               <Menu className="h-5 w-5" />
             </Button>
             <div className="flex items-center gap-3">
-              <img src={appLogo} alt="Krishi AI" className="h-9 w-9 object-contain" />
-              <h1 className="text-xl font-bold text-foreground">{t('header.app_title')}</h1>
+              <img
+                src={appLogo}
+                alt="Krishi AI"
+                className={cn(
+                  "object-contain transition-all duration-300",
+                  scrolled ? "h-7 w-7" : "h-9 w-9"
+                )}
+              />
+              <h1 className={cn(
+                "font-bold text-foreground transition-all duration-300",
+                scrolled ? "text-lg" : "text-xl"
+              )}>
+                {t('header.app_title')}
+              </h1>
             </div>
           </div>
 
@@ -78,11 +120,16 @@ export const Header = ({ user, onMenuClick, notificationCount = 0 }: HeaderProps
               <Moon className="absolute h-5 w-5 rotate-90 scale-0 transition-all dark:rotate-0 dark:scale-100" />
             </Button>
 
-            <Button variant="ghost" size="icon" className="relative" onClick={() => navigate(`/${user?.role || "farmer"}/notifications`)}>
+            <Button
+              variant="ghost"
+              size="icon"
+              className="relative"
+              onClick={() => navigate(`/${user?.role || "farmer"}/notifications`)}
+            >
               <Bell className="h-5 w-5" />
               {notificationCount > 0 && (
                 <Badge
-                  className="absolute -top-2 -right-2 h-5 w-5 rounded-full p-0 flex items-center justify-center text-xs bg-accent text-accent-foreground"
+                  className="absolute -top-2 -right-2 h-5 w-5 rounded-full p-0 flex items-center justify-center text-xs bg-accent text-accent-foreground animate-bounce-subtle"
                 >
                   {notificationCount}
                 </Badge>
@@ -100,7 +147,7 @@ export const Header = ({ user, onMenuClick, notificationCount = 0 }: HeaderProps
                     </Badge>
                   </Button>
                 </DropdownMenuTrigger>
-                <DropdownMenuContent align="end">
+                <DropdownMenuContent align="end" className="glass-heavy">
                   <DropdownMenuItem onClick={handleProfile}>
                     <User className="mr-2 h-4 w-4" />
                     {t('common.profile')}
@@ -114,7 +161,7 @@ export const Header = ({ user, onMenuClick, notificationCount = 0 }: HeaderProps
               </DropdownMenu>
             ) : (
               <Button
-                className="bg-accent text-accent-foreground hover:bg-accent/90"
+                className="bg-accent text-accent-foreground hover:bg-accent/90 click-ripple"
                 onClick={() => navigate("/login")}
               >
                 {t("auth.signin")}
