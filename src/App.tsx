@@ -85,11 +85,15 @@ const queryClient = new QueryClient({
   },
 });
 
-const RouteLoader = () => (
-  <div className="min-h-screen flex items-center justify-center">
-    <span className="h-8 w-8 rounded-full border-4 border-primary/30 border-t-primary animate-spin" />
-  </div>
-);
+const RouteLoader = () => {
+  // Use dynamic import to avoid circular deps
+  const { BrandedSpinner } = require("@/components/ui/branded-spinner");
+  return (
+    <div className="min-h-screen flex items-center justify-center">
+      <BrandedSpinner size="lg" text="Loading..." />
+    </div>
+  );
+};
 
 const ProtectedRoute = ({ children, allowedRoles }: { children: ReactNode; allowedRoles?: AppRole[] }) => {
   const { user, profile, loading } = useAuth();
