@@ -11,6 +11,7 @@ import { PageTransition } from "@/components/layout/PageTransition";
 import { AppErrorBoundary } from "@/components/system/AppErrorBoundary";
 import { AmbientMusic } from "@/components/ui/ambient-music";
 import { InstallPrompt } from "@/components/pwa/InstallPrompt";
+import { BrandedSpinner } from "@/components/ui/branded-spinner";
 
 type AppRole = "farmer" | "merchant" | "expert" | "admin";
 
@@ -85,15 +86,11 @@ const queryClient = new QueryClient({
   },
 });
 
-const RouteLoader = () => {
-  // Use dynamic import to avoid circular deps
-  const { BrandedSpinner } = require("@/components/ui/branded-spinner");
-  return (
-    <div className="min-h-screen flex items-center justify-center">
-      <BrandedSpinner size="lg" text="Loading..." />
-    </div>
-  );
-};
+const RouteLoader = () => (
+  <div className="min-h-screen flex items-center justify-center">
+    <BrandedSpinner size="lg" text="Loading..." />
+  </div>
+);
 
 const ProtectedRoute = ({ children, allowedRoles }: { children: ReactNode; allowedRoles?: AppRole[] }) => {
   const { user, profile, loading } = useAuth();
