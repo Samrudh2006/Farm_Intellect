@@ -36,7 +36,7 @@ const Login = () => {
   const [forgotPasskeyMode, setForgotPasskeyMode] = useState(false);
   const [forgotStep, setForgotStep] = useState<"phone" | "otp" | "new-passkey">("phone");
   const [forgotPhone, setForgotPhone] = useState("");
-  const [forgotUserId, setForgotUserId] = useState("");
+  const [resetToken, setResetToken] = useState("");
   const [newPasskey, setNewPasskey] = useState("");
   const [confirmNewPasskey, setConfirmNewPasskey] = useState("");
 
