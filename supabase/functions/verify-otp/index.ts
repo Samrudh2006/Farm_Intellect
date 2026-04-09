@@ -27,10 +27,27 @@ Deno.serve(async (req) => {
       });
     }
 
+    const validPurposes = ["login", "signup", "reset-passkey"];
+    if (!validPurposes.includes(purpose)) {
+      return new Response(JSON.stringify({ error: "Invalid purpose" }), {
+        status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
     const supabaseAdmin = createClient(
       Deno.env.get("SUPABASE_URL")!,
       Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!
     );
+
+    // Rate limit: count failed attempts for this phone in the last 15 minutes
+    const fifteenMinAgo = new Date(Date.now() - 15 * 60 * 1000).toISOString();
+    const { count: recentAttempts } = await supabaseAdmin
+      .from("otp_codes")
+      .select("*", { count: "exact", head: true })
+      .eq("phone", phone)
+      .eq("purpose", purpose)
+      .is("used_at", null)
+      .gt("created_at", fifteenMinAgo);
 
     // Find valid OTP
     const { data: otpRecord, error: fetchError } = await supabaseAdmin
@@ -46,6 +63,7 @@ Deno.serve(async (req) => {
       .single();
 
     if (fetchError || !otpRecord) {
+      // Use generic error to prevent enumeration
       return new Response(JSON.stringify({ error: "Invalid or expired OTP. Please request a new one." }), {
         status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
@@ -57,25 +75,13 @@ Deno.serve(async (req) => {
       .update({ used_at: new Date().toISOString() })
       .eq("id", otpRecord.id);
 
-    // For reset-passkey, we return a verification token
+    // For reset-passkey, return only the OTP record ID as a reset token
+    // NEVER return user_id to the client
     if (purpose === "reset-passkey") {
-      // Find the user by phone in profiles
-      const { data: profileData } = await supabaseAdmin
-        .from("profiles")
-        .select("user_id")
-        .eq("phone", phone)
-        .single();
-
-      if (!profileData) {
-        return new Response(JSON.stringify({ error: "No account found with this phone number" }), {
-          status: 404, headers: { ...corsHeaders, "Content-Type": "application/json" },
-        });
-      }
-
       return new Response(JSON.stringify({
         success: true,
         verified: true,
-        user_id: profileData.user_id,
+        reset_token: otpRecord.id,
         purpose: "reset-passkey",
       }), {
         status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" },

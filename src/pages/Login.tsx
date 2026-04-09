@@ -36,7 +36,7 @@ const Login = () => {
   const [forgotPasskeyMode, setForgotPasskeyMode] = useState(false);
   const [forgotStep, setForgotStep] = useState<"phone" | "otp" | "new-passkey">("phone");
   const [forgotPhone, setForgotPhone] = useState("");
-  const [forgotUserId, setForgotUserId] = useState("");
+  const [resetToken, setResetToken] = useState("");
   const [newPasskey, setNewPasskey] = useState("");
   const [confirmNewPasskey, setConfirmNewPasskey] = useState("");
 
@@ -244,7 +244,7 @@ const Login = () => {
         return;
       }
 
-      setForgotUserId(data.user_id);
+      setResetToken(data.reset_token);
       setForgotStep("new-passkey");
       toast({ title: "Verified!", description: "Now set your new passkey" });
     } catch (err: any) {
@@ -254,8 +254,12 @@ const Login = () => {
   };
 
   const handleResetPasskey = async () => {
-    if (!newPasskey || newPasskey.length < 4) {
-      toast({ title: "Invalid Passkey", description: "Passkey must be at least 4 characters", variant: "destructive" });
+    if (!newPasskey || newPasskey.length < 6) {
+      toast({ title: "Invalid Passkey", description: "Passkey must be at least 6 characters with a letter and a digit", variant: "destructive" });
+      return;
+    }
+    if (!/[a-zA-Z]/.test(newPasskey) || !/\d/.test(newPasskey)) {
+      toast({ title: "Weak Passkey", description: "Passkey must contain at least one letter and one digit", variant: "destructive" });
       return;
     }
     if (newPasskey !== confirmNewPasskey) {
@@ -265,8 +269,9 @@ const Login = () => {
 
     setLoading(true);
     try {
+      const fullPhone = `+91${forgotPhone.replace(/\D/g, "")}`;
       const { data, error } = await supabase.functions.invoke("reset-passkey", {
-        body: { user_id: forgotUserId, new_passkey: newPasskey },
+        body: { phone: fullPhone, reset_token: resetToken, new_passkey: newPasskey },
       });
 
       if (error || !data?.success) {

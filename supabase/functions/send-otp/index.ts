@@ -22,15 +22,30 @@ Deno.serve(async (req) => {
       });
     }
 
-    // Generate 6-digit OTP
-    const code = String(Math.floor(100000 + Math.random() * 900000));
-    const expiresAt = new Date(Date.now() + 10 * 60 * 1000).toISOString();
-
-    // Store OTP in database
     const supabaseAdmin = createClient(
       Deno.env.get("SUPABASE_URL")!,
       Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!
     );
+
+    // Rate limit: max 5 OTPs per phone per 15-minute window
+    const fifteenMinAgo = new Date(Date.now() - 15 * 60 * 1000).toISOString();
+    const { count: recentCount } = await supabaseAdmin
+      .from("otp_codes")
+      .select("*", { count: "exact", head: true })
+      .eq("phone", phone)
+      .gt("created_at", fifteenMinAgo);
+
+    if ((recentCount ?? 0) >= 5) {
+      return new Response(JSON.stringify({ error: "Too many OTP requests. Please wait 15 minutes before trying again." }), {
+        status: 429, headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
+    // Generate 6-digit OTP using crypto-secure random
+    const randomBytes = new Uint32Array(1);
+    crypto.getRandomValues(randomBytes);
+    const code = String(100000 + (randomBytes[0] % 900000));
+    const expiresAt = new Date(Date.now() + 10 * 60 * 1000).toISOString();
 
     // Invalidate previous unused OTPs for this phone+purpose
     await supabaseAdmin
@@ -65,7 +80,7 @@ Deno.serve(async (req) => {
     }
 
     const purposeMessages: Record<string, string> = {
-      "login": `Your Smart Crop Advisory login code is: ${code}. Valid for 10 minutes.`,
+      "login": `Your Smart Crop Advisory login code is: ${code}. Valid for 10 minutes. Do not share this code.`,
       "signup": `Welcome to Smart Crop Advisory! Your verification code is: ${code}. Valid for 10 minutes.`,
       "reset-passkey": `Your passkey reset code is: ${code}. Valid for 10 minutes. If you didn't request this, ignore this message.`,
     };
@@ -94,7 +109,8 @@ Deno.serve(async (req) => {
       });
     }
 
-    console.log(`OTP sent to ${phone} for ${purpose}, SID: ${twilioData.sid}`);
+    // Don't log the phone number in production — log only the SID
+    console.log(`OTP sent for ${purpose}, SID: ${twilioData.sid}`);
 
     return new Response(JSON.stringify({ success: true, message: "OTP sent successfully" }), {
       status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" },
