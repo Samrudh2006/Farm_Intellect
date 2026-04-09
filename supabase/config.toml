@@ -3,8 +3,7 @@ project_id = "exynaicvgadoenjfunqz"
 [functions.chat]
 verify_jwt = false
 
-[functions.weather]
-verify_jwt = false
+# weather function validates JWT in code — no config override needed for defense-in-depth
 
 [functions.market-prices]
 verify_jwt = false
