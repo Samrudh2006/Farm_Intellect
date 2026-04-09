@@ -269,8 +269,9 @@ const Login = () => {
 
     setLoading(true);
     try {
+      const fullPhone = `+91${forgotPhone.replace(/\D/g, "")}`;
       const { data, error } = await supabase.functions.invoke("reset-passkey", {
-        body: { user_id: forgotUserId, new_passkey: newPasskey },
+        body: { phone: fullPhone, reset_token: resetToken, new_passkey: newPasskey },
       });
 
       if (error || !data?.success) {
