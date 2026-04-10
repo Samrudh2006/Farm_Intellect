@@ -42,6 +42,9 @@ const Login = () => {
   const [newPasskey, setNewPasskey] = useState("");
   const [confirmNewPasskey, setConfirmNewPasskey] = useState("");
 
+  const [selectedState, setSelectedState] = useState("");
+  const [selectedCity, setSelectedCity] = useState("");
+
   const [formData, setFormData] = useState({
     aadhaar: "",
     passkey: "",
