@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Header } from "@/components/layout/Header";
 import { Sidebar } from "@/components/layout/Sidebar";
-import { EnhancedAIChatbot } from "@/components/chat/EnhancedAIChatbot";
+import { AIAssistantHub } from "@/components/chat/AIAssistantHub";
 import { useCurrentUser } from "@/hooks/useCurrentUser";
 
 const MerchantChat = () => {
@@ -15,7 +15,7 @@ const MerchantChat = () => {
       <main className="md:ml-64 pt-16 p-6">
         <div className="max-w-4xl mx-auto">
           <h1 className="text-2xl font-bold mb-4">🤖 Krishi AI Assistant</h1>
-          <EnhancedAIChatbot />
+          <AIAssistantHub />
         </div>
       </main>
     </div>

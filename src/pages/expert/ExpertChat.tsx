@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Header } from "@/components/layout/Header";
 import { Sidebar } from "@/components/layout/Sidebar";
-import { AIChatbot } from "@/components/chat/AIChatbot";
+import { AIAssistantHub } from "@/components/chat/AIAssistantHub";
 import { useCurrentUser } from "@/hooks/useCurrentUser";
 import { useLanguage } from "@/contexts/LanguageContext";
 
@@ -35,7 +35,7 @@ const ExpertChat = () => {
             </p>
           </div>
           
-          <AIChatbot />
+          <AIAssistantHub />
         </div>
       </main>
     </div>
