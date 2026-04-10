@@ -44,13 +44,13 @@ export const AIAssistantHub = () => {
   // Voice call state
   const [voiceCallActive, setVoiceCallActive] = useState(false);
   const [voiceCallDuration, setVoiceCallDuration] = useState(0);
-  const voiceCallTimerRef = useRef<NodeJS.Timeout | null>(null);
+  const voiceCallTimerRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
   // Video call state
   const [videoCallActive, setVideoCallActive] = useState(false);
   const [avatarSpeaking, setAvatarSpeaking] = useState(false);
   const [videoCallDuration, setVideoCallDuration] = useState(0);
-  const videoCallTimerRef = useRef<NodeJS.Timeout | null>(null);
+  const videoCallTimerRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
   useEffect(() => {
     setMessages([{
