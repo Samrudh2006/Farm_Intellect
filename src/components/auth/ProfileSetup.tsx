@@ -6,6 +6,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
+import { indianStates, getCitiesByState } from "@/data/indianLocations";
 import { User, Building, GraduationCap, MapPin, Phone, Mail } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 
@@ -146,13 +147,39 @@ export const ProfileSetup = ({ userRole, onComplete }: ProfileSetupProps) => {
       </div>
       
       <div className="space-y-2">
-        <Label htmlFor="location">Location</Label>
-        <Input
-          id="location"
-          value={profileData.location}
-          onChange={(e) => handleInputChange('location', e.target.value)}
-          placeholder="City, State"
-        />
+        <Label>Location</Label>
+        <div className="grid grid-cols-2 gap-2">
+          <Select
+            value={profileData.location.split(', ')[1] || ''}
+            onValueChange={(state) => handleInputChange('location', state)}
+          >
+            <SelectTrigger>
+              <SelectValue placeholder="Select State" />
+            </SelectTrigger>
+            <SelectContent className="max-h-60">
+              {indianStates.map(state => (
+                <SelectItem key={state} value={state}>{state}</SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+          <Select
+            value={profileData.location.split(', ')[0] || ''}
+            onValueChange={(city) => {
+              const state = profileData.location.split(', ')[1] || '';
+              handleInputChange('location', `${city}, ${state}`);
+            }}
+            disabled={!profileData.location}
+          >
+            <SelectTrigger>
+              <SelectValue placeholder="Select City" />
+            </SelectTrigger>
+            <SelectContent className="max-h-60">
+              {getCitiesByState(profileData.location.split(', ')[1] || '').map(city => (
+                <SelectItem key={city} value={city}>{city}</SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
       </div>
     </div>
   );
