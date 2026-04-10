@@ -4,13 +4,15 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { ArrowLeft, Sun, Moon, Shield, Phone, MessageCircle, Eye, EyeOff, KeyRound } from "lucide-react";
+import { ArrowLeft, Sun, Moon, Shield, Phone, MessageCircle, Eye, EyeOff, KeyRound, ChevronDown } from "lucide-react";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { LanguageSelector } from "@/components/ui/language-selector";
 import { AshokaChakra } from "@/components/ui/ashoka-chakra";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
+import { indianStates, getCitiesByState } from "@/data/indianLocations";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import farmerImg from "@/assets/roles/farmer-role.jpg";
 import merchantImg from "@/assets/roles/merchant-role.jpg";
 import expertImg from "@/assets/roles/expert-role.jpg";
@@ -39,6 +41,9 @@ const Login = () => {
   const [resetToken, setResetToken] = useState("");
   const [newPasskey, setNewPasskey] = useState("");
   const [confirmNewPasskey, setConfirmNewPasskey] = useState("");
+
+  const [selectedState, setSelectedState] = useState("");
+  const [selectedCity, setSelectedCity] = useState("");
 
   const [formData, setFormData] = useState({
     aadhaar: "",
@@ -676,13 +681,45 @@ const Login = () => {
                       </div>
                     </div>
                     <div className="space-y-1.5">
-                      <Label htmlFor="location" className="flex items-center gap-2">
+                      <Label className="flex items-center gap-2">
                         <svg className="h-4 w-4 text-destructive" viewBox="0 0 24 24" fill="currentColor">
                           <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/>
                         </svg>
                         {t("auth.location")}
                       </Label>
-                      <Input id="location" placeholder="Search your village/city..." value={formData.location} onChange={(e) => setFormData({ ...formData, location: e.target.value })} required />
+                      <div className="grid grid-cols-2 gap-2">
+                        <Select value={selectedState} onValueChange={(val) => {
+                          setSelectedState(val);
+                          setSelectedCity("");
+                          setFormData(prev => ({ ...prev, location: val }));
+                        }}>
+                          <SelectTrigger>
+                            <SelectValue placeholder="Select State" />
+                          </SelectTrigger>
+                          <SelectContent className="max-h-60">
+                            {indianStates.map(state => (
+                              <SelectItem key={state} value={state}>{state}</SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                        <Select
+                          value={selectedCity}
+                          onValueChange={(val) => {
+                            setSelectedCity(val);
+                            setFormData(prev => ({ ...prev, location: `${val}, ${selectedState}` }));
+                          }}
+                          disabled={!selectedState}
+                        >
+                          <SelectTrigger>
+                            <SelectValue placeholder="Select City" />
+                          </SelectTrigger>
+                          <SelectContent className="max-h-60">
+                            {getCitiesByState(selectedState).map(city => (
+                              <SelectItem key={city} value={city}>{city}</SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      </div>
                     </div>
                   </>
                 )}
