@@ -8,7 +8,7 @@ import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import {
   Send, User, Volume2, VolumeX, Trash2, Copy, ThumbsUp, ThumbsDown,
   StopCircle, RefreshCw, MessageCircle, Phone as PhoneIcon, Video,
-  Mic, MicOff
+  Mic, MicOff, ImagePlus, X, Camera
 } from "lucide-react";
 import krishiAvatar from "@/assets/krishi-ai-avatar.png";
 import doctorAvatar from "@/assets/doctor-avatar.png";
@@ -51,6 +51,15 @@ export const AIAssistantHub = () => {
   const [avatarSpeaking, setAvatarSpeaking] = useState(false);
   const [videoCallDuration, setVideoCallDuration] = useState(0);
   const videoCallTimerRef = useRef<ReturnType<typeof setInterval> | null>(null);
+
+  // Image upload state (video call)
+  const [uploadedImage, setUploadedImage] = useState<string | null>(null);
+  const [uploadedImageFile, setUploadedImageFile] = useState<File | null>(null);
+  const imageInputRef = useRef<HTMLInputElement>(null);
+
+  // Continuous voice listening (voice call)
+  const [continuousListening, setContinuousListening] = useState(false);
+  const recognitionRef = useRef<any>(null);
 
   useEffect(() => {
     setMessages([{
@@ -196,10 +205,105 @@ export const AIAssistantHub = () => {
     if (videoCallTimerRef.current) clearInterval(videoCallTimerRef.current);
   };
 
+  // Image upload handlers
+  const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    if (!file.type.startsWith('image/')) { toast.error("Please upload an image file"); return; }
+    if (file.size > 5 * 1024 * 1024) { toast.error("Image must be under 5MB"); return; }
+    setUploadedImageFile(file);
+    const reader = new FileReader();
+    reader.onload = (ev) => setUploadedImage(ev.target?.result as string);
+    reader.readAsDataURL(file);
+    toast.success("Image attached! Describe the issue or ask Dr. Krishi to diagnose.");
+  };
+
+  const removeImage = () => {
+    setUploadedImage(null);
+    setUploadedImageFile(null);
+    if (imageInputRef.current) imageInputRef.current.value = "";
+  };
+
+  const sendWithImage = async () => {
+    if (!uploadedImage) { sendMessage(); return; }
+    const prompt = (inputMessage.trim() || "Please analyze this crop image for diseases, pests, or nutrient deficiencies. Provide diagnosis and treatment recommendations.");
+    const messageText = `[📷 Crop photo attached]\n${prompt}`;
+    removeImage();
+    await sendMessage(messageText);
+  };
+
+  // Continuous voice recognition for voice call
+  const startContinuousListening = useCallback(() => {
+    const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
+    if (!SpeechRecognition) { toast.error("Speech recognition not supported in this browser"); return; }
+
+    const recognition = new SpeechRecognition();
+    recognition.continuous = true;
+    recognition.interimResults = true;
+    recognition.lang = ttsLanguageMap[language] || "en-IN";
+
+    let finalTranscript = "";
+
+    recognition.onresult = (event: any) => {
+      let interim = "";
+      for (let i = event.resultIndex; i < event.results.length; i++) {
+        if (event.results[i].isFinal) {
+          finalTranscript += event.results[i][0].transcript + " ";
+        } else {
+          interim += event.results[i][0].transcript;
+        }
+      }
+      setInputMessage(finalTranscript + interim);
+    };
+
+    recognition.onend = () => {
+      // Auto-send if we have final text and restart listening
+      if (finalTranscript.trim() && continuousListening) {
+        const text = finalTranscript.trim();
+        finalTranscript = "";
+        setInputMessage("");
+        sendMessage(text);
+        // Restart after a brief pause for the response
+        setTimeout(() => {
+          if (continuousListening && recognitionRef.current) {
+            try { recognitionRef.current.start(); } catch {}
+          }
+        }, 2000);
+      } else if (continuousListening) {
+        try { recognition.start(); } catch {}
+      }
+    };
+
+    recognition.onerror = (event: any) => {
+      if (event.error !== 'no-speech' && event.error !== 'aborted') {
+        console.error("Speech recognition error:", event.error);
+      }
+    };
+
+    recognitionRef.current = recognition;
+    setContinuousListening(true);
+    recognition.start();
+    toast.success("Hands-free mode active — speak naturally!");
+  }, [language, continuousListening]);
+
+  const stopContinuousListening = useCallback(() => {
+    setContinuousListening(false);
+    if (recognitionRef.current) {
+      try { recognitionRef.current.stop(); } catch {}
+      recognitionRef.current = null;
+    }
+  }, []);
+
+  // Cleanup continuous listening on unmount or tab change
+  useEffect(() => {
+    if (activeTab !== "voice") stopContinuousListening();
+  }, [activeTab]);
+
   useEffect(() => {
     return () => {
       if (voiceCallTimerRef.current) clearInterval(voiceCallTimerRef.current);
       if (videoCallTimerRef.current) clearInterval(videoCallTimerRef.current);
+      stopContinuousListening();
     };
   }, []);
 
@@ -432,13 +536,35 @@ export const AIAssistantHub = () => {
                 <Badge className="bg-green-500/20 text-green-700 dark:text-green-300">
                   🔴 Connected • {formatDuration(voiceCallDuration)}
                 </Badge>
+                <div className="flex items-center gap-2 mt-1">
+                  <Button
+                    variant={continuousListening ? "default" : "outline"}
+                    size="sm"
+                    onClick={continuousListening ? stopContinuousListening : startContinuousListening}
+                    className={`gap-1.5 ${continuousListening ? 'bg-green-600 hover:bg-green-700 animate-pulse' : ''}`}
+                  >
+                    {continuousListening ? <MicOff className="h-3.5 w-3.5" /> : <Mic className="h-3.5 w-3.5" />}
+                    {continuousListening ? "Stop Hands-Free" : "Hands-Free Mode"}
+                  </Button>
+                </div>
               </div>
               <div className="flex-1 overflow-y-auto">
                 {renderMessages()}
               </div>
-              {renderInputBar()}
+              {!continuousListening && renderInputBar()}
+              {continuousListening && (
+                <div className="p-4 border-t bg-muted/30 text-center">
+                  <div className="flex items-center justify-center gap-2 text-sm text-muted-foreground">
+                    <Mic className="h-4 w-4 text-green-500 animate-pulse" />
+                    <span>Listening... speak naturally. Your message will be sent automatically.</span>
+                  </div>
+                  {inputMessage && (
+                    <p className="mt-2 text-sm font-medium text-foreground italic">"{inputMessage}"</p>
+                  )}
+                </div>
+              )}
               <div className="p-3 border-t flex justify-center">
-                <Button onClick={endVoiceCall} variant="destructive" size="lg" className="rounded-full h-14 w-14">
+                <Button onClick={() => { stopContinuousListening(); endVoiceCall(); }} variant="destructive" size="lg" className="rounded-full h-14 w-14">
                   <PhoneIcon className="h-5 w-5 rotate-[135deg]" />
                 </Button>
               </div>
@@ -468,11 +594,78 @@ export const AIAssistantHub = () => {
               <div className="p-3">
                 {renderVideoAvatar()}
               </div>
-              <div className="flex-1 overflow-y-auto max-h-[200px]">
+              {/* Image upload preview */}
+              {uploadedImage && (
+                <div className="px-3 pb-2">
+                  <div className="relative inline-block rounded-lg overflow-hidden border border-primary/20">
+                    <img src={uploadedImage} alt="Crop photo" className="h-24 w-auto rounded-lg object-cover" />
+                    <Button
+                      variant="destructive"
+                      size="sm"
+                      onClick={removeImage}
+                      className="absolute top-1 right-1 h-6 w-6 p-0 rounded-full"
+                    >
+                      <X className="h-3 w-3" />
+                    </Button>
+                  </div>
+                  <p className="text-xs text-muted-foreground mt-1">📷 Photo attached — describe the issue or send for diagnosis</p>
+                </div>
+              )}
+              <div className="flex-1 overflow-y-auto max-h-[180px]">
                 {renderMessages()}
               </div>
-              {renderInputBar()}
-              <div className="p-2 border-t flex justify-center">
+              {/* Video call input with image upload button */}
+              <div className="p-4 border-t">
+                <div className="flex gap-2">
+                  <input
+                    ref={imageInputRef}
+                    type="file"
+                    accept="image/*"
+                    capture="environment"
+                    onChange={handleImageUpload}
+                    className="hidden"
+                  />
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => imageInputRef.current?.click()}
+                    className="h-10 w-10 p-0 shrink-0"
+                    title="Upload crop photo"
+                  >
+                    <Camera className="h-4 w-4" />
+                  </Button>
+                  <div className="flex-1 relative">
+                    <Input
+                      value={inputMessage}
+                      onChange={e => setInputMessage(e.target.value)}
+                      onKeyDown={(e) => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); sendWithImage(); } }}
+                      placeholder={uploadedImage ? "Describe the crop issue..." : t('ai.placeholder')}
+                      disabled={isLoading}
+                      className="pr-12"
+                    />
+                    <div className="absolute right-1 top-1/2 -translate-y-1/2">
+                      <VoiceInput
+                        onTranscript={(text) => setInputMessage(prev => prev + (prev ? " " : "") + text)}
+                        onListeningChange={setIsListening}
+                        disabled={isLoading}
+                        size="sm"
+                      />
+                    </div>
+                  </div>
+                  <Button onClick={() => sendWithImage()} disabled={(!inputMessage.trim() && !uploadedImage) || isLoading} size="sm">
+                    {isLoading ? <RefreshCw className="h-4 w-4 animate-spin" /> : <Send className="h-4 w-4" />}
+                  </Button>
+                </div>
+              </div>
+              <div className="p-2 border-t flex justify-center gap-3">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => imageInputRef.current?.click()}
+                  className="gap-1.5"
+                >
+                  <ImagePlus className="h-4 w-4" /> Share Photo
+                </Button>
                 <Button onClick={endVideoCall} variant="destructive" size="lg" className="rounded-full h-12 w-12">
                   <Video className="h-5 w-5" />
                 </Button>
