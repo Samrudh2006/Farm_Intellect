@@ -5,21 +5,30 @@ const CHAT_URL = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/chat`;
 export async function streamChat({
   messages,
   mode = "chat",
+  imageBase64,
+  imageMimeType,
   onDelta,
   onDone,
   onError,
 }: {
   messages: AiMessage[];
-  mode?: "chat" | "disease" | "recommendation" | "yield";
+  mode?: "chat" | "disease" | "recommendation" | "yield" | "vision";
+  imageBase64?: string;
+  imageMimeType?: string;
   onDelta: (text: string) => void;
   onDone: () => void;
   onError?: (error: string) => void;
 }) {
   try {
-    // Get the user's session token for authenticated requests
     const { supabase } = await import("@/integrations/supabase/client");
     const { data: { session } } = await supabase.auth.getSession();
     const token = session?.access_token || import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY;
+
+    const body: Record<string, unknown> = { messages, mode };
+    if (imageBase64) {
+      body.imageBase64 = imageBase64;
+      body.imageMimeType = imageMimeType || "image/jpeg";
+    }
 
     const resp = await fetch(CHAT_URL, {
       method: "POST",
@@ -27,7 +36,7 @@ export async function streamChat({
         "Content-Type": "application/json",
         Authorization: `Bearer ${token}`,
       },
-      body: JSON.stringify({ messages, mode }),
+      body: JSON.stringify(body),
     });
 
     if (!resp.ok) {
@@ -35,7 +44,7 @@ export async function streamChat({
       try {
         const payload = await resp.json();
         errMsg = payload.error || errMsg;
-      } catch { /* keep default */ }
+      } catch {}
 
       if (resp.status === 429) errMsg = "Too many requests — please wait a moment.";
       if (resp.status === 402) errMsg = "AI credits exhausted. Please add credits.";
@@ -81,14 +90,12 @@ export async function streamChat({
           const content = parsed.choices?.[0]?.delta?.content as string | undefined;
           if (content) onDelta(content);
         } catch {
-          // Incomplete JSON — put back and wait
           buffer = line + "\n" + buffer;
           break;
         }
       }
     }
 
-    // Flush remaining buffer
     if (buffer.trim()) {
       for (let raw of buffer.split("\n")) {
         if (!raw) continue;
@@ -101,7 +108,7 @@ export async function streamChat({
           const parsed = JSON.parse(jsonStr);
           const content = parsed.choices?.[0]?.delta?.content as string | undefined;
           if (content) onDelta(content);
-        } catch { /* ignore */ }
+        } catch {}
       }
     }
 
