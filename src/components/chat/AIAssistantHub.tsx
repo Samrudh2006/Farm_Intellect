@@ -52,6 +52,15 @@ export const AIAssistantHub = () => {
   const [videoCallDuration, setVideoCallDuration] = useState(0);
   const videoCallTimerRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
+  // Image upload state (video call)
+  const [uploadedImage, setUploadedImage] = useState<string | null>(null);
+  const [uploadedImageFile, setUploadedImageFile] = useState<File | null>(null);
+  const imageInputRef = useRef<HTMLInputElement>(null);
+
+  // Continuous voice listening (voice call)
+  const [continuousListening, setContinuousListening] = useState(false);
+  const recognitionRef = useRef<any>(null);
+
   useEffect(() => {
     setMessages([{
       id: "welcome",
