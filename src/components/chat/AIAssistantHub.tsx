@@ -594,11 +594,78 @@ export const AIAssistantHub = () => {
               <div className="p-3">
                 {renderVideoAvatar()}
               </div>
-              <div className="flex-1 overflow-y-auto max-h-[200px]">
+              {/* Image upload preview */}
+              {uploadedImage && (
+                <div className="px-3 pb-2">
+                  <div className="relative inline-block rounded-lg overflow-hidden border border-primary/20">
+                    <img src={uploadedImage} alt="Crop photo" className="h-24 w-auto rounded-lg object-cover" />
+                    <Button
+                      variant="destructive"
+                      size="sm"
+                      onClick={removeImage}
+                      className="absolute top-1 right-1 h-6 w-6 p-0 rounded-full"
+                    >
+                      <X className="h-3 w-3" />
+                    </Button>
+                  </div>
+                  <p className="text-xs text-muted-foreground mt-1">📷 Photo attached — describe the issue or send for diagnosis</p>
+                </div>
+              )}
+              <div className="flex-1 overflow-y-auto max-h-[180px]">
                 {renderMessages()}
               </div>
-              {renderInputBar()}
-              <div className="p-2 border-t flex justify-center">
+              {/* Video call input with image upload button */}
+              <div className="p-4 border-t">
+                <div className="flex gap-2">
+                  <input
+                    ref={imageInputRef}
+                    type="file"
+                    accept="image/*"
+                    capture="environment"
+                    onChange={handleImageUpload}
+                    className="hidden"
+                  />
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => imageInputRef.current?.click()}
+                    className="h-10 w-10 p-0 shrink-0"
+                    title="Upload crop photo"
+                  >
+                    <Camera className="h-4 w-4" />
+                  </Button>
+                  <div className="flex-1 relative">
+                    <Input
+                      value={inputMessage}
+                      onChange={e => setInputMessage(e.target.value)}
+                      onKeyDown={(e) => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); sendWithImage(); } }}
+                      placeholder={uploadedImage ? "Describe the crop issue..." : t('ai.placeholder')}
+                      disabled={isLoading}
+                      className="pr-12"
+                    />
+                    <div className="absolute right-1 top-1/2 -translate-y-1/2">
+                      <VoiceInput
+                        onTranscript={(text) => setInputMessage(prev => prev + (prev ? " " : "") + text)}
+                        onListeningChange={setIsListening}
+                        disabled={isLoading}
+                        size="sm"
+                      />
+                    </div>
+                  </div>
+                  <Button onClick={() => sendWithImage()} disabled={(!inputMessage.trim() && !uploadedImage) || isLoading} size="sm">
+                    {isLoading ? <RefreshCw className="h-4 w-4 animate-spin" /> : <Send className="h-4 w-4" />}
+                  </Button>
+                </div>
+              </div>
+              <div className="p-2 border-t flex justify-center gap-3">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => imageInputRef.current?.click()}
+                  className="gap-1.5"
+                >
+                  <ImagePlus className="h-4 w-4" /> Share Photo
+                </Button>
                 <Button onClick={endVideoCall} variant="destructive" size="lg" className="rounded-full h-12 w-12">
                   <Video className="h-5 w-5" />
                 </Button>
