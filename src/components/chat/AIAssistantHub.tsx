@@ -536,13 +536,35 @@ export const AIAssistantHub = () => {
                 <Badge className="bg-green-500/20 text-green-700 dark:text-green-300">
                   🔴 Connected • {formatDuration(voiceCallDuration)}
                 </Badge>
+                <div className="flex items-center gap-2 mt-1">
+                  <Button
+                    variant={continuousListening ? "default" : "outline"}
+                    size="sm"
+                    onClick={continuousListening ? stopContinuousListening : startContinuousListening}
+                    className={`gap-1.5 ${continuousListening ? 'bg-green-600 hover:bg-green-700 animate-pulse' : ''}`}
+                  >
+                    {continuousListening ? <MicOff className="h-3.5 w-3.5" /> : <Mic className="h-3.5 w-3.5" />}
+                    {continuousListening ? "Stop Hands-Free" : "Hands-Free Mode"}
+                  </Button>
+                </div>
               </div>
               <div className="flex-1 overflow-y-auto">
                 {renderMessages()}
               </div>
-              {renderInputBar()}
+              {!continuousListening && renderInputBar()}
+              {continuousListening && (
+                <div className="p-4 border-t bg-muted/30 text-center">
+                  <div className="flex items-center justify-center gap-2 text-sm text-muted-foreground">
+                    <Mic className="h-4 w-4 text-green-500 animate-pulse" />
+                    <span>Listening... speak naturally. Your message will be sent automatically.</span>
+                  </div>
+                  {inputMessage && (
+                    <p className="mt-2 text-sm font-medium text-foreground italic">"{inputMessage}"</p>
+                  )}
+                </div>
+              )}
               <div className="p-3 border-t flex justify-center">
-                <Button onClick={endVoiceCall} variant="destructive" size="lg" className="rounded-full h-14 w-14">
+                <Button onClick={() => { stopContinuousListening(); endVoiceCall(); }} variant="destructive" size="lg" className="rounded-full h-14 w-14">
                   <PhoneIcon className="h-5 w-5 rotate-[135deg]" />
                 </Button>
               </div>
