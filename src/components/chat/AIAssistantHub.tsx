@@ -205,19 +205,107 @@ export const AIAssistantHub = () => {
     if (videoCallTimerRef.current) clearInterval(videoCallTimerRef.current);
   };
 
+  // Image upload handlers
+  const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    if (!file.type.startsWith('image/')) { toast.error("Please upload an image file"); return; }
+    if (file.size > 5 * 1024 * 1024) { toast.error("Image must be under 5MB"); return; }
+    setUploadedImageFile(file);
+    const reader = new FileReader();
+    reader.onload = (ev) => setUploadedImage(ev.target?.result as string);
+    reader.readAsDataURL(file);
+    toast.success("Image attached! Describe the issue or ask Dr. Krishi to diagnose.");
+  };
+
+  const removeImage = () => {
+    setUploadedImage(null);
+    setUploadedImageFile(null);
+    if (imageInputRef.current) imageInputRef.current.value = "";
+  };
+
+  const sendWithImage = async () => {
+    if (!uploadedImage) { sendMessage(); return; }
+    const prompt = (inputMessage.trim() || "Please analyze this crop image for diseases, pests, or nutrient deficiencies. Provide diagnosis and treatment recommendations.");
+    const messageText = `[📷 Crop photo attached]\n${prompt}`;
+    removeImage();
+    await sendMessage(messageText);
+  };
+
+  // Continuous voice recognition for voice call
+  const startContinuousListening = useCallback(() => {
+    const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
+    if (!SpeechRecognition) { toast.error("Speech recognition not supported in this browser"); return; }
+
+    const recognition = new SpeechRecognition();
+    recognition.continuous = true;
+    recognition.interimResults = true;
+    recognition.lang = ttsLanguageMap[language] || "en-IN";
+
+    let finalTranscript = "";
+
+    recognition.onresult = (event: any) => {
+      let interim = "";
+      for (let i = event.resultIndex; i < event.results.length; i++) {
+        if (event.results[i].isFinal) {
+          finalTranscript += event.results[i][0].transcript + " ";
+        } else {
+          interim += event.results[i][0].transcript;
+        }
+      }
+      setInputMessage(finalTranscript + interim);
+    };
+
+    recognition.onend = () => {
+      // Auto-send if we have final text and restart listening
+      if (finalTranscript.trim() && continuousListening) {
+        const text = finalTranscript.trim();
+        finalTranscript = "";
+        setInputMessage("");
+        sendMessage(text);
+        // Restart after a brief pause for the response
+        setTimeout(() => {
+          if (continuousListening && recognitionRef.current) {
+            try { recognitionRef.current.start(); } catch {}
+          }
+        }, 2000);
+      } else if (continuousListening) {
+        try { recognition.start(); } catch {}
+      }
+    };
+
+    recognition.onerror = (event: any) => {
+      if (event.error !== 'no-speech' && event.error !== 'aborted') {
+        console.error("Speech recognition error:", event.error);
+      }
+    };
+
+    recognitionRef.current = recognition;
+    setContinuousListening(true);
+    recognition.start();
+    toast.success("Hands-free mode active — speak naturally!");
+  }, [language, continuousListening]);
+
+  const stopContinuousListening = useCallback(() => {
+    setContinuousListening(false);
+    if (recognitionRef.current) {
+      try { recognitionRef.current.stop(); } catch {}
+      recognitionRef.current = null;
+    }
+  }, []);
+
+  // Cleanup continuous listening on unmount or tab change
+  useEffect(() => {
+    if (activeTab !== "voice") stopContinuousListening();
+  }, [activeTab]);
+
   useEffect(() => {
     return () => {
       if (voiceCallTimerRef.current) clearInterval(voiceCallTimerRef.current);
       if (videoCallTimerRef.current) clearInterval(videoCallTimerRef.current);
+      stopContinuousListening();
     };
   }, []);
-
-  const quickQuestions = [
-    t('ai.quick_crop_season'),
-    t('ai.quick_pest_control'),
-    t('ai.quick_fertilizer'),
-    t('ai.quick_msp'),
-  ];
 
   // ─── Chat Messages Renderer ───
   const renderMessages = () => (
