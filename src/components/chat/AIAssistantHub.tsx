@@ -8,7 +8,7 @@ import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import {
   Send, User, Volume2, VolumeX, Trash2, Copy, ThumbsUp, ThumbsDown,
   StopCircle, RefreshCw, MessageCircle, Phone as PhoneIcon, Video,
-  Mic, MicOff
+  Mic, MicOff, ImagePlus, X, Camera
 } from "lucide-react";
 import krishiAvatar from "@/assets/krishi-ai-avatar.png";
 import doctorAvatar from "@/assets/doctor-avatar.png";
