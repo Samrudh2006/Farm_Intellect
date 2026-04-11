@@ -307,6 +307,13 @@ export const AIAssistantHub = () => {
     };
   }, []);
 
+  const quickQuestions = [
+    t('ai.quick_crop_season'),
+    t('ai.quick_pest_control'),
+    t('ai.quick_fertilizer'),
+    t('ai.quick_msp'),
+  ];
+
   // ─── Chat Messages Renderer ───
   const renderMessages = () => (
     <div className="flex-1 overflow-y-auto p-4 space-y-4">
