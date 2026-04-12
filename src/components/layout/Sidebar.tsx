@@ -19,7 +19,8 @@ import {
   Gauge,
   Vote,
   Building,
-  Landmark
+  Landmark,
+  Video
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
@@ -45,6 +46,7 @@ const getNavigationItems = (t: (key: string) => string) => ({
     { icon: Landmark, label: `🏛 ${t('nav.schemes')}`, href: "/farmer/schemes" },
     { icon: Activity, label: t('nav.smart_features'), href: "/farmer/features" },
     { icon: Bot, label: t('nav.ai_assistant'), href: "/farmer/chat" },
+    { icon: Video, label: "Video/Voice Call", href: "/farmer/call" },
     { icon: MessageSquare, label: t('nav.forum'), href: "/farmer/forum" },
     { icon: Calendar, label: t('nav.crop_calendar'), href: "/farmer/calendar" },
     { icon: BookOpen, label: "📚 Knowledge Hub", href: "/farmer/knowledge" },
@@ -64,7 +66,8 @@ const getNavigationItems = (t: (key: string) => string) => ({
     { icon: LayoutDashboard, label: `🎓 ${t('sidebar.expert_center')}`, href: "/expert/dashboard" },
     { icon: Activity, label: t('nav.ai_crop_scanner'), href: "/expert/ai-crop-scanner" },
     { icon: Brain, label: t('nav.ai_advisory'), href: "/expert/ai-advisory" },
-    { icon: MessageSquare, label: "🔬 Consultations", href: "/expert/consultations" },
+    { icon: MessageSquare, label: "Consultations", href: "/expert/consultations" },
+    { icon: Video, label: "Video/Voice Call", href: "/expert/call" },
     { icon: BookOpen, label: "📚 Knowledge Hub", href: "/expert/knowledge" },
     { icon: Bot, label: t('nav.ai_assistant'), href: "/expert/chat" },
     { icon: Bell, label: t('nav.notifications'), href: "/expert/notifications" },

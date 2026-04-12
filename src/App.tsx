@@ -60,6 +60,7 @@ const MerchantChat = lazy(() => import("./pages/merchant/MerchantChat"));
 const MerchantOrders = lazy(() => import("./pages/merchant/MerchantOrders"));
 
 const FarmerKnowledgeHub = lazy(() => import("./pages/farmer/FarmerKnowledgeHub"));
+const Call = lazy(() => import("./pages/Call"));
 const ExpertAICropScanner = lazy(() => import("./pages/expert/ExpertAICropScanner"));
 const ExpertAIAdvisory = lazy(() => import("./pages/expert/ExpertAIAdvisory"));
 const ExpertChat = lazy(() => import("./pages/expert/ExpertChat"));
@@ -149,6 +150,7 @@ const AnimatedRoutes = () => {
         <Route path="/farmer/notifications" element={renderProtectedPage(Notifications, ["farmer"])} />
         <Route path="/farmer/features" element={renderProtectedPage(FarmFeatures, ["farmer"])} />
         <Route path="/farmer/knowledge" element={renderProtectedPage(FarmerKnowledgeHub, ["farmer"])} />
+        <Route path="/farmer/call" element={renderProtectedPage(Call, ["farmer"])} />
         <Route path="/farmer/profile" element={renderProtectedPage(Profile, ["farmer"])} />
         
         {/* Merchant Routes */}
@@ -169,6 +171,7 @@ const AnimatedRoutes = () => {
         <Route path="/expert/consultations" element={renderProtectedPage(ExpertConsultations, ["expert"])} />
         <Route path="/expert/knowledge" element={renderProtectedPage(ExpertKnowledgeHub, ["expert"])} />
         <Route path="/expert/notifications" element={renderProtectedPage(ExpertNotifications, ["expert"])} />
+        <Route path="/expert/call" element={renderProtectedPage(Call, ["expert"])} />
         <Route path="/expert/profile" element={renderProtectedPage(Profile, ["expert"])} />
         
         {/* Admin Routes */}
