@@ -105,4 +105,91 @@ router.get('/farmers', authenticate, authorize('MERCHANT', 'EXPERT', 'ADMIN'), a
   }
 });
 
+// Get experts (for farmer consultations)
+router.get('/experts', authenticate, async (_req, res) => {
+  try {
+    const experts = await prisma.user.findMany({
+      where: { role: 'EXPERT' },
+      include: { expertProfile: true },
+      select: {
+        id: true,
+        name: true,
+        role: true,
+        email: true,
+        phone: true,
+        location: true,
+        expertProfile: {
+          select: {
+            specialization: true,
+            experience: true,
+            rating: true,
+            consultations: true
+          }
+        }
+      },
+      orderBy: { createdAt: 'desc' }
+    });
+
+    if (experts.length > 0) {
+      return res.json({ experts });
+    }
+
+    return res.json({
+      experts: [
+        {
+          id: 'seed-expert-1',
+          name: 'Dr. Kavita Sharma',
+          role: 'EXPERT',
+          location: 'Punjab',
+          expertProfile: {
+            specialization: 'Plant Pathology & Crop Disease',
+            experience: 15,
+            rating: 4.9,
+            consultations: 1247
+          }
+        },
+        {
+          id: 'seed-expert-2',
+          name: 'Dr. Arjun Patel',
+          role: 'EXPERT',
+          location: 'Gujarat',
+          expertProfile: {
+            specialization: 'Soil Health & Irrigation',
+            experience: 12,
+            rating: 4.8,
+            consultations: 892
+          }
+        },
+        {
+          id: 'seed-expert-3',
+          name: 'Dr. Meera Singh',
+          role: 'EXPERT',
+          location: 'Haryana',
+          expertProfile: {
+            specialization: 'Market Linkage & Government Schemes',
+            experience: 10,
+            rating: 4.7,
+            consultations: 654
+          }
+        },
+        {
+          id: 'seed-expert-4',
+          name: 'Dr. Rajesh Kumar',
+          role: 'EXPERT',
+          location: 'Maharashtra',
+          expertProfile: {
+            specialization: 'Pest Control & Organic Farming',
+            experience: 18,
+            rating: 4.9,
+            consultations: 1089
+          }
+        }
+      ]
+    });
+  } catch (error) {
+    logger.error('Get experts error:', error);
+    res.status(500).json({ error: 'Failed to fetch experts' });
+  }
+});
+
 export default router;

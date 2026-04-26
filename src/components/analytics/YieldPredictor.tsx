@@ -1,9 +1,12 @@
-import { useState } from "react";
+import { useMemo, useState, useEffect } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { apiFetch } from "@/lib/api";
 import {
   LineChart,
   Line,
@@ -32,72 +35,97 @@ import {
   CheckCircle
 } from "lucide-react";
 
-interface YieldPrediction {
-  crop: string;
-  predictedYield: number;
-  confidence: number;
-  factors: {
-    weather: number;
-    soil: number;
-    management: number;
-    genetics: number;
-  };
-  riskAssessment: 'low' | 'medium' | 'high';
-  recommendations: string[];
-}
-
-const mockYieldData = [
-  { month: 'Nov', expected: 35, actual: 0, weather: 85 },
-  { month: 'Dec', expected: 40, actual: 0, weather: 90 },
-  { month: 'Jan', expected: 42, actual: 0, weather: 88 },
-  { month: 'Feb', expected: 45, actual: 0, weather: 92 },
-  { month: 'Mar', expected: 48, actual: 0, weather: 85 },
-  { month: 'Apr', expected: 50, actual: 0, weather: 80 }
-];
-
-const historicalYield = [
-  { year: '2020', wheat: 42, rice: 65, cotton: 18, mustard: 15 },
-  { year: '2021', wheat: 45, rice: 68, cotton: 20, mustard: 17 },
-  { year: '2022', wheat: 43, rice: 70, cotton: 19, mustard: 16 },
-  { year: '2023', wheat: 47, rice: 72, cotton: 22, mustard: 18 },
-  { year: '2024', wheat: 49, rice: 75, cotton: 24, mustard: 20 }
-];
-
-const profitAnalysis = [
-  { crop: 'Wheat', cost: 35000, revenue: 75000, profit: 40000 },
-  { crop: 'Rice', cost: 45000, revenue: 90000, profit: 45000 },
-  { crop: 'Cotton', cost: 50000, revenue: 120000, profit: 70000 },
-  { crop: 'Mustard', cost: 25000, revenue: 80000, profit: 55000 }
-];
-
-const riskFactors = [
-  { name: 'Weather Risk', value: 25, color: '#ef4444' },
-  { name: 'Market Risk', value: 35, color: '#f59e0b' },
-  { name: 'Disease Risk', value: 20, color: '#8b5cf6' },
-  { name: 'Resource Risk', value: 20, color: '#06b6d4' }
-];
-
 const YieldPredictor = () => {
   const [selectedCrop, setSelectedCrop] = useState('wheat');
-  
-  const mockPrediction: YieldPrediction = {
-    crop: 'Wheat (PBW 725)',
-    predictedYield: 48.5,
-    confidence: 87,
-    factors: {
-      weather: 85,
-      soil: 92,
-      management: 78,
-      genetics: 88
-    },
-    riskAssessment: 'low',
-    recommendations: [
-      'Apply second dose of urea by Jan 15 for optimal tillering',
-      'Monitor for yellow rust after first irrigation',
-      'Plan harvest by April 15 to avoid heat stress',
-      'Use weedicide at 30-35 DAS for maximum efficacy'
-    ]
+  const [farmSize, setFarmSize] = useState("5");
+  const [prediction, setPrediction] = useState<any | null>(null);
+  const [forecast, setForecast] = useState<Array<{ month: string; price: number }>>([]);
+  const [loading, setLoading] = useState(false);
+
+  const fetchPrediction = async () => {
+    setLoading(true);
+    try {
+      const { prediction: result } = await apiFetch<{ prediction: any }>("/api/ai/predict-yield", {
+        method: "POST",
+        body: JSON.stringify({
+          cropType: selectedCrop,
+          farmSize,
+          soilQuality: "good",
+          irrigation: "adequate",
+          irrigationMethod: "tube-well",
+          fertilizer: "optimal",
+          fertilizerTiming: "correct",
+          weather: { temperature: 28, humidity: 65, rainfall: 800 },
+          pestPressure: "low",
+        }),
+      });
+      setPrediction(result);
+      const { forecast: forecastResult } = await apiFetch<{ forecast: { forecasts: Array<{ month: string; price: number }> } }>("/api/ai/forecast-price", {
+        method: "POST",
+        body: JSON.stringify({ commodity: selectedCrop, months: 6 }),
+      });
+      setForecast(forecastResult?.forecasts?.map((item) => ({ month: item.month, price: item.price })) || []);
+    } catch (error) {
+      console.error("Yield prediction error:", error);
+    } finally {
+      setLoading(false);
+    }
   };
+
+  useEffect(() => {
+    fetchPrediction();
+  }, [selectedCrop, farmSize]);
+
+  const yieldPerHectare = prediction?.yieldPerHectare ? prediction.yieldPerHectare / 100 : 0;
+  const yieldProgression = useMemo(() => {
+    const months = ["Nov", "Dec", "Jan", "Feb", "Mar", "Apr"];
+    return months.map((month, index) => ({
+      month,
+      expected: Math.round(yieldPerHectare * (0.6 + index * 0.08)),
+      actual: 0,
+      weather: prediction?.factors?.weather?.score ? Math.round(prediction.factors.weather.score) : 80,
+    }));
+  }, [yieldPerHectare, prediction]);
+
+  const historicalYield = useMemo(() => {
+    const base = yieldPerHectare || 45;
+    const multipliers = [0.85, 0.92, 0.96, 1.0, 1.04];
+    return ["2020", "2021", "2022", "2023", "2024"].map((year, index) => ({
+      year,
+      wheat: Math.round(base * multipliers[index]),
+      rice: Math.round(base * 1.4 * multipliers[index]),
+      cotton: Math.round(base * 0.45 * multipliers[index]),
+      mustard: Math.round(base * 0.4 * multipliers[index]),
+    }));
+  }, [yieldPerHectare]);
+
+  const pricePerKg = forecast.length > 0
+    ? Math.round(forecast.reduce((sum, item) => sum + item.price, 0) / forecast.length) / 100
+    : 22;
+
+  const profitAnalysis = useMemo(() => {
+    const revenue = Math.round((prediction?.yieldPerHectare || 4000) * pricePerKg);
+    const cost = Math.round(revenue * 0.55);
+    return [
+      { crop: selectedCrop.charAt(0).toUpperCase() + selectedCrop.slice(1), cost, revenue, profit: revenue - cost },
+      { crop: "Rice", cost: Math.round(cost * 1.2), revenue: Math.round(revenue * 1.15), profit: Math.round(revenue * 1.15) - Math.round(cost * 1.2) },
+      { crop: "Cotton", cost: Math.round(cost * 1.05), revenue: Math.round(revenue * 1.4), profit: Math.round(revenue * 1.4) - Math.round(cost * 1.05) },
+      { crop: "Mustard", cost: Math.round(cost * 0.7), revenue: Math.round(revenue * 0.9), profit: Math.round(revenue * 0.9) - Math.round(cost * 0.7) },
+    ];
+  }, [prediction, pricePerKg, selectedCrop]);
+
+  const riskFactors = useMemo(() => {
+    const weatherRisk = prediction?.factors?.weather?.score ? 100 - prediction.factors.weather.score : 25;
+    const pestRisk = prediction?.factors?.pestManagement?.score ? 100 - prediction.factors.pestManagement.score : 20;
+    const soilRisk = prediction?.factors?.soilQuality?.score ? 100 - prediction.factors.soilQuality.score : 20;
+    const marketRisk = forecast.length === 0 ? 35 : Math.max(10, Math.round((forecast[forecast.length - 1]?.price || 0) / 100));
+    return [
+      { name: "Weather Risk", value: Math.round(weatherRisk), color: "#ef4444" },
+      { name: "Market Risk", value: Math.round(marketRisk), color: "#f59e0b" },
+      { name: "Disease Risk", value: Math.round(pestRisk), color: "#8b5cf6" },
+      { name: "Resource Risk", value: Math.round(soilRisk), color: "#06b6d4" },
+    ];
+  }, [prediction, forecast]);
 
   const riskColor = {
     low: 'text-green-600 bg-green-50',
@@ -108,33 +136,35 @@ const YieldPredictor = () => {
   return (
     <div className="space-y-6">
       {/* Yield Prediction Overview */}
-      <div className="grid gap-6 md:grid-cols-3">
+       <div className="grid gap-6 md:grid-cols-3">
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Predicted Yield</CardTitle>
             <Target className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-primary">{mockPrediction.predictedYield} q/ha</div>
+            <div className="text-2xl font-bold text-primary">
+              {prediction ? `${yieldPerHectare.toFixed(1)} q/ha` : "--"}
+            </div>
             <p className="text-xs text-muted-foreground">
-              {mockPrediction.confidence}% confidence level
+              {prediction?.confidence ?? "--"}% confidence level
             </p>
-            <Progress value={mockPrediction.confidence} className="mt-2 h-2" />
+            <Progress value={prediction?.confidence || 0} className="mt-2 h-2" />
           </CardContent>
         </Card>
 
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Risk Assessment</CardTitle>
-            {mockPrediction.riskAssessment === 'low' ? (
+            {prediction?.riskLevel === 'low' ? (
               <CheckCircle className="h-4 w-4 text-green-600" />
             ) : (
               <AlertCircle className="h-4 w-4 text-yellow-600" />
             )}
           </CardHeader>
           <CardContent>
-            <div className={`text-2xl font-bold capitalize ${riskColor[mockPrediction.riskAssessment]}`}>
-              {mockPrediction.riskAssessment}
+            <div className={`text-2xl font-bold capitalize ${riskColor[prediction?.riskLevel || 'medium']}`}>
+              {prediction?.riskLevel || 'medium'}
             </div>
             <p className="text-xs text-muted-foreground">
               Overall production risk
@@ -148,17 +178,49 @@ const YieldPredictor = () => {
             <DollarSign className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-green-600">₹42,500</div>
+            <div className="text-2xl font-bold text-green-600">
+              ₹{profitAnalysis[0]?.profit?.toLocaleString("en-IN") || "--"}
+            </div>
             <p className="text-xs text-muted-foreground">
               Net profit per hectare
             </p>
             <div className="flex items-center mt-2">
               <TrendingUp className="h-3 w-3 text-green-600 mr-1" />
-              <span className="text-xs text-green-600">+12% vs last year</span>
+              <span className="text-xs text-green-600">
+                {prediction?.comparisonToNational ? `${prediction.comparisonToNational} vs national avg` : "Benchmarking..."}
+              </span>
             </div>
           </CardContent>
         </Card>
       </div>
+
+      <Card>
+        <CardContent className="grid gap-4 md:grid-cols-3 py-4">
+          <div className="space-y-2">
+            <Label>Crop</Label>
+            <select
+              className="w-full p-2 border rounded"
+              value={selectedCrop}
+              onChange={(e) => setSelectedCrop(e.target.value)}
+            >
+              <option value="wheat">Wheat</option>
+              <option value="rice">Rice</option>
+              <option value="cotton">Cotton</option>
+              <option value="maize">Maize</option>
+              <option value="mustard">Mustard</option>
+            </select>
+          </div>
+          <div className="space-y-2">
+            <Label>Farm Size (acres)</Label>
+            <Input value={farmSize} onChange={(e) => setFarmSize(e.target.value)} type="number" min="1" />
+          </div>
+          <div className="flex items-end">
+            <Button onClick={fetchPrediction} disabled={loading} className="w-full">
+              {loading ? "Updating..." : "Refresh Prediction"}
+            </Button>
+          </div>
+        </CardContent>
+      </Card>
 
       <Tabs defaultValue="prediction" className="space-y-6">
         <TabsList className="grid w-full grid-cols-4">
@@ -182,27 +244,27 @@ const YieldPredictor = () => {
                 <div className="space-y-3">
                   <div className="flex justify-between items-center">
                     <span className="text-sm font-medium">Weather Conditions</span>
-                    <span className="text-sm">{mockPrediction.factors.weather}%</span>
+                    <span className="text-sm">{prediction?.factors?.weather?.score ?? 0}%</span>
                   </div>
-                  <Progress value={mockPrediction.factors.weather} className="h-2" />
+                  <Progress value={prediction?.factors?.weather?.score || 0} className="h-2" />
                   
                   <div className="flex justify-between items-center">
                     <span className="text-sm font-medium">Soil Health</span>
-                    <span className="text-sm">{mockPrediction.factors.soil}%</span>
+                    <span className="text-sm">{prediction?.factors?.soilQuality?.score ?? 0}%</span>
                   </div>
-                  <Progress value={mockPrediction.factors.soil} className="h-2" />
+                  <Progress value={prediction?.factors?.soilQuality?.score || 0} className="h-2" />
                   
                   <div className="flex justify-between items-center">
                     <span className="text-sm font-medium">Management Practices</span>
-                    <span className="text-sm">{mockPrediction.factors.management}%</span>
+                    <span className="text-sm">{prediction?.factors?.irrigation?.score ?? 0}%</span>
                   </div>
-                  <Progress value={mockPrediction.factors.management} className="h-2" />
+                  <Progress value={prediction?.factors?.irrigation?.score || 0} className="h-2" />
                   
                   <div className="flex justify-between items-center">
                     <span className="text-sm font-medium">Seed Genetics</span>
-                    <span className="text-sm">{mockPrediction.factors.genetics}%</span>
+                    <span className="text-sm">{prediction?.factors?.fertilizer?.score ?? 0}%</span>
                   </div>
-                  <Progress value={mockPrediction.factors.genetics} className="h-2" />
+                  <Progress value={prediction?.factors?.fertilizer?.score || 0} className="h-2" />
                 </div>
               </CardContent>
             </Card>
@@ -217,7 +279,7 @@ const YieldPredictor = () => {
               </CardHeader>
               <CardContent>
                 <ResponsiveContainer width="100%" height={250}>
-                  <AreaChart data={mockYieldData}>
+                  <AreaChart data={yieldProgression}>
                     <CartesianGrid strokeDasharray="3 3" />
                     <XAxis dataKey="month" />
                     <YAxis />
@@ -248,7 +310,7 @@ const YieldPredictor = () => {
             </CardHeader>
             <CardContent>
               <div className="space-y-3">
-                {mockPrediction.recommendations.map((rec, index) => (
+                {(prediction?.recommendations || []).map((rec: string, index: number) => (
                   <div key={index} className="flex items-start gap-3 p-3 rounded-lg bg-muted/50">
                     <Badge className="mt-0.5">{index + 1}</Badge>
                     <span className="text-sm">{rec}</span>

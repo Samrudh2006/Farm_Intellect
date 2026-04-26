@@ -8,6 +8,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { useToast } from "@/hooks/use-toast";
+import { apiFetch } from "@/lib/api";
 import {
   Brain,
   Leaf,
@@ -75,59 +76,133 @@ const CropRecommendationEngine = () => {
   const generateRecommendations = async () => {
     setLoading(true);
 
-    // Use real dataset: score crops by soil parameters
-    await new Promise(r => setTimeout(r, 800));
-    
-    const results = getRecommendationBySoil(
-      soilData.nitrogen,
-      soilData.phosphorus,
-      soilData.potassium,
-      soilData.ph,
-      25,      // default temp — could add to form
-      60,      // default humidity
-      farmData.season === 'kharif' ? 1200 : 400  // rainfall estimate by season
-    );
+    try {
+      const climateDefaults = {
+        temperature: 28,
+        humidity: 60,
+        rainfall: farmData.season === "kharif" ? 1200 : farmData.season === "zaid" ? 600 : 400,
+      };
 
-    if (results.length > 0) {
-      const mapped: CropRecommendation[] = results.slice(0, 4).map(r => {
-        const c = r.crop;
-        const variety = c.bestVarieties[0];
-        return {
+      const { recommendations: backendRecommendations } = await apiFetch<{ recommendations: Array<{
+        crop: string;
+        confidence: number;
+        suitability: number;
+        expectedYield: string;
+        profitEstimate: string;
+        growthPeriod: string;
+        riskLevel: string;
+        reason: string;
+        parameterScores?: Record<string, number>;
+      }>; }>("/api/ai/recommend-crops", {
+        method: "POST",
+        body: JSON.stringify({
+          location: farmData.location || undefined,
+          soilType: farmData.soilType || undefined,
+          season: farmData.season,
+          farmSize: farmData.farmSize || undefined,
+          experience: farmData.previousCrop || undefined,
+          nitrogen: soilData.nitrogen,
+          phosphorus: soilData.phosphorus,
+          potassium: soilData.potassium,
+          ph: soilData.ph,
+          ...climateDefaults,
+        }),
+      });
+
+      if (backendRecommendations?.length) {
+        const fertilizers = getFertilizerRecommendation({
+          ph: soilData.ph,
+          nitrogen: soilData.nitrogen,
+          phosphorus: soilData.phosphorus,
+          potassium: soilData.potassium,
+          organicCarbon: soilData.organicCarbon,
+          moisture: soilData.moisture,
+        });
+
+        const mapped: CropRecommendation[] = backendRecommendations.slice(0, 4).map((rec) => ({
+          crop: rec.crop,
+          variety: rec.crop,
+          confidence: rec.confidence,
+          expectedYield: rec.expectedYield,
+          profitEstimate: rec.profitEstimate,
+          plantingWindow: rec.growthPeriod,
+          waterRequirement: rec.parameterScores?.rainfall
+            ? `${Math.round(rec.parameterScores.rainfall)}% rainfall match`
+            : "Moderate",
+          fertilizers: fertilizers.slice(0, 3),
+          riskFactors: [rec.reason, `Risk level: ${rec.riskLevel}`],
+          marketDemand: rec.suitability >= 70 ? "high" : rec.suitability >= 45 ? "medium" : "low",
+          suitabilityScore: rec.suitability,
+        }));
+
+        setRecommendations(mapped);
+        toast({
+          title: "Recommendations Ready",
+          description: `${mapped.length} crops matched using backend ML models.`,
+        });
+      } else {
+        throw new Error("No recommendations returned from AI service");
+      }
+    } catch (error: any) {
+      console.error("Crop recommendation error:", error);
+      const results = getRecommendationBySoil(
+        soilData.nitrogen,
+        soilData.phosphorus,
+        soilData.potassium,
+        soilData.ph,
+        25,
+        60,
+        farmData.season === "kharif" ? 1200 : 400
+      );
+
+      if (results.length > 0) {
+        const mapped: CropRecommendation[] = results.slice(0, 4).map((r) => {
+          const c = r.crop;
+          const variety = c.bestVarieties[0];
+          return {
+            crop: c.crop,
+            variety: variety?.name || c.crop,
+            confidence: r.score,
+            expectedYield: `${c.avgYield.value} ${c.avgYield.unit}`,
+            profitEstimate: `₹${c.profitPerHectare.min.toLocaleString()}–${c.profitPerHectare.max.toLocaleString()}/hectare`,
+            plantingWindow: `${c.season} season`,
+            waterRequirement: `${c.waterRequirement.value} ${c.waterRequirement.unit}`,
+            fertilizers: [...c.fertilizers.basal.slice(0, 2), ...c.fertilizers.topDressing.slice(0, 1)],
+            riskFactors: c.rotationCrops.length > 0 ? [`Rotate with: ${c.rotationCrops.slice(0, 2).join(", ")}`] : ["Monitor for common pests"],
+            marketDemand: c.profitPerHectare.max > 80000 ? "high" : c.profitPerHectare.max > 40000 ? "medium" : "low",
+            suitabilityScore: r.score,
+          };
+        });
+        setRecommendations(mapped);
+        toast({
+          title: "Fallback Recommendation",
+          description: "Backend unavailable — showing local dataset matches.",
+          variant: "default",
+        });
+      } else {
+        const high = getHighProfitCrops().slice(0, 3);
+        const mapped: CropRecommendation[] = high.map((c) => ({
           crop: c.crop,
-          variety: variety?.name || c.crop,
-          confidence: r.score,
+          variety: c.bestVarieties[0]?.name || c.crop,
+          confidence: 60,
           expectedYield: `${c.avgYield.value} ${c.avgYield.unit}`,
           profitEstimate: `₹${c.profitPerHectare.min.toLocaleString()}–${c.profitPerHectare.max.toLocaleString()}/hectare`,
           plantingWindow: `${c.season} season`,
           waterRequirement: `${c.waterRequirement.value} ${c.waterRequirement.unit}`,
-          fertilizers: [...c.fertilizers.basal.slice(0, 2), ...c.fertilizers.topDressing.slice(0, 1)],
-          riskFactors: c.rotationCrops.length > 0 ? [`Rotate with: ${c.rotationCrops.slice(0, 2).join(", ")}`] : ["Monitor for common pests"],
-          marketDemand: c.profitPerHectare.max > 80000 ? 'high' : c.profitPerHectare.max > 40000 ? 'medium' : 'low',
-          suitabilityScore: r.score
-        };
-      });
-      setRecommendations(mapped);
-      toast({ title: "Recommendations Ready", description: `${mapped.length} crops matched your soil parameters from ICAR dataset.` });
-    } else {
-      // Fallback: high-profit crops
-      const high = getHighProfitCrops().slice(0, 3);
-      const mapped: CropRecommendation[] = high.map(c => ({
-        crop: c.crop,
-        variety: c.bestVarieties[0]?.name || c.crop,
-        confidence: 60,
-        expectedYield: `${c.avgYield.value} ${c.avgYield.unit}`,
-        profitEstimate: `₹${c.profitPerHectare.min.toLocaleString()}–${c.profitPerHectare.max.toLocaleString()}/hectare`,
-        plantingWindow: `${c.season} season`,
-        waterRequirement: `${c.waterRequirement.value} ${c.waterRequirement.unit}`,
-        fertilizers: c.fertilizers.basal.slice(0, 2),
-        riskFactors: ["Adjust soil parameters for better match"],
-        marketDemand: 'high',
-        suitabilityScore: 60
-      }));
-      setRecommendations(mapped);
-      toast({ title: "General Recommendation", description: "Showing high-profit crops. Adjust soil data for precise results.", variant: "default" });
+          fertilizers: c.fertilizers.basal.slice(0, 2),
+          riskFactors: ["Adjust soil parameters for better match"],
+          marketDemand: "high",
+          suitabilityScore: 60,
+        }));
+        setRecommendations(mapped);
+        toast({
+          title: "General Recommendation",
+          description: "Showing high-profit crops. Adjust soil data for precise results.",
+        });
+      }
+    } finally {
+      setLoading(false);
     }
-    setLoading(false);
   };
 
   const demandColors = {

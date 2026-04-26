@@ -24,8 +24,7 @@ import {
 } from "lucide-react";
 import { useCurrentUser } from "@/hooks/useCurrentUser";
 import { useToast } from "@/hooks/use-toast";
-import { getDiseasesByCrop } from "@/data/cropDiseases";
-import { getPestsByCrop } from "@/data/pestData";
+import { apiFetch } from "@/lib/api";
 
 interface ScanMedicine {
   name: string;
@@ -114,20 +113,13 @@ const AICropScanner = () => {
   ];
 
   const localMlCandidates = useMemo(() => {
-    if (!cropType) return [];
-
-    const crop = cropType.charAt(0).toUpperCase() + cropType.slice(1).toLowerCase();
-    const imageSignal = selectedImage ? (selectedImage.size % 11) - 5 : 0;
-
-    return getDiseasesByCrop(crop)
-      .map((disease, index) => ({
-        name: disease.diseaseName,
-        severity: disease.severity,
-        confidence: Math.max(62, Math.min(98, Math.round(disease.confidence * 100 + imageSignal - index * 2))),
-      }))
-      .sort((left, right) => right.confidence - left.confidence)
-      .slice(0, 3);
-  }, [cropType, selectedImage]);
+    if (!scanResults) return [];
+    return scanResults.relatedPests.map((candidate) => ({
+      name: candidate.name,
+      severity: "medium",
+      confidence: 68,
+    }));
+  }, [scanResults]);
 
   const handleImageSelect = useCallback((event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
@@ -158,79 +150,82 @@ const AICropScanner = () => {
     }
 
     setScanning(true);
-    
-    // Look up real disease data from ICAR/PlantVillage dataset
-    setTimeout(() => {
-      const crop = cropType.charAt(0).toUpperCase() + cropType.slice(1).toLowerCase();
-      const diseases = getDiseasesByCrop(crop);
-      const pests = getPestsByCrop(crop);
+    try {
+      const formData = new FormData();
+      formData.append("image", selectedImage);
+      formData.append("cropType", cropType);
 
-      let scanResult: ScanResult;
-      if (diseases.length > 0) {
-        // Pick most severe disease for the selected crop
-        const sorted = [...diseases].sort((a, b) => {
-          const sev = { critical: 4, high: 3, medium: 2, low: 1 };
-          return sev[b.severity] - sev[a.severity];
-        });
-        const d = sorted[0];
-        scanResult = {
-          disease: d.diseaseName,
-          hindiName: d.hindiName,
-          scientificName: d.scientificName,
-          confidence: Math.round(d.confidence * 100),
-          severity: d.severity,
-          category: d.category,
-          yieldLoss: d.yieldLoss,
-          spreadRate: d.spreadRate,
-          description: d.symptoms.slice(0, 3).join(". "),
-          affectedParts: d.affectedParts,
-          treatment: {
-            immediate: d.treatment.chemical[0] || "Apply recommended fungicide",
-            followup: d.treatment.chemical[1] || "Repeat treatment after 7-10 days",
-            prevention: d.treatment.cultural[0] || "Practice crop rotation and proper sanitation"
-          },
-          medicines: d.treatment.chemical.slice(0, 3).map(m => {
-            const parts = m.split("@");
-            return { name: parts[0].trim(), dosage: parts[1]?.trim() || "As directed", type: d.category === "fungal" ? "Fungicide" : d.category === "bacterial" ? "Bactericide" : "Pesticide" };
-          }),
-          organic: d.treatment.organic.slice(0, 2),
-          prevention: d.prevention.slice(0, 3),
-          conditions: d.conditions,
-          relatedPests: pests.slice(0, 2).map(p => ({ name: p.name, damage: p.identification.damage.substring(0, 80) }))
-        };
-      } else {
-        // Fallback for crops not in dataset
-        const generalPests = pests.slice(0, 2);
-        scanResult = {
-          disease: "Healthy / No Major Disease Detected",
-          confidence: 78,
-          severity: "low",
-          category: "monitoring",
-          yieldLoss: "0-5%",
-          spreadRate: "slow",
-          description: `No significant disease pattern detected on ${crop}. Some pest activity may be present.`,
-          affectedParts: [],
-          treatment: {
-            immediate: "Continue regular scouting every 7-10 days",
-            followup: "Apply preventive organic spray if symptoms develop",
-            prevention: "Maintain field hygiene and balanced fertilization"
-          },
-          medicines: [],
-          organic: ["Neem oil 3% spray as preventive", "Trichoderma viride soil application"],
-          prevention: ["Regular crop scouting", "Proper spacing for airflow", "Avoid waterlogging"],
-          conditions: { temperature: "25-35°C", humidity: "60-80%", season: ["Kharif", "Rabi"], soil: "Well-drained" },
-          relatedPests: generalPests.map(p => ({ name: p.name, damage: p.identification.damage.substring(0, 80) }))
-        };
-      }
-      
+      const { detection } = await apiFetch<{ detection: {
+        disease: string;
+        confidence: number;
+        severity: string;
+        category: string;
+        description: string;
+        symptomsDetected?: string[];
+        treatment?: { chemical?: string[]; organic?: string[]; cultural?: string[] };
+        prevention?: string[];
+        yieldLossEstimate?: string;
+        urgency?: string;
+        alternativeDiagnoses?: Array<{ disease: string; confidence: number }>;
+      } }>("/api/ai/detect-disease", {
+        method: "POST",
+        body: formData,
+      });
+
+      const chemicalTreatments = detection.treatment?.chemical ?? [];
+      const organicTreatments = detection.treatment?.organic ?? [];
+      const culturalTreatments = detection.treatment?.cultural ?? [];
+
+      const scanResult: ScanResult = {
+        disease: detection.disease,
+        confidence: detection.confidence,
+        severity: detection.severity,
+        category: detection.category,
+        yieldLoss: detection.yieldLossEstimate || "5-15%",
+        spreadRate: detection.urgency === "immediate" ? "rapid" : detection.urgency === "within_week" ? "moderate" : "slow",
+        description: detection.description,
+        affectedParts: detection.symptomsDetected || [],
+        treatment: {
+          immediate: chemicalTreatments[0] || organicTreatments[0] || "Apply recommended treatment",
+          followup: chemicalTreatments[1] || culturalTreatments[0] || "Monitor and re-evaluate after 7-10 days",
+          prevention: (detection.prevention || [])[0] || culturalTreatments[0] || "Maintain field hygiene",
+        },
+        medicines: chemicalTreatments.slice(0, 3).map((item) => {
+          const parts = item.split("@");
+          return {
+            name: parts[0].trim(),
+            dosage: parts[1]?.trim() || "As directed",
+            type: detection.category === "fungal" ? "Fungicide" : detection.category === "bacterial" ? "Bactericide" : "Pesticide",
+          };
+        }),
+        organic: organicTreatments.slice(0, 2),
+        prevention: detection.prevention || [],
+        conditions: {
+          temperature: "25-35°C",
+          humidity: "60-80%",
+          season: ["Kharif", "Rabi"],
+          soil: "Well-drained",
+        },
+        relatedPests: (detection.alternativeDiagnoses || []).map((alt) => ({
+          name: alt.disease,
+          damage: `Alternate diagnosis (${alt.confidence}% confidence)`,
+        })),
+      };
+
       setScanResults(scanResult);
-      setScanning(false);
-      
       toast({
         title: "Scan completed",
         description: `${scanResult.disease} detected with ${scanResult.confidence}% confidence`,
       });
-    }, 2500);
+    } catch (err: any) {
+      toast({
+        title: "Scan failed",
+        description: err?.message || "Unable to analyze the crop image.",
+        variant: "destructive",
+      });
+    } finally {
+      setScanning(false);
+    }
   };
 
   const clearImage = () => {
