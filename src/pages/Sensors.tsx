@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Header } from "@/components/layout/Header";
 import { Sidebar } from "@/components/layout/Sidebar";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -18,6 +18,9 @@ import {
   Plus,
   MapPin
 } from "lucide-react";
+import { useCurrentUser } from "@/hooks/useCurrentUser";
+import { apiFetch } from "@/lib/api";
+import { useToast } from "@/hooks/use-toast";
 
 const mockSensors = [
   {
@@ -104,11 +107,10 @@ const sensorColors = {
 const Sensors = () => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [filterStatus, setFilterStatus] = useState("all");
-
-  const user = {
-    name: "John Farmer",
-    role: "farmer",
-  };
+  const { user } = useCurrentUser();
+  const { toast } = useToast();
+  const [sensors, setSensors] = useState<typeof mockSensors>([]);
+  const [loading, setLoading] = useState(true);
 
   const getStatusColor = (status: string) => {
     switch (status) {
@@ -144,13 +146,32 @@ const Sensors = () => {
     return "Optimal";
   };
 
-  const filteredSensors = filterStatus === "all" 
-    ? mockSensors 
-    : mockSensors.filter(sensor => sensor.status === filterStatus);
+  useEffect(() => {
+    const fetchSensors = async () => {
+      setLoading(true);
+      try {
+        const { sensors: apiSensors } = await apiFetch<{ sensors: typeof mockSensors }>("/api/farm/sensors");
+        setSensors(apiSensors || []);
+      } catch (error: any) {
+        toast({
+          title: "Failed to load sensors",
+          description: error?.message || "Please try again.",
+          variant: "destructive",
+        });
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchSensors();
+  }, [toast]);
 
-  const onlineSensors = mockSensors.filter(s => s.status === "online").length;
-  const offlineSensors = mockSensors.filter(s => s.status === "offline").length;
-  const warningSensors = mockSensors.filter(s => s.status === "warning").length;
+  const filteredSensors = filterStatus === "all"
+    ? sensors
+    : sensors.filter(sensor => sensor.status === filterStatus);
+
+  const onlineSensors = sensors.filter(s => s.status === "online").length;
+  const offlineSensors = sensors.filter(s => s.status === "offline").length;
+  const warningSensors = sensors.filter(s => s.status === "warning").length;
 
   return (
     <div className="min-h-screen bg-background">
@@ -188,7 +209,7 @@ const Sensors = () => {
               <CardContent className="flex items-center justify-between p-4">
                 <div>
                   <p className="text-sm text-muted-foreground">Total Sensors</p>
-                  <p className="text-2xl font-bold">{mockSensors.length}</p>
+                  <p className="text-2xl font-bold">{sensors.length}</p>
                 </div>
                 <Activity className="h-8 w-8 text-primary" />
               </CardContent>
@@ -244,7 +265,13 @@ const Sensors = () => {
 
           {/* Sensors Grid */}
           <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-            {filteredSensors.map((sensor) => {
+            {loading ? (
+              <Card className="md:col-span-2 lg:col-span-3">
+                <CardContent className="p-6 text-center text-muted-foreground">
+                  Loading sensor data...
+                </CardContent>
+              </Card>
+            ) : filteredSensors.map((sensor) => {
               const SensorIcon = sensorIcons[sensor.type as keyof typeof sensorIcons];
               const isOptimal = isValueOptimal(sensor.value, sensor.optimal);
               const valueStatus = getValueStatus(sensor.value, sensor.optimal);

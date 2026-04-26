@@ -16,6 +16,7 @@ import {
   getSchemeWizardState,
   saveSchemeWizardState,
 } from "@/lib/phase1-storage";
+import { apiFetch } from "@/lib/api";
 import {
   Award,
   Building2,
@@ -67,6 +68,15 @@ interface SchemeRecommendation {
   score: number;
   reasons: string[];
   blockers: string[];
+}
+
+interface AiSchemeMatch {
+  name: string;
+  hindi_name?: string;
+  benefit?: string;
+  eligibility?: string;
+  how_to_apply?: string;
+  deadline?: string;
 }
 
 const schemeCatalog: Scheme[] = [
@@ -836,6 +846,8 @@ const Schemes = () => {
     return saved.profile ?? createDefaultProfile(user.location);
   });
   const [matchedSchemeIds, setMatchedSchemeIds] = useState<string[]>(() => getSchemeWizardState().matchedSchemeIds);
+  const [aiMatches, setAiMatches] = useState<AiSchemeMatch[]>([]);
+  const [aiLoading, setAiLoading] = useState(false);
   const [lastUpdated, setLastUpdated] = useState<string | undefined>(() => getSchemeWizardState().lastUpdated);
 
   const completionChecks = useMemo(() => wizardFields(wizardProfile), [wizardProfile]);
@@ -915,23 +927,65 @@ const Schemes = () => {
     [matchedSchemeSet, recommendationMap],
   );
 
-  const handleRunWizard = () => {
+  const handleRunWizard = async () => {
     const matches = schemeCatalog.filter((scheme) => recommendationMap.get(scheme.id)?.isEligible).map((scheme) => scheme.id);
-    const now = new Date().toISOString();
+    setAiLoading(true);
+    try {
+      const { schemes } = await apiFetch<{ schemes: { eligible_schemes: AiSchemeMatch[] } }>("/api/ai/match-schemes", {
+        method: "POST",
+        body: JSON.stringify({
+          landHolding: wizardProfile.landHolding,
+          cropType: wizardProfile.cropFocus,
+          state: wizardProfile.state,
+          category: wizardProfile.farmerType,
+        }),
+      });
 
-    saveSchemeWizardState({
-      profile: wizardProfile,
-      matchedSchemeIds: matches,
-      lastUpdated: now,
-    });
+      const eligibleSchemes = schemes?.eligible_schemes ?? [];
+      setAiMatches(eligibleSchemes);
 
-    setMatchedSchemeIds(matches);
-    setLastUpdated(now);
+      const matchedIds = schemeCatalog
+        .filter((scheme) =>
+          eligibleSchemes.some((ai) => scheme.title.toLowerCase().includes(ai.name.toLowerCase()))
+        )
+        .map((scheme) => scheme.id);
 
-    toast({
-      title: "Eligibility updated",
-      description: matches.length > 0 ? `${matches.length} schemes matched your profile.` : "No direct matches yet — try adjusting state, interest, or farmer type.",
-    });
+      const allMatches = matchedIds.length > 0 ? matchedIds : matches;
+      const now = new Date().toISOString();
+
+      saveSchemeWizardState({
+        profile: wizardProfile,
+        matchedSchemeIds: allMatches,
+        lastUpdated: now,
+      });
+
+      setMatchedSchemeIds(allMatches);
+      setLastUpdated(now);
+
+      toast({
+        title: "Eligibility updated",
+        description: eligibleSchemes.length > 0
+          ? `${eligibleSchemes.length} schemes matched by AI.`
+          : allMatches.length > 0
+            ? `${allMatches.length} schemes matched your profile.`
+            : "No direct matches yet — try adjusting state, interest, or farmer type.",
+      });
+    } catch (error: any) {
+      const now = new Date().toISOString();
+      saveSchemeWizardState({
+        profile: wizardProfile,
+        matchedSchemeIds: matches,
+        lastUpdated: now,
+      });
+      setMatchedSchemeIds(matches);
+      setLastUpdated(now);
+      toast({
+        title: "Eligibility updated",
+        description: matches.length > 0 ? `${matches.length} schemes matched your profile.` : "No direct matches yet — try adjusting state, interest, or farmer type.",
+      });
+    } finally {
+      setAiLoading(false);
+    }
   };
 
   const handleResetWizard = () => {
@@ -1128,9 +1182,9 @@ const Schemes = () => {
               </div>
 
               <div className="flex flex-wrap gap-3">
-                <Button onClick={handleRunWizard}>
+                <Button onClick={handleRunWizard} disabled={aiLoading}>
                   <CheckCircle2 className="mr-2 h-4 w-4" />
-                  Save profile & run wizard
+                  {aiLoading ? "Matching schemes..." : "Save profile & run wizard"}
                 </Button>
                 <Button variant="outline" onClick={handleResetWizard}>
                   Reset wizard
@@ -1150,6 +1204,38 @@ const Schemes = () => {
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-3">
+              {aiMatches.length > 0 && (
+                <div className="rounded-xl border border-primary/20 bg-primary/5 p-4 space-y-3">
+                  <div className="flex items-center justify-between">
+                    <h3 className="font-semibold">AI-matched schemes</h3>
+                    <Badge variant="secondary">{aiMatches.length} matches</Badge>
+                  </div>
+                  <div className="space-y-3">
+                    {aiMatches.map((scheme) => (
+                      <div key={scheme.name} className="rounded-lg border border-primary/10 bg-background p-3">
+                        <div className="flex flex-wrap items-center justify-between gap-2">
+                          <div>
+                            <p className="font-medium">{scheme.name}</p>
+                            {scheme.hindi_name && (
+                              <p className="text-xs text-muted-foreground">{scheme.hindi_name}</p>
+                            )}
+                          </div>
+                          {scheme.deadline && <Badge variant="outline">Deadline: {scheme.deadline}</Badge>}
+                        </div>
+                        {scheme.benefit && (
+                          <p className="mt-2 text-sm text-muted-foreground">{scheme.benefit}</p>
+                        )}
+                        {scheme.eligibility && (
+                          <p className="mt-2 text-xs text-muted-foreground">Eligibility: {scheme.eligibility}</p>
+                        )}
+                        {scheme.how_to_apply && (
+                          <p className="mt-2 text-xs text-muted-foreground">How to apply: {scheme.how_to_apply}</p>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
               {matchedSchemes.length > 0 ? (
                 matchedSchemes.map((scheme) => (
                   <div key={scheme.id} className="rounded-xl border p-4">

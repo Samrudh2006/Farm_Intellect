@@ -17,6 +17,9 @@ import {
   Gauge,
   AlertCircle
 } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
+import { useCurrentUser } from "@/hooks/useCurrentUser";
+import { useToast } from "@/hooks/use-toast";
 
 interface WeatherData {
   temperature: number;
@@ -40,6 +43,8 @@ export const SmartIrrigationCalculator = () => {
   const [fieldSize, setFieldSize] = useState("1");
   const [soilType, setSoilType] = useState("loamy");
   const [currentStage, setCurrentStage] = useState("vegetative");
+  const { user } = useCurrentUser();
+  const { toast } = useToast();
   const [weather, setWeatherData] = useState<WeatherData>({
     temperature: 28,
     humidity: 65,
@@ -49,6 +54,7 @@ export const SmartIrrigationCalculator = () => {
   });
   const [recommendation, setRecommendation] = useState<IrrigationRecommendation | null>(null);
   const [isCalculating, setIsCalculating] = useState(false);
+  const [weatherLoading, setWeatherLoading] = useState(false);
 
   const cropWaterRequirements = {
     wheat: { base: 400, coefficient: 1.0 },
@@ -119,22 +125,48 @@ export const SmartIrrigationCalculator = () => {
     }, 2000);
   };
 
-  const updateWeatherData = () => {
-    // Simulate weather API call
-    setWeatherData({
-      temperature: Math.round(20 + Math.random() * 20),
-      humidity: Math.round(30 + Math.random() * 50),
-      rainfall: Math.round(Math.random() * 15),
-      windSpeed: Math.round(5 + Math.random() * 20),
-      soilMoisture: Math.round(20 + Math.random() * 60)
-    });
+  const updateWeatherData = async () => {
+    const location = user?.location || "Chandigarh";
+    setWeatherLoading(true);
+    try {
+      const { data, error } = await supabase.functions.invoke("weather", { body: { city: location } });
+      if (error || !data?.current) {
+        throw new Error("Weather service unavailable");
+      }
+
+      const current = data.current;
+      const rainfall = data.forecast?.list?.[0]?.rain?.["3h"] || 0;
+      const humidity = current.main.humidity;
+      const temperature = current.main.temp;
+      const windSpeed = current.wind.speed * 3.6;
+      const soilMoistureEstimate = Math.min(
+        90,
+        Math.max(15, Math.round(35 + rainfall * 1.5 + humidity * 0.2 - (temperature - 25)))
+      );
+
+      setWeatherData({
+        temperature: Math.round(temperature),
+        humidity,
+        rainfall: Math.round(rainfall),
+        windSpeed: Math.round(windSpeed),
+        soilMoisture: soilMoistureEstimate,
+      });
+    } catch (error: any) {
+      toast({
+        title: "Weather update failed",
+        description: error?.message || "Using last known values.",
+        variant: "destructive",
+      });
+    } finally {
+      setWeatherLoading(false);
+    }
   };
 
   useEffect(() => {
     updateWeatherData();
-    const interval = setInterval(updateWeatherData, 30000); // Update every 30 seconds
+    const interval = setInterval(updateWeatherData, 10 * 60 * 1000);
     return () => clearInterval(interval);
-  }, []);
+  }, [user?.location]);
 
   const getScheduleColor = (schedule: string) => {
     switch (schedule) {
@@ -295,6 +327,10 @@ export const SmartIrrigationCalculator = () => {
           </TabsContent>
           
           <TabsContent value="weather" className="space-y-4">
+            <div className="flex items-center justify-between text-xs text-muted-foreground">
+              <span>Location: {user?.location || "Chandigarh"}</span>
+              <span>{weatherLoading ? "Updating weather..." : "Live weather feed"}</span>
+            </div>
             <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
               <Card>
                 <CardContent className="p-4 text-center">

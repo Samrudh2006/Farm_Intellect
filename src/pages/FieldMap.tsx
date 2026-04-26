@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Header } from "@/components/layout/Header";
 import { Sidebar } from "@/components/layout/Sidebar";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -19,6 +19,8 @@ import {
   Settings
 } from "lucide-react";
 import { ndviClassification, ndwiClassification, cropNDVIProfiles } from "@/data/satelliteData";
+import { apiFetch } from "@/lib/api";
+import { useToast } from "@/hooks/use-toast";
 
 const mockFields = [
   {
@@ -117,12 +119,38 @@ const FieldMap = () => {
   const [selectedField, setSelectedField] = useState<number | null>(null);
   const [mapView, setMapView] = useState<"satellite" | "terrain">("satellite");
   const { user } = useCurrentUser();
+  const { toast } = useToast();
+  const [fields, setFields] = useState<typeof mockFields>([]);
+  const [loading, setLoading] = useState(true);
 
   const getHealthColor = (health: number) => {
     if (health >= 80) return "text-primary";
     if (health >= 60) return "text-harvest";
     return "text-destructive";
   };
+
+  useEffect(() => {
+    const fetchFields = async () => {
+      setLoading(true);
+      try {
+        const { fields: apiFields } = await apiFetch<{ fields: typeof mockFields }>("/api/farm/fields");
+        setFields(apiFields || []);
+        if (!selectedField && apiFields?.length) {
+          setSelectedField(1);
+        }
+      } catch (error: any) {
+        toast({
+          title: "Failed to load fields",
+          description: error?.message || "Using cached data.",
+          variant: "destructive",
+        });
+        setFields(mockFields);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchFields();
+  }, [toast, selectedField]);
 
   return (
     <div className="min-h-screen bg-background">
