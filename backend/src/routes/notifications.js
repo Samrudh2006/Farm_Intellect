@@ -4,6 +4,8 @@ import { logActivity } from '../middleware/activity.js';
 import prisma from '../config/database.js';
 import { logger } from '../utils/logger.js';
 import { io } from '../server.js';
+import { sendNotificationToUser } from '../services/notificationService.js';
+import { ensureNotificationPreference, registerDeviceToken } from '../services/notificationService.js';
 
 const router = express.Router();
 
@@ -43,6 +45,63 @@ router.get('/', authenticate, async (req, res) => {
   } catch (error) {
     logger.error('Get notifications error:', error);
     res.status(500).json({ error: 'Failed to fetch notifications' });
+  }
+});
+
+// Get notification preferences
+router.get('/preferences', authenticate, async (req, res) => {
+  try {
+    const preference = await ensureNotificationPreference(req.user.id);
+    res.json({ preference });
+  } catch (error) {
+    logger.error('Get notification preferences error:', error);
+    res.status(500).json({ error: 'Failed to fetch notification preferences' });
+  }
+});
+
+// Update notification preferences
+router.put('/preferences', authenticate, logActivity, async (req, res) => {
+  try {
+    const { email, sms, whatsapp, push, inApp } = req.body || {};
+    const preference = await prisma.notificationPreference.upsert({
+      where: { userId: req.user.id },
+      update: {
+        email: Boolean(email),
+        sms: Boolean(sms),
+        whatsapp: Boolean(whatsapp),
+        push: Boolean(push),
+        inApp: Boolean(inApp),
+      },
+      create: {
+        userId: req.user.id,
+        email: Boolean(email),
+        sms: Boolean(sms),
+        whatsapp: Boolean(whatsapp),
+        push: Boolean(push),
+        inApp: Boolean(inApp),
+      },
+    });
+
+    res.json({ preference });
+  } catch (error) {
+    logger.error('Update notification preferences error:', error);
+    res.status(500).json({ error: 'Failed to update notification preferences' });
+  }
+});
+
+// Register a device token for push notifications
+router.post('/devices', authenticate, logActivity, async (req, res) => {
+  try {
+    const { token, platform } = req.body || {};
+    if (!token || !platform) {
+      return res.status(400).json({ error: 'Token and platform are required' });
+    }
+
+    const device = await registerDeviceToken({ userId: req.user.id, token, platform });
+    res.status(201).json({ device });
+  } catch (error) {
+    logger.error('Register device token error:', error);
+    res.status(500).json({ error: 'Failed to register device token' });
   }
 });
 
@@ -96,15 +155,7 @@ router.post('/', authenticate, async (req, res) => {
 
     const { userId, title, message, type = 'INFO', data } = req.body;
 
-    const notification = await prisma.notification.create({
-      data: {
-        userId,
-        title,
-        message,
-        type,
-        data: data ? JSON.stringify(data) : null
-      }
-    });
+    const notification = await sendNotificationToUser({ userId, title, message, type, data });
 
     // Send real-time notification
     if (io) {

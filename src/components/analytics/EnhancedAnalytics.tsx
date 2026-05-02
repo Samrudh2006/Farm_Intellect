@@ -7,14 +7,16 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Users, TrendingUp, AlertTriangle, BarChart3, Activity, Target } from "lucide-react";
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip } from "recharts";
 import { supabase } from "@/integrations/supabase/client";
-import { nationalCropStats } from "@/data/cropProduction";
-import { mandiPrices, getMSPCrops, getHighVolatilityCommodities } from "@/data/mandiPrices";
+import { nationalCropStats, cropProductionMetadata } from "@/data/cropProduction";
+import { mandiPrices, mandiPricesMetadata, getMSPCrops, getHighVolatilityCommodities } from "@/data/mandiPrices";
 
 export const EnhancedAnalytics = () => {
   const [timeRange, setTimeRange] = useState("30d");
   const [loading, setLoading] = useState(true);
   const [stats, setStats] = useState({ totalUsers: 0, farmers: 0, merchants: 0, experts: 0, admins: 0, totalActivity: 0, totalCropPlans: 0, totalTasks: 0 });
   const [activityByType, setActivityByType] = useState<{ type: string; count: number }[]>([]);
+
+  const formatUpdatedAt = (value: string) => new Date(value).toLocaleDateString("en-IN", { day: "numeric", month: "short", year: "numeric" });
 
   useEffect(() => {
     const fetchStats = async () => {
@@ -134,7 +136,7 @@ export const EnhancedAnalytics = () => {
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <BarChart3 className="h-5 w-5" /> Indian Crop Production 2023-24 (Mt)
-            <Badge variant="outline" className="ml-auto text-xs">Source: DES / ICAR</Badge>
+            <Badge variant="outline" className="ml-auto text-xs">Updated {formatUpdatedAt(cropProductionMetadata.lastUpdated)}</Badge>
           </CardTitle>
         </CardHeader>
         <CardContent>
@@ -156,7 +158,7 @@ export const EnhancedAnalytics = () => {
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <TrendingUp className="h-5 w-5" /> Mandi vs MSP 2024-25 (₹/quintal)
-            <Badge variant="outline" className="ml-auto text-xs">Source: AGMARKNET</Badge>
+            <Badge variant="outline" className="ml-auto text-xs">Updated {formatUpdatedAt(mandiPricesMetadata.lastUpdated)}</Badge>
           </CardTitle>
         </CardHeader>
         <CardContent>

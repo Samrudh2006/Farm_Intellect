@@ -1,11 +1,20 @@
 // Comprehensive list of Indian cities/towns organized by state
 // Covers all states and major agricultural regions
 
+import { createDatasetMetadata } from "./datasetMetadata";
+
 export interface IndianLocation {
   city: string;
   state: string;
   label: string; // "City, State"
 }
+
+export const indianLocationsMetadata = createDatasetMetadata({
+  version: "1.0.0",
+  lastUpdated: "2024-10-01T00:00:00Z",
+  source: "Govt open data + census town lists",
+  notes: "Primary districts and market towns for geo personalization.",
+});
 
 const locationsByState: Record<string, string[]> = {
   "Andhra Pradesh": [

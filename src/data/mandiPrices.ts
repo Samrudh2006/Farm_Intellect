@@ -2,6 +2,8 @@
 // Source: AGMARKNET (agmarknet.gov.in), eNAM portal, APMC market data
 // Real commodity prices from major Indian mandis
 
+import { createDatasetMetadata } from "./datasetMetadata";
+
 export interface MandiPrice {
   id: string;
   commodity: string;
@@ -31,6 +33,13 @@ export interface PriceTrend {
   seasonalPattern: string;
   volatility: "low" | "medium" | "high" | "extreme";
 }
+
+export const mandiPricesMetadata = createDatasetMetadata({
+  version: "1.0.0",
+  lastUpdated: "2024-12-01T00:00:00Z",
+  source: "AGMARKNET, eNAM, APMC market data",
+  notes: "Snapshot of representative mandi pricing for 2024.",
+});
 
 export const mandiPrices: MandiPrice[] = [
   // ==================== CEREALS ====================

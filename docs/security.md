@@ -81,6 +81,30 @@ Because some current UI components still rely on inline style patterns, CSP must
 - store backend secrets only in deployment platform secret stores
 - review secrets quarterly or after every incident
 
+## Security operations runbook
+
+### Required GitHub settings
+- enable secret scanning, push protection, and Dependabot alerts
+- restrict GitHub Actions to approved actions only
+- require code review for all production branches
+
+### Key rotation steps
+1. invalidate and rotate Supabase service keys, JWT secrets, and provider API keys
+2. update secrets in cloud secret manager (never commit to git)
+3. redeploy frontend + backend with new secret versions
+4. rotate any webhook signing secrets
+5. verify access logs for unexpected usage during rotation
+
+### Token/session revocation
+- rotate JWT signing keys and invalidate existing sessions on critical incidents
+- revoke Supabase refresh tokens for compromised users
+- expire user sessions in backend persistence when high-risk actions are detected
+
+### Incident response
+- trigger on-call alert for auth bypass, data exfiltration, or privilege escalation
+- freeze high-risk endpoints using feature flags or rate limiting overrides
+- capture forensic logs and preserve audit entries
+
 ## Sensitive data policy
 
 - do not persist Aadhaar unless legally and operationally necessary

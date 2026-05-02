@@ -2,6 +2,8 @@
 // Sources: ISRO/NRSC Bhuvan, ESA Sentinel-2, USGS Landsat-8, MODIS Terra/Aqua
 // Vegetation index thresholds: NASA EarthData, ICAR Remote Sensing standards
 
+import { createDatasetMetadata } from "./datasetMetadata";
+
 export interface VegetationIndexRange {
   min: number;
   max: number;
@@ -42,6 +44,13 @@ export interface SatelliteBand {
   spatialResolution: string;
   swathWidth: string;
 }
+
+export const satelliteDataMetadata = createDatasetMetadata({
+  version: "1.0.0",
+  lastUpdated: "2024-10-10T00:00:00Z",
+  source: "ISRO/NRSC Bhuvan, ESA Sentinel-2, USGS Landsat-8",
+  notes: "NDVI/EVI/NDRE thresholds aligned with remote sensing standards.",
+});
 
 export interface NDVIAlert {
   id: string;

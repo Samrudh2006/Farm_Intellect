@@ -16,6 +16,7 @@ import mustard from '@/assets/crops/mustard.jpg';
 import tomato from '@/assets/crops/tomato.jpg';
 import watermelon from '@/assets/crops/watermelon.jpg';
 import muskmelon from '@/assets/crops/muskmelon.jpg';
+import { createDatasetMetadata } from './datasetMetadata';
 
 export interface CropInfo {
   id: string;
@@ -39,6 +40,13 @@ export interface CropInfo {
   fertilizers: string[];
   description: string;
 }
+
+export const cropsDataMetadata = createDatasetMetadata({
+  version: '1.0.0',
+  lastUpdated: '2024-10-15T00:00:00Z',
+  source: 'ICAR seasonal crop references',
+  notes: 'Seasonal crop showcase with imagery and regional notes.',
+});
 
 export const cropsData: CropInfo[] = [
   // RABI SEASON (Winter Crops)

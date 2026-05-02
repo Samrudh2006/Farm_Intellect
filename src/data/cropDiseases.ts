@@ -2,6 +2,8 @@
 // Source: PlantVillage Dataset (54,000+ images, 38 diseases)
 // Real disease data from ICAR, PlantVillage, and agricultural research
 
+import { createDatasetMetadata } from "./datasetMetadata";
+
 export interface CropDisease {
   id: string;
   crop: string;
@@ -29,6 +31,13 @@ export interface CropDisease {
   spreadRate: "slow" | "moderate" | "fast";
   confidence: number; // AI detection confidence threshold
 }
+
+export const cropDiseasesMetadata = createDatasetMetadata({
+  version: "1.0.0",
+  lastUpdated: "2024-11-20T00:00:00Z",
+  source: "PlantVillage, ICAR crop protection references",
+  notes: "Curated disease profiles and symptoms for AI triage.",
+});
 
 export const cropDiseases: CropDisease[] = [
   // ==================== TOMATO DISEASES (10) ====================

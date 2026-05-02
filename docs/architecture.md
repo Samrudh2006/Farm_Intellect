@@ -92,7 +92,7 @@ flowchart TB
 
     subgraph DataLayer[Persistence Layer]
       Prisma[Prisma ORM]
-      DB[(SQLite / Future Postgres)]
+      DB[(PostgreSQL)]
       Uploads[Uploaded Documents]
     end
 

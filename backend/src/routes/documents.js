@@ -6,6 +6,7 @@ import { authenticate, authorize } from '../middleware/auth.js';
 import { logActivity } from '../middleware/activity.js';
 import prisma from '../config/database.js';
 import { logger } from '../utils/logger.js';
+import { scanFileForThreats } from '../utils/fileScan.js';
 
 const router = express.Router();
 
@@ -62,6 +63,16 @@ router.post('/upload', authenticate, upload.single('document'), logActivity, asy
     
     if (!type || !['ID_PROOF', 'ADDRESS_PROOF', 'LAND_RECORDS', 'BUSINESS_LICENSE', 'OTHER'].includes(type)) {
       return res.status(400).json({ error: 'Invalid document type' });
+    }
+
+    const scanResult = await scanFileForThreats(req.file.path);
+    if (scanResult.status === 'infected') {
+      fs.unlinkSync(req.file.path);
+      return res.status(400).json({ error: 'Malware detected in uploaded file.' });
+    }
+    if (scanResult.status === 'failed') {
+      fs.unlinkSync(req.file.path);
+      return res.status(500).json({ error: 'File scan failed. Please try again later.' });
     }
 
     const document = await prisma.document.create({

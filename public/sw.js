@@ -27,9 +27,10 @@ self.addEventListener("fetch", (event) => {
   const isSameOrigin = requestUrl.origin === self.location.origin;
   const isSupabaseRequest = requestUrl.hostname.includes("supabase.co");
   const isFunctionRequest = requestUrl.pathname.includes("/functions/v1/");
+  const isApiRequest = requestUrl.pathname.startsWith("/api/");
 
   // Never cache API/AI requests.
-  if (isSupabaseRequest || isFunctionRequest) return;
+  if (isSupabaseRequest || isFunctionRequest || isApiRequest) return;
 
   // Always prefer fresh HTML when online.
   if (event.request.mode === "navigate") {

@@ -3,6 +3,8 @@
 // ICAR Annual Report, DES (Directorate of Economics & Statistics) crop schedules,
 // State Agriculture Departments, FAO GAEZ India crop calendars (2023)
 
+import { createDatasetMetadata } from "./datasetMetadata";
+
 export interface CropActivity {
   week: number;           // Week number in crop calendar (1-52)
   month: string;
@@ -38,6 +40,13 @@ export interface CropCalendarEntry {
   yieldPotential: string;
   notes: string;
 }
+
+export const cropCalendarMetadata = createDatasetMetadata({
+  version: "1.0.0",
+  lastUpdated: "2024-10-20T00:00:00Z",
+  source: "ICAR-CRIDA, DES, State Agri Depts, FAO GAEZ",
+  notes: "District-level calendar guidance with critical stage advisories.",
+});
 
 // AICRPAM Zone definitions (ICAR-CRIDA):
 // Zone I   = Western Himalayan Region (J&K, HP, Uttarakhand)

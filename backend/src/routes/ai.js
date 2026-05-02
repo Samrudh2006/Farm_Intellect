@@ -9,8 +9,17 @@ import { logger } from '../utils/logger.js';
 import { predictYield, forecastPrice, assessPestRisk, recommendCrops, analyzeSoilHealth } from '../services/ml.js';
 import { detectDiseaseFromImage, diagnoseDiseaseFromText } from '../services/cv.js';
 import { classifyForumPost, analyzeSentiment, summarizeAdvisory, matchGovernmentSchemes, generateCropCalendar } from '../services/nlp.js';
+import { runInference } from '../services/inferenceClient.js';
 
 const router = express.Router();
+
+const MODEL_VERSIONS = {
+  cropRecommendation: { name: 'crop-recommendation', version: '1.0.0' },
+  yieldPrediction: { name: 'yield-prediction', version: '1.0.0' },
+  priceForecast: { name: 'price-forecast', version: '1.0.0' },
+  pestRisk: { name: 'pest-risk', version: '1.0.0' },
+  diseaseVision: { name: 'disease-vision', version: '1.0.0' },
+};
 
 // Configure multer for AI image uploads
 const storage = multer.diskStorage({
@@ -46,18 +55,25 @@ router.post('/recommend-crops', authenticate, logActivity, async (req, res) => {
     const { location, soilType, season, farmSize, experience, nitrogen, phosphorus, potassium, ph, temperature, humidity, rainfall } = req.body;
 
     // Real ML-powered crop recommendation
-    const recommendations = recommendCrops({
-      nitrogen: nitrogen || 280,
-      phosphorus: phosphorus || 45,
-      potassium: potassium || 320,
-      ph: ph || 7.0,
-      temperature: temperature || 28,
-      humidity: humidity || 65,
-      rainfall: rainfall || 800,
-      season: season === 'winter' ? 'Rabi' : season === 'monsoon' ? 'Kharif' : season === 'summer' ? 'Zaid' : season,
-      farmSize,
-      experience,
+    const { result, source, model } = await runInference({
+      endpoint: '/recommend-crops',
+      payload: req.body,
+      model: MODEL_VERSIONS.cropRecommendation,
+      fallback: () =>
+        recommendCrops({
+          nitrogen: nitrogen || 280,
+          phosphorus: phosphorus || 45,
+          potassium: potassium || 320,
+          ph: ph || 7.0,
+          temperature: temperature || 28,
+          humidity: humidity || 65,
+          rainfall: rainfall || 800,
+          season: season === 'winter' ? 'Rabi' : season === 'monsoon' ? 'Kharif' : season === 'summer' ? 'Zaid' : season,
+          farmSize,
+          experience,
+        }),
     });
+    const recommendations = result.recommendations || result;
 
     // Save recommendation to database
     for (const rec of recommendations) {
@@ -73,7 +89,7 @@ router.post('/recommend-crops', authenticate, logActivity, async (req, res) => {
       });
     }
 
-    res.json({ recommendations });
+    res.json({ recommendations, model: { ...model, source } });
   } catch (error) {
     logger.error('Crop recommendation error:', error);
     res.status(500).json({ error: 'Failed to generate crop recommendations' });
@@ -99,7 +115,14 @@ router.post('/detect-disease', authenticate, upload.single('image'), logActivity
       }
     }, 60000); // Delete after 1 minute
 
-    res.json({ detection });
+    res.json({
+      detection,
+      model: {
+        ...MODEL_VERSIONS.diseaseVision,
+        source: detection.source || 'local',
+        fallback: String(detection.source || '').includes('fallback'),
+      },
+    });
   } catch (error) {
     logger.error('Disease detection error:', error);
     if (req.file && fs.existsSync(req.file.path)) {
@@ -139,20 +162,27 @@ router.post('/predict-yield', authenticate, logActivity, async (req, res) => {
     const { cropType, farmSize, soilQuality, soilParams, irrigation, irrigationMethod, fertilizer, fertilizerTiming, weather, pestPressure } = req.body;
 
     // Real ML-powered yield prediction
-    const prediction = predictYield({
-      cropType,
-      farmSize,
-      soilQuality,
-      soilParams,
-      irrigation,
-      irrigationMethod,
-      fertilizer,
-      fertilizerTiming,
-      weather,
-      pestPressure,
+    const { result, source, model } = await runInference({
+      endpoint: '/predict-yield',
+      payload: req.body,
+      model: MODEL_VERSIONS.yieldPrediction,
+      fallback: () =>
+        predictYield({
+          cropType,
+          farmSize,
+          soilQuality,
+          soilParams,
+          irrigation,
+          irrigationMethod,
+          fertilizer,
+          fertilizerTiming,
+          weather,
+          pestPressure,
+        }),
     });
+    const prediction = result.prediction || result;
 
-    res.json({ prediction });
+    res.json({ prediction, model: { ...model, source } });
   } catch (error) {
     logger.error('Yield prediction error:', error);
     res.status(500).json({ error: 'Failed to predict yield' });
@@ -183,8 +213,14 @@ router.get('/preventive-tips', authenticate, async (req, res) => {
 router.post('/forecast-price', authenticate, logActivity, async (req, res) => {
   try {
     const { commodity, months, currentPrice } = req.body;
-    const forecast = forecastPrice({ commodity, months, currentPrice });
-    res.json({ forecast });
+    const { result, source, model } = await runInference({
+      endpoint: '/forecast-price',
+      payload: req.body,
+      model: MODEL_VERSIONS.priceForecast,
+      fallback: () => forecastPrice({ commodity, months, currentPrice }),
+    });
+    const forecast = result.forecast || result;
+    res.json({ forecast, model: { ...model, source } });
   } catch (error) {
     logger.error('Price forecast error:', error);
     res.status(500).json({ error: 'Failed to forecast prices' });
@@ -195,8 +231,14 @@ router.post('/forecast-price', authenticate, logActivity, async (req, res) => {
 router.post('/pest-risk', authenticate, logActivity, async (req, res) => {
   try {
     const { cropType, temperature, humidity, season, region, previousPestHistory } = req.body;
-    const assessment = assessPestRisk({ cropType, temperature, humidity, season, region, previousPestHistory });
-    res.json({ assessment });
+    const { result, source, model } = await runInference({
+      endpoint: '/pest-risk',
+      payload: req.body,
+      model: MODEL_VERSIONS.pestRisk,
+      fallback: () => assessPestRisk({ cropType, temperature, humidity, season, region, previousPestHistory }),
+    });
+    const assessment = result.assessment || result;
+    res.json({ assessment, model: { ...model, source } });
   } catch (error) {
     logger.error('Pest risk assessment error:', error);
     res.status(500).json({ error: 'Failed to assess pest risk' });

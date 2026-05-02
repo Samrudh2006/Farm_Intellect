@@ -5,7 +5,8 @@ import dotenv from 'dotenv';
 import { createServer } from 'http';
 import { Server } from 'socket.io';
 import rateLimit from 'express-rate-limit';
-import { resolveAuthenticatedUser } from './middleware/auth.js';
+import { resolveAuthenticatedUser, authenticate, authorize } from './middleware/auth.js';
+import * as Sentry from '@sentry/node';
 
 import authRoutes from './routes/auth.js';
 import userRoutes from './routes/users.js';
@@ -19,8 +20,11 @@ import aiRoutes from './routes/ai.js';
 import farmRoutes from './routes/farm.js';
 import marketRoutes from './routes/market.js';
 import pollRoutes from './routes/polls.js';
+import datasetRoutes from './routes/datasets.js';
+import { scheduleIngestionJobs } from './jobs/ingestion.js';
 
 import { errorHandler } from './middleware/errorHandler.js';
+import { metricsHandler, metricsMiddleware } from './middleware/metrics.js';
 import { logger } from './utils/logger.js';
 
 dotenv.config();
@@ -66,11 +70,38 @@ const allowedOrigin = process.env.NODE_ENV === 'production'
   : 'http://localhost:5173';
 
 // Middleware
-app.use(helmet());
+if (process.env.SENTRY_DSN) {
+  Sentry.init({
+    dsn: process.env.SENTRY_DSN,
+    environment: process.env.NODE_ENV || 'development',
+    tracesSampleRate: 0.1,
+  });
+  app.use(Sentry.Handlers.requestHandler());
+}
+
+app.use(
+  helmet({
+    contentSecurityPolicy: process.env.NODE_ENV === 'production'
+      ? {
+          directives: {
+            defaultSrc: ["'self'"],
+            scriptSrc: ["'self'", "'unsafe-inline'", "'unsafe-eval'"],
+            styleSrc: ["'self'", "'unsafe-inline'"],
+            imgSrc: ["'self'", 'data:', 'https:'],
+            connectSrc: ["'self'", 'https:', 'wss:'],
+            fontSrc: ["'self'", 'https:', 'data:'],
+            objectSrc: ["'none'"],
+            frameAncestors: ["'none'"],
+          },
+        }
+      : false,
+  }),
+);
 app.use(cors({ origin: allowedOrigin, credentials: true }));
 app.use(limiter);
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true }));
+app.use(metricsMiddleware);
 
 // Static files for uploads
 app.use('/uploads', express.static('uploads'));
@@ -88,11 +119,14 @@ app.use('/api/ai', aiLimiter, aiRoutes);
 app.use('/api/farm', farmRoutes);
 app.use('/api/market', marketRoutes);
 app.use('/api/polls', pollRoutes);
+app.use('/api/datasets', datasetRoutes);
 
 // Health check
 app.get('/health', (req, res) => {
   res.json({ status: 'OK', timestamp: new Date().toISOString() });
 });
+
+app.get('/metrics', authenticate, authorize('ADMIN'), metricsHandler);
 
 // Socket.IO JWT authentication middleware
 io.use((socket, next) => {
@@ -144,6 +178,7 @@ app.use('*', (req, res) => {
 });
 
 if (process.env.NODE_ENV !== 'test') {
+  scheduleIngestionJobs();
   server.listen(PORT, () => {
     logger.info(`Server running on port ${PORT}`);
   });

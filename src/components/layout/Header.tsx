@@ -1,5 +1,5 @@
 import { useNavigate } from "react-router-dom";
-import { Bell, User, LogOut, Menu, Sun, Moon } from "lucide-react";
+import { Bell, User, LogOut, Menu, Sun, Moon, WifiOff, RefreshCw } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -13,6 +13,7 @@ import appLogo from "@/assets/krishi-app-logo.png";
 import { LanguageSelector } from "@/components/ui/language-selector";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { useAuth } from "@/contexts/AuthContext";
+import { useOfflineSyncStatus } from "@/hooks/useOfflineSyncStatus";
 
 interface HeaderProps {
   user?: {
@@ -28,6 +29,7 @@ export const Header = ({ user, onMenuClick, notificationCount = 0 }: HeaderProps
   const navigate = useNavigate();
   const { t } = useLanguage();
   const { signOut } = useAuth();
+  const { queuedCount, isOnline } = useOfflineSyncStatus();
 
   const handleSignOut = async () => {
     await signOut();
@@ -77,6 +79,16 @@ export const Header = ({ user, onMenuClick, notificationCount = 0 }: HeaderProps
               <Sun className="h-5 w-5 rotate-0 scale-100 transition-all dark:-rotate-90 dark:scale-0" />
               <Moon className="absolute h-5 w-5 rotate-90 scale-0 transition-all dark:rotate-0 dark:scale-100" />
             </Button>
+
+            <div className="hidden md:flex items-center gap-2 rounded-full border border-border px-3 py-1 text-xs text-muted-foreground">
+              {!isOnline ? <WifiOff className="h-3.5 w-3.5 text-destructive" /> : <RefreshCw className="h-3.5 w-3.5 text-primary" />}
+              <span>{isOnline ? "Sync ready" : "Offline mode"}</span>
+              {queuedCount > 0 && (
+                <Badge variant="secondary" className="ml-1 text-[10px]">
+                  {queuedCount} queued
+                </Badge>
+              )}
+            </div>
 
             <Button variant="ghost" size="icon" className="relative" onClick={() => navigate(`/${user?.role || "farmer"}/notifications`)}>
               <Bell className="h-5 w-5" />

@@ -1,0 +1,116 @@
+name: Security Checks
+
+on:
+  workflow_dispatch:
+    inputs:
+      dast_target_url:
+        description: "Target URL for ZAP baseline scan (e.g. https://staging.example.com)"
+        required: false
+        default: ""
+  schedule:
+    - cron: "0 4 * * 1"
+  pull_request:
+    branches: [main]
+
+permissions:
+  contents: read
+  security-events: write
+
+jobs:
+  dependency-audit:
+    name: Dependency audit
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        working-directory: [".", "backend"]
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+          cache-dependency-path: ${{ matrix.working-directory }}/package-lock.json
+
+      - name: Install dependencies
+        run: npm ci
+        working-directory: ${{ matrix.working-directory }}
+
+      - name: Run audit
+        run: npm audit --audit-level=high
+        working-directory: ${{ matrix.working-directory }}
+
+  sbom:
+    name: Generate SBOM
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - project-path: "."
+            artifact-name: "frontend"
+          - project-path: "backend"
+            artifact-name: "backend"
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Generate CycloneDX SBOM
+        uses: CycloneDX/gh-node-module-generatebom@v1
+        with:
+          path: ${{ matrix.project-path }}
+          output: ${{ matrix.artifact-name }}-sbom.xml
+
+      - name: Upload SBOM
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ matrix.artifact-name }}-sbom
+          path: ${{ matrix.artifact-name }}-sbom.xml
+
+  trivy:
+    name: Trivy filesystem scan
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Run Trivy filesystem scan
+        uses: aquasecurity/trivy-action@0.26.0
+        with:
+          scan-type: fs
+          ignore-unfixed: true
+          severity: CRITICAL,HIGH
+          format: sarif
+          output: trivy.sarif
+
+      - name: Upload Trivy results
+        uses: github/codeql-action/upload-sarif@v3
+        with:
+          sarif_file: trivy.sarif
+
+  gitleaks:
+    name: Secret scan
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Run gitleaks
+        uses: gitleaks/gitleaks-action@v2
+        with:
+          fail: true
+
+  dast:
+    name: DAST (ZAP baseline)
+    runs-on: ubuntu-latest
+    env:
+      DAST_TARGET_URL: ${{ inputs.dast_target_url || secrets.DAST_TARGET_URL }}
+    if: ${{ env.DAST_TARGET_URL != '' }}
+    steps:
+      - name: ZAP baseline scan
+        uses: zaproxy/action-baseline@v0.12.0
+        with:
+          target: ${{ env.DAST_TARGET_URL }}

@@ -18,6 +18,9 @@ import {
   Clock,
   AlertTriangle
 } from "lucide-react";
+import { cropRecommendationsMetadata } from "@/data/cropRecommendations";
+import { pestDataMetadata } from "@/data/pestData";
+import { soilHealthMetadata } from "@/data/soilHealth";
 
 const mockAdvisory = [
   {
@@ -115,6 +118,14 @@ const Advisory = () => {
     ? mockAdvisory 
     : mockAdvisory.filter(item => item.status === filter);
 
+  const advisorySources = [
+    { label: "Crop recommendations", meta: cropRecommendationsMetadata },
+    { label: "Pest intelligence", meta: pestDataMetadata },
+    { label: "Soil health baselines", meta: soilHealthMetadata },
+  ];
+
+  const formatUpdatedAt = (value: string) => new Date(value).toLocaleDateString("en-IN", { day: "numeric", month: "short", year: "numeric" });
+
   return (
     <div className="min-h-screen bg-background">
       <Header 
@@ -166,6 +177,25 @@ const Advisory = () => {
               </Button>
             ))}
           </div>
+
+          <Card className="border-primary/20 bg-primary/5">
+            <CardHeader className="flex flex-row items-center justify-between space-y-0">
+              <div className="flex items-center gap-2">
+                <Clock className="h-4 w-4 text-primary" />
+                <CardTitle className="text-base">Advisory data freshness</CardTitle>
+              </div>
+              <Badge variant="outline" className="text-xs">Verified sources</Badge>
+            </CardHeader>
+            <CardContent className="grid gap-2 sm:grid-cols-3">
+              {advisorySources.map(({ label, meta }) => (
+                <div key={label} className="rounded-md border border-border bg-background p-3 text-sm">
+                  <div className="font-medium text-foreground">{label}</div>
+                  <div className="text-xs text-muted-foreground">Updated {formatUpdatedAt(meta.lastUpdated)}</div>
+                  <div className="text-xs text-muted-foreground">Version {meta.version}</div>
+                </div>
+              ))}
+            </CardContent>
+          </Card>
 
           {/* Advisory Cards */}
           <div className="space-y-4">

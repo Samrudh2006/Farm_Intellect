@@ -106,7 +106,7 @@ flowchart TB
 
     subgraph DataRuntime[Data Runtime]
       PrismaClient[Prisma Client]
-      AppDB[(SQLite / Future Postgres)]
+      AppDB[(PostgreSQL)]
       CuratedData[Curated Dataset Files]
       UploadStore[Uploads Directory]
     end

@@ -1,7 +1,11 @@
 import { logger } from '../utils/logger.js';
+import * as Sentry from '@sentry/node';
 
 export const errorHandler = (err, req, res, next) => {
   logger.error(err.stack);
+  if (process.env.SENTRY_DSN) {
+    Sentry.captureException(err);
+  }
 
   // Prisma errors
   if (err.code === 'P2002') {

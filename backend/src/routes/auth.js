@@ -59,6 +59,10 @@ router.post('/signup', signupValidation, logActivity, async (req, res) => {
       }
     });
 
+    await prisma.notificationPreference.create({
+      data: { userId: user.id }
+    });
+
     // Create role-specific profile
     if (role === 'FARMER') {
       await prisma.farmerProfile.create({

@@ -2,6 +2,8 @@
 // Source: Kaggle Crop Recommendation Dataset (N, P, K, temperature, humidity, pH, rainfall)
 // Enhanced with Indian agricultural data from ICAR, IARI, and state agricultural universities
 
+import { createDatasetMetadata } from "./datasetMetadata";
+
 export interface SoilParameters {
   nitrogen: { min: number; max: number; optimal: number; unit: string };
   phosphorus: { min: number; max: number; optimal: number; unit: string };
@@ -37,6 +39,13 @@ export interface CropRecommendationData {
   intercropping: string[];
   rotationCrops: string[];
 }
+
+export const cropRecommendationsMetadata = createDatasetMetadata({
+  version: "1.0.0",
+  lastUpdated: "2024-12-01T00:00:00Z",
+  source: "Kaggle + ICAR/IARI/state agri universities",
+  notes: "Merged nutrient ranges with India-specific agronomy references.",
+});
 
 export const cropRecommendations: CropRecommendationData[] = [
   // ==================== CEREALS ====================

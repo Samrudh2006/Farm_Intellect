@@ -2,6 +2,8 @@
 // Sources: ICAR Soil Health Card scheme, IISS Bhopal norms, NBSS&LUP soil maps,
 // Fertiliser Control Order standards, GoI Soil Health Management guidelines
 
+import { createDatasetMetadata } from "./datasetMetadata";
+
 export interface SoilHealthParameter {
   id: string;
   name: string;
@@ -62,6 +64,13 @@ export interface MicronutrientStatus {
   timing: string;
   crops: string[];
 }
+
+export const soilHealthMetadata = createDatasetMetadata({
+  version: "1.0.0",
+  lastUpdated: "2024-11-15T00:00:00Z",
+  source: "ICAR SHC, IISS Bhopal, NBSS&LUP",
+  notes: "Aligned with GoI Soil Health Card scheme parameters.",
+});
 
 // ===================== SOIL HEALTH CARD PARAMETERS =====================
 // Based on GoI SHC scheme — 12 mandatory parameters
