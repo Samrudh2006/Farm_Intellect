@@ -120,7 +120,7 @@ const CropRecommendationEngine = () => {
           waterRequirement: rec.parameterScores?.rainfall
             ? `${Math.round(rec.parameterScores.rainfall)}% rainfall match`
             : "Moderate",
-          fertilizers: getFertilizerRecommendation(rec.crop).slice(0, 3).map((f) => `${f.name} (${f.applicationRate})`),
+          fertilizers: getFertilizerRecommendation(rec.crop).slice(0, 3).map((f) => `${f.cropName}: N${f.NPK.N}-P${f.NPK.P}-K${f.NPK.K} kg/ha`),
           riskFactors: [rec.reason, `Risk level: ${rec.riskLevel}`],
           marketDemand: rec.suitability >= 70 ? "high" : rec.suitability >= 45 ? "medium" : "low",
           suitabilityScore: rec.suitability,
