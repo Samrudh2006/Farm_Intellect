@@ -16,3 +16,6 @@ verify_jwt = false
 
 [functions.reset-passkey]
 verify_jwt = false
+
+[functions.generate-alerts]
+verify_jwt = false

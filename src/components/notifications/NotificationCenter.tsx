@@ -3,11 +3,12 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Bell, CheckCircle, AlertTriangle, Info, Calendar, Trash2, Settings, BellRing, Clock, Loader2 } from "lucide-react";
+import { Bell, CheckCircle, AlertTriangle, Info, Calendar, Trash2, Settings, BellRing, Clock, Loader2, BellOff } from "lucide-react";
 import { format } from "date-fns";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { useToast } from "@/hooks/use-toast";
+import { usePushNotifications } from "@/hooks/usePushNotifications";
 
 interface Notification {
   id: string;
@@ -22,6 +23,7 @@ interface Notification {
 export const NotificationCenter = () => {
   const { toast } = useToast();
   const { user } = useAuth();
+  const { permission, requestPermission } = usePushNotifications();
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [selectedTab, setSelectedTab] = useState("all");
   const [loading, setLoading] = useState(true);
@@ -112,7 +114,7 @@ export const NotificationCenter = () => {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
         <div className="flex items-center gap-3">
           <Bell className="h-8 w-8 text-primary" />
           <div>
@@ -120,11 +122,34 @@ export const NotificationCenter = () => {
             <p className="text-muted-foreground">Stay updated with important alerts and reminders</p>
           </div>
         </div>
-        {unreadCount > 0 && (
-          <Button variant="outline" onClick={markAllAsRead}>
-            <CheckCircle className="h-4 w-4 mr-2" /> Mark All Read
-          </Button>
-        )}
+        <div className="flex flex-wrap items-center gap-2">
+          {permission !== "granted" && (
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={async () => {
+                const r = await requestPermission();
+                if (r === "granted") {
+                  toast({ title: "Push notifications enabled", description: "You'll receive crop, weather, and market alerts." });
+                } else {
+                  toast({ title: "Push notifications blocked", description: "Enable them in your browser settings.", variant: "destructive" });
+                }
+              }}
+            >
+              <BellRing className="h-4 w-4 mr-2" /> Enable Push Alerts
+            </Button>
+          )}
+          {permission === "granted" && (
+            <Button variant="ghost" size="sm" disabled className="text-primary">
+              <CheckCircle className="h-4 w-4 mr-2" /> Push Alerts On
+            </Button>
+          )}
+          {unreadCount > 0 && (
+            <Button variant="outline" size="sm" onClick={markAllAsRead}>
+              <CheckCircle className="h-4 w-4 mr-2" /> Mark All Read
+            </Button>
+          )}
+        </div>
       </div>
 
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
@@ -149,7 +174,7 @@ export const NotificationCenter = () => {
         </CardHeader>
         <CardContent>
           <Tabs value={selectedTab} onValueChange={setSelectedTab}>
-            <TabsList className="grid w-full grid-cols-5">
+            <TabsList className="grid w-full grid-cols-3 sm:grid-cols-5 h-auto">
               <TabsTrigger value="all">All</TabsTrigger>
               <TabsTrigger value="unread">Unread {unreadCount > 0 && <Badge className="ml-1 bg-accent text-accent-foreground">{unreadCount}</Badge>}</TabsTrigger>
               <TabsTrigger value="read">Read</TabsTrigger>
