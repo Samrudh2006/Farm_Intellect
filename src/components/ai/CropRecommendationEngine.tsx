@@ -110,15 +110,6 @@ const CropRecommendationEngine = () => {
       });
 
       if (backendRecommendations?.length) {
-        const fertilizers = getFertilizerRecommendation({
-          ph: soilData.ph,
-          nitrogen: soilData.nitrogen,
-          phosphorus: soilData.phosphorus,
-          potassium: soilData.potassium,
-          organicCarbon: soilData.organicCarbon,
-          moisture: soilData.moisture,
-        });
-
         const mapped: CropRecommendation[] = backendRecommendations.slice(0, 4).map((rec) => ({
           crop: rec.crop,
           variety: rec.crop,
@@ -129,7 +120,7 @@ const CropRecommendationEngine = () => {
           waterRequirement: rec.parameterScores?.rainfall
             ? `${Math.round(rec.parameterScores.rainfall)}% rainfall match`
             : "Moderate",
-          fertilizers: fertilizers.slice(0, 3),
+          fertilizers: getFertilizerRecommendation(rec.crop).slice(0, 3).map((f) => `${f.name} (${f.applicationRate})`),
           riskFactors: [rec.reason, `Risk level: ${rec.riskLevel}`],
           marketDemand: rec.suitability >= 70 ? "high" : rec.suitability >= 45 ? "medium" : "low",
           suitabilityScore: rec.suitability,
