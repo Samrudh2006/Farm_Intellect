@@ -174,7 +174,7 @@ export const NotificationCenter = () => {
         </CardHeader>
         <CardContent>
           <Tabs value={selectedTab} onValueChange={setSelectedTab}>
-            <TabsList className="grid w-full grid-cols-5">
+            <TabsList className="grid w-full grid-cols-3 sm:grid-cols-5 h-auto">
               <TabsTrigger value="all">All</TabsTrigger>
               <TabsTrigger value="unread">Unread {unreadCount > 0 && <Badge className="ml-1 bg-accent text-accent-foreground">{unreadCount}</Badge>}</TabsTrigger>
               <TabsTrigger value="read">Read</TabsTrigger>
