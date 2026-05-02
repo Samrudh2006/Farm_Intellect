@@ -2,6 +2,8 @@
 // Source: Data.gov.in, Directorate of Economics & Statistics (DES), Ministry of Agriculture
 // State-wise and district-wise crop production statistics for major Indian crops
 
+import { createDatasetMetadata } from "./datasetMetadata";
+
 export interface CropProductionEntry {
   state: string;
   district: string;
@@ -33,6 +35,13 @@ export interface NationalCropStats {
   trend: "increasing" | "stable" | "decreasing";
   mspPrice: number; // ₹/quintal 2024-25
 }
+
+export const cropProductionMetadata = createDatasetMetadata({
+  version: "1.0.0",
+  lastUpdated: "2024-09-30T00:00:00Z",
+  source: "Data.gov.in, DES, Ministry of Agriculture",
+  notes: "National production statistics aligned with 2023-24 DES releases.",
+});
 
 // National-level crop production statistics (2023-24 data from DES)
 export const nationalCropStats: NationalCropStats[] = [

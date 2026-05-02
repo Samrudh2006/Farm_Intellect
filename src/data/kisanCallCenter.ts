@@ -2,6 +2,8 @@
 // Source: AIKosh/IndiaAI, Kisan Call Centre (1800-180-1551), ICAR farmer helplines
 // Common farmer queries and expert answers for chatbot integration
 
+import { createDatasetMetadata } from "./datasetMetadata";
+
 export interface KCCQuery {
   id: string;
   category: string;
@@ -16,6 +18,13 @@ export interface KCCQuery {
   season?: string[];
   region?: string[];
 }
+
+export const kisanCallCenterMetadata = createDatasetMetadata({
+  version: "1.0.0",
+  lastUpdated: "2024-11-05T00:00:00Z",
+  source: "Kisan Call Centre + ICAR helpline guidance",
+  notes: "FAQ responses normalized for multilingual assistant usage.",
+});
 
 export const kisanCallCenterData: KCCQuery[] = [
   // ==================== CROP MANAGEMENT ====================

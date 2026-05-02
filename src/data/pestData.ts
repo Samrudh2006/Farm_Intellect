@@ -2,6 +2,8 @@
 // Sources: NCIPM (National Centre for Integrated Pest Management), ICAR crop protection manuals,
 // FAO pest risk assessment, CIBRC India, PPQ (Plant Protection Quarantine) data
 
+import { createDatasetMetadata } from "./datasetMetadata";
+
 export interface PestProfile {
   id: string;
   name: string;
@@ -38,6 +40,13 @@ export interface PestProfile {
   resistance: string;             // Known chemical resistances
   quarantineStatus: "A1" | "A2" | "Regulated" | "None";  // NPPO classification
 }
+
+export const pestDataMetadata = createDatasetMetadata({
+  version: "1.0.0",
+  lastUpdated: "2024-11-01T00:00:00Z",
+  source: "NCIPM, ICAR crop protection manuals, FAO pest risk data",
+  notes: "Integrated pest profiles with IPM recommendations.",
+});
 
 export const pestProfiles: PestProfile[] = [
   // =================== RICE PESTS ===================

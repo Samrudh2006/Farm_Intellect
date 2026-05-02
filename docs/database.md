@@ -82,7 +82,7 @@ These support the Supabase-authenticated frontend experience.
 ## Design gaps / future improvements
 
 - unify Supabase and Prisma data ownership strategy
-- move from SQLite to PostgreSQL/MySQL for production scale
+- use PostgreSQL in production and run Prisma migrations for schema changes
 - add migration/version strategy across both backend and Supabase schemas
 - encrypt sensitive fields at rest if Aadhaar/regulated identifiers are ever persisted
 - add audit tables for admin moderation and document verification decisions

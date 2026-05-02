@@ -29,6 +29,7 @@ Recommended:
 - `PORT=3001`
 - `NODE_ENV=production`
 - `FRONTEND_URL=https://your-frontend-domain`
+- `DATABASE_URL=postgresql://user:password@host:5432/farm_intellect?schema=public`
 - `JWT_SECRET=<strong-random-secret>`
 - `JWT_EXPIRES_IN=7d`
 - `BCRYPT_ROUNDS=12`
@@ -49,6 +50,8 @@ npm run build
 ```bash
 cd backend
 npm install
+npm run db:migrate
+npm run db:seed
 npm run start
 ```
 
@@ -67,7 +70,7 @@ The repository already includes `vercel.json` for SPA routing support.
 - rotate all exposed or previously hardcoded secrets
 - set production CORS origin to the actual frontend domain
 - configure persistent storage for uploads if needed
-- switch SQLite to a production-grade relational database
+- provision a managed PostgreSQL instance and run Prisma migrations
 - configure logs retention and alerting
 - enable HTTPS end to end
 

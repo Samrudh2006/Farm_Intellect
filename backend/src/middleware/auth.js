@@ -37,23 +37,24 @@ const findOrProvisionSupabaseUser = async (supabaseUser) => {
   const role = toAppRole(metadata.role);
   const generatedPassword = await hashPassword(`supabase-${crypto.randomUUID()}`);
 
-  return prisma.user.create({
-    data: {
-      email: supabaseUser.email,
-      password: generatedPassword,
-      name: metadata.display_name || metadata.name || supabaseUser.email.split('@')[0],
-      phone: metadata.phone || null,
-      location: metadata.location || null,
-      role,
-      isVerified: Boolean(supabaseUser.email_confirmed_at),
-      emailVerified: Boolean(supabaseUser.email_confirmed_at),
-      phoneVerified: Boolean(supabaseUser.phone_confirmed_at),
-      ...(role === 'FARMER' ? { farmerProfile: { create: {} } } : {}),
-      ...(role === 'MERCHANT' ? { merchantProfile: { create: {} } } : {}),
-      ...(role === 'EXPERT' ? { expertProfile: { create: {} } } : {}),
-    },
-    include: userInclude,
-  });
+    return prisma.user.create({
+      data: {
+        email: supabaseUser.email,
+        password: generatedPassword,
+        name: metadata.display_name || metadata.name || supabaseUser.email.split('@')[0],
+        phone: metadata.phone || null,
+        location: metadata.location || null,
+        role,
+        isVerified: Boolean(supabaseUser.email_confirmed_at),
+        emailVerified: Boolean(supabaseUser.email_confirmed_at),
+        phoneVerified: Boolean(supabaseUser.phone_confirmed_at),
+        notificationPreference: { create: {} },
+        ...(role === 'FARMER' ? { farmerProfile: { create: {} } } : {}),
+        ...(role === 'MERCHANT' ? { merchantProfile: { create: {} } } : {}),
+        ...(role === 'EXPERT' ? { expertProfile: { create: {} } } : {}),
+      },
+      include: userInclude,
+    });
 };
 
 export const resolveAuthenticatedUser = async (token) => {
