@@ -6,6 +6,17 @@ const corsHeaders = {
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version",
 };
 
+const CACHE_TTL_MS = 15 * 60 * 1000;
+const STALE_TTL_MS = 6 * 60 * 60 * 1000;
+const cache = new Map<string, { at: number; prices: any[] }>();
+
+async function fetchWithTimeout(url: string, ms = 5000) {
+  const ctrl = new AbortController();
+  const t = setTimeout(() => ctrl.abort(), ms);
+  try { return await fetch(url, { signal: ctrl.signal }); }
+  finally { clearTimeout(t); }
+}
+
 serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
 
@@ -48,15 +59,24 @@ serve(async (req) => {
       });
     }
 
-    // Use data.gov.in Agmarknet API for real mandi prices
     const API_KEY = Deno.env.get("DATA_GOV_API_KEY");
+    const cacheKey = `${state || "Punjab"}|${district || ""}`;
+    const cached = cache.get(cacheKey);
+    const now = Date.now();
+
+    if (cached && now - cached.at < CACHE_TTL_MS) {
+      return new Response(JSON.stringify({ prices: cached.prices, source: "cache" }), {
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
 
     let prices: any[] = [];
+    let source: "live" | "cache-stale" | "ai-fallback" | "unavailable" = "unavailable";
 
     if (API_KEY) {
       try {
         const url = `https://api.data.gov.in/resource/9ef84268-d588-465a-a308-a864a43d0070?api-key=${API_KEY}&format=json&limit=20&filters[state]=${encodeURIComponent(state || "Punjab")}`;
-        const res = await fetch(url);
+        const res = await fetchWithTimeout(url, 5000);
         if (res.ok) {
           const data = await res.json();
           prices = (data.records || []).map((r: any) => ({
@@ -68,10 +88,20 @@ serve(async (req) => {
             unit: "per quintal",
             date: r.arrival_date,
           }));
+          if (prices.length > 0) {
+            source = "live";
+            cache.set(cacheKey, { at: now, prices });
+          }
         }
       } catch (e) {
-        console.error("data.gov.in fetch error:", e);
+        console.error("data.gov.in fetch error/timeout:", e);
       }
+    }
+
+    if (prices.length === 0 && cached && now - cached.at < STALE_TTL_MS) {
+      return new Response(JSON.stringify({ prices: cached.prices, source: "cache-stale", staleAgeMs: now - cached.at }), {
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
     }
 
     // If API key not set or no results, use AI to generate contextual prices
@@ -138,7 +168,10 @@ serve(async (req) => {
       }
     }
 
-    return new Response(JSON.stringify({ prices, source: prices.length > 0 ? "live" : "unavailable" }), {
+    if (prices.length > 0 && source === "unavailable") source = "ai-fallback";
+    if (prices.length > 0 && source !== "live") cache.set(cacheKey, { at: now, prices });
+
+    return new Response(JSON.stringify({ prices, source }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
   } catch (e) {
