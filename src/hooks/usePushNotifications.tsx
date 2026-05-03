@@ -66,6 +66,13 @@ export function usePushNotifications() {
 
   useEffect(() => {
     if (!user?.id) return;
+    let pushEnabled = true;
+    supabase
+      .from("notification_preferences")
+      .select("push_enabled")
+      .eq("user_id", user.id)
+      .maybeSingle()
+      .then(({ data }) => { if (data && data.push_enabled === false) pushEnabled = false; });
 
     const channel = supabase
       .channel(`push-notifications-${user.id}`)
@@ -80,7 +87,7 @@ export function usePushNotifications() {
           const variant = n.type === "error" || n.type === "warning" ? "destructive" : "default";
           toast({ title: n.title, description: n.message, variant: variant as "default" | "destructive" });
 
-          if (PRIORITY_TYPES.has(n.type)) {
+          if (pushEnabled && PRIORITY_TYPES.has(n.type)) {
             showBrowserNotification(n);
           }
         }
