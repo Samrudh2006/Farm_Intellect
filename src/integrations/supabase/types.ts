@@ -224,6 +224,39 @@ export type Database = {
         }
         Relationships: []
       }
+      notification_preferences: {
+        Row: {
+          created_at: string
+          crop_enabled: boolean
+          id: string
+          market_enabled: boolean
+          push_enabled: boolean
+          updated_at: string
+          user_id: string
+          weather_enabled: boolean
+        }
+        Insert: {
+          created_at?: string
+          crop_enabled?: boolean
+          id?: string
+          market_enabled?: boolean
+          push_enabled?: boolean
+          updated_at?: string
+          user_id: string
+          weather_enabled?: boolean
+        }
+        Update: {
+          created_at?: string
+          crop_enabled?: boolean
+          id?: string
+          market_enabled?: boolean
+          push_enabled?: boolean
+          updated_at?: string
+          user_id?: string
+          weather_enabled?: boolean
+        }
+        Relationships: []
+      }
       notifications: {
         Row: {
           created_at: string
