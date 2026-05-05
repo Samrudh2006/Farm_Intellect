@@ -52,6 +52,20 @@ const Login = () => {
   const [selectedState, setSelectedState] = useState("");
   const [selectedCity, setSelectedCity] = useState("");
 
+  // Biometric (WebAuthn) state
+  const [bioSupported, setBioSupported] = useState(false);
+  const [bioFingerprintRegistered, setBioFingerprintRegistered] = useState(false);
+  const [bioFaceRegistered, setBioFaceRegistered] = useState(false);
+  const [bioRegisterOnSignup, setBioRegisterOnSignup] = useState<BiometricKind | null>(null);
+
+  useEffect(() => {
+    isBiometricSupported().then((ok) => {
+      setBioSupported(ok);
+      setBioFingerprintRegistered(hasRegistered("fingerprint"));
+      setBioFaceRegistered(hasRegistered("face"));
+    });
+  }, []);
+
   const [formData, setFormData] = useState({
     aadhaar: "",
     passkey: "",
