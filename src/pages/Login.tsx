@@ -142,6 +142,24 @@ const Login = () => {
         toast({ title: "Signup Failed", description: error.message, variant: "destructive" });
       } else {
         toast({ title: "🎉 Account Created!", description: "You are now logged in" });
+        // Optionally register biometric right after signup
+        if (bioRegisterOnSignup && bioSupported) {
+          try {
+            await registerBiometric(bioRegisterOnSignup, {
+              aadhaar: cleanAadhaar,
+              passkey: formData.passkey,
+              label: formData.name || cleanAadhaar,
+            });
+            if (bioRegisterOnSignup === "fingerprint") setBioFingerprintRegistered(true);
+            else setBioFaceRegistered(true);
+            toast({
+              title: bioRegisterOnSignup === "face" ? "Face ID registered" : "Fingerprint registered",
+              description: "You can now sign in with biometrics on this device.",
+            });
+          } catch (err: any) {
+            toast({ title: "Biometric registration skipped", description: err.message, variant: "destructive" });
+          }
+        }
       }
       setLoading(false);
     } else {
@@ -152,6 +170,60 @@ const Login = () => {
       } else {
         toast({ title: t("auth.login_success"), description: t("auth.welcome_back") });
       }
+      setLoading(false);
+    }
+  };
+
+  // ── Biometric handlers ──
+  const handleBiometricLogin = async (kind: BiometricKind) => {
+    if (!bioSupported) {
+      toast({ title: "Not supported", description: "This device/browser does not support biometric login.", variant: "destructive" });
+      return;
+    }
+    try {
+      setLoading(true);
+      const creds = await authenticateBiometric(kind);
+      const { error } = await signInWithAadhaar(creds.aadhaar, creds.passkey);
+      if (error) {
+        toast({ title: "Login Failed", description: "Stored credentials no longer valid. Please re-register.", variant: "destructive" });
+      } else {
+        toast({ title: kind === "face" ? "Face verified ✓" : "Fingerprint verified ✓", description: t("auth.welcome_back") });
+      }
+    } catch (err: any) {
+      toast({ title: "Biometric login failed", description: err.message, variant: "destructive" });
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleBiometricRegisterNow = async (kind: BiometricKind) => {
+    const cleanAadhaar = formData.aadhaar.replace(/\s/g, "");
+    if (cleanAadhaar.length !== 12 || !formData.passkey) {
+      toast({ title: "Fill credentials first", description: "Enter your Aadhaar and Passkey above, then tap to register.", variant: "destructive" });
+      return;
+    }
+    try {
+      setLoading(true);
+      // Verify credentials are valid before storing them locally
+      const { error } = await signInWithAadhaar(cleanAadhaar, formData.passkey);
+      if (error) {
+        toast({ title: "Invalid credentials", description: "Cannot register biometric — Aadhaar/Passkey did not work.", variant: "destructive" });
+        return;
+      }
+      await registerBiometric(kind, {
+        aadhaar: cleanAadhaar,
+        passkey: formData.passkey,
+        label: formData.name || cleanAadhaar,
+      });
+      if (kind === "fingerprint") setBioFingerprintRegistered(true);
+      else setBioFaceRegistered(true);
+      toast({
+        title: kind === "face" ? "Face ID registered ✓" : "Fingerprint registered ✓",
+        description: "Next time, just tap the icon to sign in.",
+      });
+    } catch (err: any) {
+      toast({ title: "Registration failed", description: err.message, variant: "destructive" });
+    } finally {
       setLoading(false);
     }
   };
