@@ -228,6 +228,42 @@ const Login = () => {
     }
   };
 
+  // Used during SIGNUP form — registers biometric locally without requiring an existing account.
+  // Credentials are bound to the Aadhaar/Passkey the user is about to sign up with.
+  const handleSignupBiometricRegister = async (kind: BiometricKind) => {
+    const cleanAadhaar = formData.aadhaar.replace(/\s/g, "");
+    if (cleanAadhaar.length !== 12) {
+      toast({ title: "Enter Aadhaar first", description: "Fill the 12-digit Aadhaar above before registering.", variant: "destructive" });
+      return;
+    }
+    if (!formData.passkey || formData.passkey.length < 4) {
+      toast({ title: "Enter Passkey first", description: "Create a passkey (min 4 chars) above before registering.", variant: "destructive" });
+      return;
+    }
+    if (formData.confirmPasskey && formData.passkey !== formData.confirmPasskey) {
+      toast({ title: "Passkey Mismatch", description: "Passkeys do not match", variant: "destructive" });
+      return;
+    }
+    try {
+      setLoading(true);
+      await registerBiometric(kind, {
+        aadhaar: cleanAadhaar,
+        passkey: formData.passkey,
+        label: formData.name || cleanAadhaar,
+      });
+      if (kind === "fingerprint") setBioFingerprintRegistered(true);
+      else setBioFaceRegistered(true);
+      toast({
+        title: kind === "face" ? "Face registered ✓" : "Fingerprint registered ✓",
+        description: "Now click Sign Up to finish creating your account.",
+      });
+    } catch (err: any) {
+      toast({ title: "Registration failed", description: err.message, variant: "destructive" });
+    } finally {
+      setLoading(false);
+    }
+  };
+
   // ── Real SMS OTP via edge function ──
   const sendRealOTP = async (phone: string, purpose: string) => {
     const fullPhone = `+91${phone.replace(/\D/g, "")}`;
