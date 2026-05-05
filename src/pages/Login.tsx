@@ -977,7 +977,7 @@ const Login = () => {
                   >
                     <Fingerprint className="h-6 w-6 text-primary" />
                     <span className="text-xs font-medium">
-                      {bioFingerprintRegistered ? "Fingerprint Login" : "Register Fingerprint"}
+                      {bioFingerprintRegistered ? "Login with Fingerprint" : "Register Fingerprint"}
                     </span>
                   </Button>
                   <Button
@@ -993,40 +993,38 @@ const Login = () => {
                   >
                     <ScanFace className="h-6 w-6 text-secondary-foreground" />
                     <span className="text-xs font-medium">
-                      {bioFaceRegistered ? "Face Login" : "Register Face"}
+                      {bioFaceRegistered ? "Login with Face" : "Register Face"}
                     </span>
                   </Button>
                 </div>
               ) : (
                 <div className="space-y-2">
                   <p className="text-xs text-muted-foreground text-center">
-                    Optionally register a biometric for faster login next time:
+                    Register a biometric now — fill Aadhaar & Passkey above first, then tap to scan:
                   </p>
                   <div className="grid grid-cols-2 gap-3">
                     <Button
                       type="button"
-                      variant={bioRegisterOnSignup === "fingerprint" ? "default" : "outline"}
+                      variant="outline"
                       className="h-14 py-0 flex-col gap-0.5"
-                      onClick={() =>
-                        setBioRegisterOnSignup(bioRegisterOnSignup === "fingerprint" ? null : "fingerprint")
-                      }
+                      disabled={loading}
+                      onClick={() => handleSignupBiometricRegister("fingerprint")}
                     >
-                      <Fingerprint className="h-6 w-6" />
+                      <Fingerprint className="h-6 w-6 text-primary" />
                       <span className="text-xs font-medium">
-                        {bioRegisterOnSignup === "fingerprint" ? "✓ Fingerprint" : "Add Fingerprint"}
+                        {bioFingerprintRegistered ? "✓ Fingerprint Registered" : "Register Fingerprint"}
                       </span>
                     </Button>
                     <Button
                       type="button"
-                      variant={bioRegisterOnSignup === "face" ? "default" : "outline"}
+                      variant="outline"
                       className="h-14 py-0 flex-col gap-0.5"
-                      onClick={() =>
-                        setBioRegisterOnSignup(bioRegisterOnSignup === "face" ? null : "face")
-                      }
+                      disabled={loading}
+                      onClick={() => handleSignupBiometricRegister("face")}
                     >
-                      <ScanFace className="h-6 w-6" />
+                      <ScanFace className="h-6 w-6 text-secondary-foreground" />
                       <span className="text-xs font-medium">
-                        {bioRegisterOnSignup === "face" ? "✓ Face ID" : "Add Face ID"}
+                        {bioFaceRegistered ? "✓ Face Registered" : "Register Face"}
                       </span>
                     </Button>
                   </div>
