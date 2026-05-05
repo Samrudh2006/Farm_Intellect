@@ -228,6 +228,42 @@ const Login = () => {
     }
   };
 
+  // Used during SIGNUP form — registers biometric locally without requiring an existing account.
+  // Credentials are bound to the Aadhaar/Passkey the user is about to sign up with.
+  const handleSignupBiometricRegister = async (kind: BiometricKind) => {
+    const cleanAadhaar = formData.aadhaar.replace(/\s/g, "");
+    if (cleanAadhaar.length !== 12) {
+      toast({ title: "Enter Aadhaar first", description: "Fill the 12-digit Aadhaar above before registering.", variant: "destructive" });
+      return;
+    }
+    if (!formData.passkey || formData.passkey.length < 4) {
+      toast({ title: "Enter Passkey first", description: "Create a passkey (min 4 chars) above before registering.", variant: "destructive" });
+      return;
+    }
+    if (formData.confirmPasskey && formData.passkey !== formData.confirmPasskey) {
+      toast({ title: "Passkey Mismatch", description: "Passkeys do not match", variant: "destructive" });
+      return;
+    }
+    try {
+      setLoading(true);
+      await registerBiometric(kind, {
+        aadhaar: cleanAadhaar,
+        passkey: formData.passkey,
+        label: formData.name || cleanAadhaar,
+      });
+      if (kind === "fingerprint") setBioFingerprintRegistered(true);
+      else setBioFaceRegistered(true);
+      toast({
+        title: kind === "face" ? "Face registered ✓" : "Fingerprint registered ✓",
+        description: "Now click Sign Up to finish creating your account.",
+      });
+    } catch (err: any) {
+      toast({ title: "Registration failed", description: err.message, variant: "destructive" });
+    } finally {
+      setLoading(false);
+    }
+  };
+
   // ── Real SMS OTP via edge function ──
   const sendRealOTP = async (phone: string, purpose: string) => {
     const fullPhone = `+91${phone.replace(/\D/g, "")}`;
@@ -977,7 +1013,7 @@ const Login = () => {
                   >
                     <Fingerprint className="h-6 w-6 text-primary" />
                     <span className="text-xs font-medium">
-                      {bioFingerprintRegistered ? "Fingerprint Login" : "Register Fingerprint"}
+                      {bioFingerprintRegistered ? "Login with Fingerprint" : "Register Fingerprint"}
                     </span>
                   </Button>
                   <Button
@@ -993,40 +1029,38 @@ const Login = () => {
                   >
                     <ScanFace className="h-6 w-6 text-secondary-foreground" />
                     <span className="text-xs font-medium">
-                      {bioFaceRegistered ? "Face Login" : "Register Face"}
+                      {bioFaceRegistered ? "Login with Face" : "Register Face"}
                     </span>
                   </Button>
                 </div>
               ) : (
                 <div className="space-y-2">
                   <p className="text-xs text-muted-foreground text-center">
-                    Optionally register a biometric for faster login next time:
+                    Register a biometric now — fill Aadhaar & Passkey above first, then tap to scan:
                   </p>
                   <div className="grid grid-cols-2 gap-3">
                     <Button
                       type="button"
-                      variant={bioRegisterOnSignup === "fingerprint" ? "default" : "outline"}
+                      variant="outline"
                       className="h-14 py-0 flex-col gap-0.5"
-                      onClick={() =>
-                        setBioRegisterOnSignup(bioRegisterOnSignup === "fingerprint" ? null : "fingerprint")
-                      }
+                      disabled={loading}
+                      onClick={() => handleSignupBiometricRegister("fingerprint")}
                     >
-                      <Fingerprint className="h-6 w-6" />
+                      <Fingerprint className="h-6 w-6 text-primary" />
                       <span className="text-xs font-medium">
-                        {bioRegisterOnSignup === "fingerprint" ? "✓ Fingerprint" : "Add Fingerprint"}
+                        {bioFingerprintRegistered ? "✓ Fingerprint Registered" : "Register Fingerprint"}
                       </span>
                     </Button>
                     <Button
                       type="button"
-                      variant={bioRegisterOnSignup === "face" ? "default" : "outline"}
+                      variant="outline"
                       className="h-14 py-0 flex-col gap-0.5"
-                      onClick={() =>
-                        setBioRegisterOnSignup(bioRegisterOnSignup === "face" ? null : "face")
-                      }
+                      disabled={loading}
+                      onClick={() => handleSignupBiometricRegister("face")}
                     >
-                      <ScanFace className="h-6 w-6" />
+                      <ScanFace className="h-6 w-6 text-secondary-foreground" />
                       <span className="text-xs font-medium">
-                        {bioRegisterOnSignup === "face" ? "✓ Face ID" : "Add Face ID"}
+                        {bioFaceRegistered ? "✓ Face Registered" : "Register Face"}
                       </span>
                     </Button>
                   </div>
