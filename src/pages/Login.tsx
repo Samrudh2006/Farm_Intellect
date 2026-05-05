@@ -56,7 +56,7 @@ const Login = () => {
   const [bioSupported, setBioSupported] = useState(false);
   const [bioFingerprintRegistered, setBioFingerprintRegistered] = useState(false);
   const [bioFaceRegistered, setBioFaceRegistered] = useState(false);
-  const [bioRegisterOnSignup, setBioRegisterOnSignup] = useState<BiometricKind | null>(null);
+  const [bioRegisterOnSignup, setBioRegisterOnSignup] = useState<BiometricKind[]>([]);
 
   useEffect(() => {
     isBiometricSupported().then(async (ok) => {
@@ -143,22 +143,28 @@ const Login = () => {
       } else {
         toast({ title: "🎉 Account Created!", description: "You are now logged in" });
         // Optionally register biometric right after signup
-        if (bioRegisterOnSignup && bioSupported) {
-          try {
-            await registerBiometric(bioRegisterOnSignup, {
-              aadhaar: cleanAadhaar,
-              passkey: formData.passkey,
-              label: formData.name || cleanAadhaar,
-            });
-            if (bioRegisterOnSignup === "fingerprint") setBioFingerprintRegistered(true);
-            else setBioFaceRegistered(true);
-            toast({
-              title: bioRegisterOnSignup === "face" ? "Face ID registered" : "Fingerprint registered",
-              description: "You can now sign in with biometrics on this device.",
-            });
-          } catch (err: any) {
-            toast({ title: "Biometric registration skipped", description: err.message, variant: "destructive" });
+        if (bioRegisterOnSignup.length > 0 && bioSupported) {
+          for (const kind of bioRegisterOnSignup) {
+            try {
+              await registerBiometric(kind, {
+                aadhaar: cleanAadhaar,
+                passkey: formData.passkey,
+                label: formData.name || cleanAadhaar,
+              });
+              if (kind === "fingerprint") setBioFingerprintRegistered(true);
+              else setBioFaceRegistered(true);
+            } catch (err: any) {
+              toast({
+                title: kind === "face" ? "Face registration skipped" : "Fingerprint registration skipped",
+                description: err.message,
+                variant: "destructive",
+              });
+            }
           }
+          toast({
+            title: "Biometric registration completed",
+            description: "You can now login with fingerprint or login with face on this device.",
+          });
         }
       }
       setLoading(false);
@@ -1041,26 +1047,20 @@ const Login = () => {
                   <div className="grid grid-cols-2 gap-3">
                     <Button
                       type="button"
-                      variant="outline"
-                      className="h-14 py-0 flex-col gap-0.5"
-                      disabled={loading}
-                      onClick={() => handleSignupBiometricRegister("fingerprint")}
+
                     >
                       <Fingerprint className="h-6 w-6 text-primary" />
                       <span className="text-xs font-medium">
-                        {bioFingerprintRegistered ? "✓ Fingerprint Registered" : "Register Fingerprint"}
+
                       </span>
                     </Button>
                     <Button
                       type="button"
-                      variant="outline"
-                      className="h-14 py-0 flex-col gap-0.5"
-                      disabled={loading}
-                      onClick={() => handleSignupBiometricRegister("face")}
+
                     >
                       <ScanFace className="h-6 w-6 text-secondary-foreground" />
                       <span className="text-xs font-medium">
-                        {bioFaceRegistered ? "✓ Face Registered" : "Register Face"}
+
                       </span>
                     </Button>
                   </div>
