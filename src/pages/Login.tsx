@@ -111,22 +111,22 @@ const Login = () => {
     const cleanAadhaar = formData.aadhaar.replace(/\s/g, "");
 
     if (cleanAadhaar.length !== 12) {
-      toast({ title: t("auth.invalid_phone"), description: "Please enter a valid 12-digit Aadhaar number", variant: "destructive" });
+      toast({ title: t("auth.invalid_aadhaar_title"), description: t("auth.invalid_aadhaar_desc"), variant: "destructive" });
       return;
     }
 
     if (!formData.passkey || formData.passkey.length < 4) {
-      toast({ title: "Invalid Passkey", description: "Passkey must be at least 4 characters", variant: "destructive" });
+      toast({ title: t("auth.invalid_passkey_title"), description: t("auth.passkey_min_desc"), variant: "destructive" });
       return;
     }
 
     if (!isLogin) {
       if (formData.passkey !== formData.confirmPasskey) {
-        toast({ title: "Passkey Mismatch", description: "Passkeys do not match", variant: "destructive" });
+        toast({ title: t("auth.passkey_mismatch_title"), description: t("auth.passkey_mismatch_desc"), variant: "destructive" });
         return;
       }
       if (!formData.name) {
-        toast({ title: "Error", description: "Please fill all required fields", variant: "destructive" });
+        toast({ title: t("common.error"), description: t("auth.required_fields_desc"), variant: "destructive" });
         return;
       }
 
@@ -139,9 +139,9 @@ const Login = () => {
       });
 
       if (error) {
-        toast({ title: "Signup Failed", description: error.message, variant: "destructive" });
+        toast({ title: t("auth.signup_failed"), description: error.message, variant: "destructive" });
       } else {
-        toast({ title: "🎉 Account Created!", description: "You are now logged in" });
+        toast({ title: t("auth.account_created_title"), description: t("auth.account_created_desc") });
         // Optionally register biometric right after signup
         if (bioRegisterOnSignup.length > 0 && bioSupported) {
           for (const kind of bioRegisterOnSignup) {
@@ -155,15 +155,15 @@ const Login = () => {
               else setBioFaceRegistered(true);
             } catch (err: any) {
               toast({
-                title: kind === "face" ? "Face registration skipped" : "Fingerprint registration skipped",
+                title: kind === "face" ? t("auth.face_registration_skipped_title") : t("auth.fingerprint_registration_skipped_title"),
                 description: err.message,
                 variant: "destructive",
               });
             }
           }
           toast({
-            title: "Biometric registration completed",
-            description: "You can now login with fingerprint or login with face on this device.",
+            title: t("auth.biometric_registration_completed_title"),
+            description: t("auth.biometric_registration_completed_desc"),
           });
         }
       }
@@ -172,7 +172,7 @@ const Login = () => {
       setLoading(true);
       const { error } = await signInWithAadhaar(cleanAadhaar, formData.passkey);
       if (error) {
-        toast({ title: "Login Failed", description: "Invalid Aadhaar or Passkey", variant: "destructive" });
+        toast({ title: t("auth.login_failed"), description: t("auth.invalid_aadhaar_passkey_desc"), variant: "destructive" });
       } else {
         toast({ title: t("auth.login_success"), description: t("auth.welcome_back") });
       }
@@ -183,7 +183,7 @@ const Login = () => {
   // ── Biometric handlers ──
   const handleBiometricLogin = async (kind: BiometricKind) => {
     if (!bioSupported) {
-      toast({ title: "Not supported", description: "This device/browser does not support biometric login.", variant: "destructive" });
+      toast({ title: t("common.not_supported"), description: t("auth.biometric_not_supported"), variant: "destructive" });
       return;
     }
     try {
@@ -191,12 +191,12 @@ const Login = () => {
       const creds = await authenticateBiometric(kind);
       const { error } = await signInWithAadhaar(creds.aadhaar, creds.passkey);
       if (error) {
-        toast({ title: "Login Failed", description: "Stored credentials no longer valid. Please re-register.", variant: "destructive" });
+        toast({ title: t("auth.login_failed"), description: t("auth.biometric_credentials_invalid_desc"), variant: "destructive" });
       } else {
-        toast({ title: kind === "face" ? "Face verified ✓" : "Fingerprint verified ✓", description: t("auth.welcome_back") });
+        toast({ title: kind === "face" ? t("auth.face_verified_title") : t("auth.fingerprint_verified_title"), description: t("auth.welcome_back") });
       }
     } catch (err: any) {
-      toast({ title: "Biometric login failed", description: err.message, variant: "destructive" });
+      toast({ title: t("auth.biometric_login_failed_title"), description: err.message, variant: "destructive" });
     } finally {
       setLoading(false);
     }
@@ -205,7 +205,7 @@ const Login = () => {
   const handleBiometricRegisterNow = async (kind: BiometricKind) => {
     const cleanAadhaar = formData.aadhaar.replace(/\s/g, "");
     if (cleanAadhaar.length !== 12 || !formData.passkey) {
-      toast({ title: "Fill credentials first", description: "Enter your Aadhaar and Passkey above, then tap to register.", variant: "destructive" });
+      toast({ title: t("auth.fill_credentials_first_title"), description: t("auth.fill_credentials_first_desc"), variant: "destructive" });
       return;
     }
     try {
@@ -213,7 +213,7 @@ const Login = () => {
       // Verify credentials are valid before storing them locally
       const { error } = await signInWithAadhaar(cleanAadhaar, formData.passkey);
       if (error) {
-        toast({ title: "Invalid credentials", description: "Cannot register biometric — Aadhaar/Passkey did not work.", variant: "destructive" });
+        toast({ title: t("auth.invalid_credentials_title"), description: t("auth.invalid_biometric_credentials_desc"), variant: "destructive" });
         return;
       }
       await registerBiometric(kind, {
@@ -224,11 +224,11 @@ const Login = () => {
       if (kind === "fingerprint") setBioFingerprintRegistered(true);
       else setBioFaceRegistered(true);
       toast({
-        title: kind === "face" ? "Face ID registered ✓" : "Fingerprint registered ✓",
-        description: "Next time, just tap the icon to sign in.",
+        title: kind === "face" ? t("auth.face_registered_title") : t("auth.fingerprint_registered_title"),
+        description: t("auth.tap_icon_next_time_desc"),
       });
     } catch (err: any) {
-      toast({ title: "Registration failed", description: err.message, variant: "destructive" });
+      toast({ title: t("auth.registration_failed_title"), description: err.message, variant: "destructive" });
     } finally {
       setLoading(false);
     }
@@ -239,15 +239,15 @@ const Login = () => {
   const handleSignupBiometricRegister = async (kind: BiometricKind) => {
     const cleanAadhaar = formData.aadhaar.replace(/\s/g, "");
     if (cleanAadhaar.length !== 12) {
-      toast({ title: "Enter Aadhaar first", description: "Fill the 12-digit Aadhaar above before registering.", variant: "destructive" });
+      toast({ title: t("auth.enter_aadhaar_first_title"), description: t("auth.enter_aadhaar_first_desc"), variant: "destructive" });
       return;
     }
     if (!formData.passkey || formData.passkey.length < 4) {
-      toast({ title: "Enter Passkey first", description: "Create a passkey (min 4 chars) above before registering.", variant: "destructive" });
+      toast({ title: t("auth.enter_passkey_first_title"), description: t("auth.enter_passkey_first_desc"), variant: "destructive" });
       return;
     }
     if (formData.confirmPasskey && formData.passkey !== formData.confirmPasskey) {
-      toast({ title: "Passkey Mismatch", description: "Passkeys do not match", variant: "destructive" });
+      toast({ title: t("auth.passkey_mismatch_title"), description: t("auth.passkey_mismatch_desc"), variant: "destructive" });
       return;
     }
     try {
@@ -260,11 +260,11 @@ const Login = () => {
       if (kind === "fingerprint") setBioFingerprintRegistered(true);
       else setBioFaceRegistered(true);
       toast({
-        title: kind === "face" ? "Face registered ✓" : "Fingerprint registered ✓",
-        description: "Now click Sign Up to finish creating your account.",
+        title: kind === "face" ? t("auth.face_registered_title") : t("auth.fingerprint_registered_title"),
+        description: t("auth.finish_signup_desc"),
       });
     } catch (err: any) {
-      toast({ title: "Registration failed", description: err.message, variant: "destructive" });
+      toast({ title: t("auth.registration_failed_title"), description: err.message, variant: "destructive" });
     } finally {
       setLoading(false);
     }
@@ -277,14 +277,14 @@ const Login = () => {
       body: { phone: fullPhone, purpose },
     });
     if (error || !data?.success) {
-      throw new Error(data?.error || error?.message || "Failed to send OTP");
+      throw new Error(data?.error || error?.message || t("auth.failed_send_otp_desc"));
     }
   };
 
   // ── Phone / WhatsApp OTP (now uses real SMS) ──
   const sendOTP = async () => {
     if (!formData.phone || formData.phone.length < 10) {
-      toast({ title: t("auth.invalid_phone"), description: "Please enter a valid 10-digit phone number", variant: "destructive" });
+      toast({ title: t("auth.invalid_phone_title"), description: t("auth.invalid_phone_desc"), variant: "destructive" });
       return;
     }
 
@@ -298,11 +298,11 @@ const Login = () => {
       setOtpSent(true);
       setResendTimer(30);
       toast({
-        title: loginMethod === "whatsapp" ? "OTP sent via WhatsApp" : t("auth.otp_sent"),
-        description: `OTP sent to +91 ${formData.phone}`,
+        title: loginMethod === "whatsapp" ? t("auth.otp_sent_whatsapp") : t("auth.otp_sent"),
+        description: `${t("auth.otp_sent_to_desc")} +91 ${formData.phone}`,
       });
     } catch (err: any) {
-      toast({ title: t("auth.error"), description: err.message || "Failed to send OTP", variant: "destructive" });
+      toast({ title: t("common.error"), description: err.message || t("auth.failed_send_otp_desc"), variant: "destructive" });
     }
     setLoading(false);
   };
@@ -310,7 +310,7 @@ const Login = () => {
   const verifyOTPCode = async () => {
     const otpCode = otp.join("");
     if (otpCode.length !== 6) {
-      toast({ title: t("auth.enter_otp"), description: "Please enter all 6 digits", variant: "destructive" });
+      toast({ title: t("auth.enter_otp"), description: t("auth.enter_otp_desc"), variant: "destructive" });
       return;
     }
 
@@ -323,7 +323,7 @@ const Login = () => {
       });
 
       if (verifyError || !data?.verified) {
-        toast({ title: t("auth.error"), description: data?.error || "Invalid OTP. Please try again.", variant: "destructive" });
+        toast({ title: t("common.error"), description: data?.error || t("auth.invalid_otp_desc"), variant: "destructive" });
         setLoading(false);
         return;
       }
@@ -339,7 +339,7 @@ const Login = () => {
       }
       toast({ title: t("auth.login_success"), description: t("auth.welcome_back") });
     } catch (err: any) {
-      toast({ title: t("auth.error"), description: err.message || "Verification failed", variant: "destructive" });
+      toast({ title: t("common.error"), description: err.message || t("auth.verification_failed_desc"), variant: "destructive" });
     }
     setLoading(false);
   };
@@ -347,7 +347,7 @@ const Login = () => {
   // ── Forgot Passkey Flow ──
   const handleForgotSendOTP = async () => {
     if (!forgotPhone || forgotPhone.length < 10) {
-      toast({ title: "Invalid Phone", description: "Please enter a valid 10-digit phone number", variant: "destructive" });
+      toast({ title: t("auth.invalid_phone_title"), description: t("auth.invalid_phone_desc"), variant: "destructive" });
       return;
     }
 
@@ -357,9 +357,9 @@ const Login = () => {
       setForgotStep("otp");
       setResendTimer(30);
       setOtp(["", "", "", "", "", ""]);
-      toast({ title: "OTP Sent", description: `Verification code sent to +91 ${forgotPhone}` });
+      toast({ title: t("auth.otp_sent"), description: `${t("auth.otp_sent_to_desc")} +91 ${forgotPhone}` });
     } catch (err: any) {
-      toast({ title: "Error", description: err.message || "Failed to send OTP", variant: "destructive" });
+      toast({ title: t("common.error"), description: err.message || t("auth.failed_send_otp_desc"), variant: "destructive" });
     }
     setLoading(false);
   };
@@ -367,7 +367,7 @@ const Login = () => {
   const handleForgotVerifyOTP = async () => {
     const otpCode = otp.join("");
     if (otpCode.length !== 6) {
-      toast({ title: "Enter OTP", description: "Please enter all 6 digits", variant: "destructive" });
+      toast({ title: t("auth.enter_otp"), description: t("auth.enter_otp_desc"), variant: "destructive" });
       return;
     }
 
@@ -379,31 +379,31 @@ const Login = () => {
       });
 
       if (error || !data?.verified) {
-        toast({ title: "Invalid OTP", description: data?.error || "Invalid or expired OTP", variant: "destructive" });
+        toast({ title: t("auth.invalid_otp_title"), description: data?.error || t("auth.invalid_otp_desc"), variant: "destructive" });
         setLoading(false);
         return;
       }
 
       setResetToken(data.reset_token);
       setForgotStep("new-passkey");
-      toast({ title: "Verified!", description: "Now set your new passkey" });
+      toast({ title: t("auth.verified_title"), description: t("auth.verified_desc") });
     } catch (err: any) {
-      toast({ title: "Error", description: err.message || "Verification failed", variant: "destructive" });
+      toast({ title: t("common.error"), description: err.message || t("auth.verification_failed_desc"), variant: "destructive" });
     }
     setLoading(false);
   };
 
   const handleResetPasskey = async () => {
     if (!newPasskey || newPasskey.length < 6) {
-      toast({ title: "Invalid Passkey", description: "Passkey must be at least 6 characters with a letter and a digit", variant: "destructive" });
+      toast({ title: t("auth.invalid_passkey_title"), description: t("auth.passkey_min_complex_desc"), variant: "destructive" });
       return;
     }
     if (!/[a-zA-Z]/.test(newPasskey) || !/\d/.test(newPasskey)) {
-      toast({ title: "Weak Passkey", description: "Passkey must contain at least one letter and one digit", variant: "destructive" });
+      toast({ title: t("auth.weak_passkey_title"), description: t("auth.passkey_letter_digit_desc"), variant: "destructive" });
       return;
     }
     if (newPasskey !== confirmNewPasskey) {
-      toast({ title: "Mismatch", description: "Passkeys do not match", variant: "destructive" });
+      toast({ title: t("auth.passkey_mismatch_title"), description: t("auth.passkey_mismatch_desc"), variant: "destructive" });
       return;
     }
 
@@ -415,12 +415,12 @@ const Login = () => {
       });
 
       if (error || !data?.success) {
-        toast({ title: "Error", description: data?.error || "Failed to reset passkey", variant: "destructive" });
+        toast({ title: t("common.error"), description: data?.error || t("auth.reset_failed_desc"), variant: "destructive" });
         setLoading(false);
         return;
       }
 
-      toast({ title: "✅ Passkey Reset!", description: "You can now login with your new passkey" });
+      toast({ title: t("auth.passkey_reset_success_title"), description: t("auth.passkey_reset_success_desc") });
       setForgotPasskeyMode(false);
       setForgotStep("phone");
       setNewPasskey("");
@@ -428,7 +428,7 @@ const Login = () => {
       setForgotPhone("");
       setOtp(["", "", "", "", "", ""]);
     } catch (err: any) {
-      toast({ title: "Error", description: err.message || "Reset failed", variant: "destructive" });
+      toast({ title: t("common.error"), description: err.message || t("auth.reset_failed_desc"), variant: "destructive" });
     }
     setLoading(false);
   };
@@ -482,7 +482,7 @@ const Login = () => {
             <Button variant="ghost" size="icon" onClick={() => {
               const isDark = document.documentElement.classList.toggle("dark");
               localStorage.setItem("theme", isDark ? "dark" : "light");
-            }} aria-label="Toggle dark mode">
+            }} aria-label={t("common.toggle_dark_mode")}>
               <Sun className="h-5 w-5 rotate-0 scale-100 transition-all dark:-rotate-90 dark:scale-0" />
               <Moon className="absolute h-5 w-5 rotate-90 scale-0 transition-all dark:rotate-0 dark:scale-100" />
             </Button>
@@ -492,7 +492,7 @@ const Login = () => {
             <div className="flex items-center justify-center gap-3 mb-3">
               <AshokaChakra size={44} />
             </div>
-            <h1 className="text-3xl font-bold text-gradient-tricolor mb-2">Smart Crop Advisory</h1>
+            <h1 className="text-3xl font-bold text-gradient-tricolor mb-2">{t("header.app_title")}</h1>
             <p className="text-muted-foreground max-w-xl mx-auto">{t("auth.welcome")}</p>
           </div>
           <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6 max-w-6xl mx-auto">
@@ -537,33 +537,33 @@ const Login = () => {
             <Card className="tricolor-card overflow-hidden">
               <CardHeader className="text-center pb-4">
                 <CardTitle className="text-xl">
-                  {forgotStep === "phone" && "Forgot Passkey"}
-                  {forgotStep === "otp" && "Verify OTP"}
-                  {forgotStep === "new-passkey" && "Set New Passkey"}
+                  {forgotStep === "phone" && t("auth.forgot_passkey_title")}
+                  {forgotStep === "otp" && t("auth.verify_otp_title")}
+                  {forgotStep === "new-passkey" && t("auth.set_new_passkey_title")}
                 </CardTitle>
                 <CardDescription>
-                  {forgotStep === "phone" && "Enter your registered phone number to receive a verification code"}
-                  {forgotStep === "otp" && `Enter the 6-digit code sent to +91 ${forgotPhone}`}
-                  {forgotStep === "new-passkey" && "Create a new passkey for your account"}
+                  {forgotStep === "phone" && t("auth.forgot_passkey_desc_phone")}
+                  {forgotStep === "otp" && `${t("auth.otp_sent_desc")} +91 ${forgotPhone}`}
+                  {forgotStep === "new-passkey" && t("auth.forgot_passkey_desc_new")}
                 </CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
                 {forgotStep === "phone" && (
                   <>
                     <div className="space-y-1.5">
-                      <Label htmlFor="forgot-phone" className="flex items-center gap-2">
-                        <Phone className="h-4 w-4 text-primary" />
-                        Registered Phone Number
-                      </Label>
-                      <div className="flex">
-                        <span className="inline-flex items-center px-3 rounded-l-md border border-r-0 border-input bg-muted text-sm">+91</span>
-                        <Input
-                          id="forgot-phone"
-                          type="tel"
-                          placeholder="9876543210"
-                          className="rounded-l-none"
-                          maxLength={10}
-                          value={forgotPhone}
+                        <Label htmlFor="forgot-phone" className="flex items-center gap-2">
+                          <Phone className="h-4 w-4 text-primary" />
+                          {t("auth.registered_phone_number")}
+                        </Label>
+                        <div className="flex">
+                          <span className="inline-flex items-center px-3 rounded-l-md border border-r-0 border-input bg-muted text-sm">+91</span>
+                          <Input
+                            id="forgot-phone"
+                            type="tel"
+                            placeholder={t("auth.enter_phone")}
+                            className="rounded-l-none"
+                            maxLength={10}
+                            value={forgotPhone}
                           onChange={(e) => setForgotPhone(e.target.value.replace(/\D/g, "").slice(0, 10))}
                         />
                       </div>
@@ -576,9 +576,9 @@ const Login = () => {
                       {loading ? (
                         <span className="flex items-center gap-2">
                           <span className="h-4 w-4 border-2 border-primary-foreground/30 border-t-primary-foreground rounded-full animate-spin" />
-                          Sending...
+                          {t("common.loading")}
                         </span>
-                      ) : "Send OTP to Phone"}
+                      ) : t("auth.send_otp_to_phone")}
                     </Button>
                   </>
                 )}
@@ -608,16 +608,16 @@ const Login = () => {
                       {loading ? (
                         <span className="flex items-center gap-2">
                           <span className="h-4 w-4 border-2 border-primary-foreground/30 border-t-primary-foreground rounded-full animate-spin" />
-                          Verifying...
+                          {t("common.loading")}
                         </span>
-                      ) : "Verify OTP"}
+                      ) : t("auth.verify_otp_title")}
                     </Button>
                     <div className="text-center">
                       {resendTimer > 0 ? (
-                        <p className="text-sm text-muted-foreground">Resend OTP in {resendTimer}s</p>
+                        <p className="text-sm text-muted-foreground">{t("auth.resend_otp_in")} {resendTimer}s</p>
                       ) : (
                         <button onClick={handleForgotSendOTP} className="text-sm text-primary hover:underline">
-                          Resend OTP
+                          {t("auth.resend_otp")}
                         </button>
                       )}
                     </div>
@@ -629,7 +629,7 @@ const Login = () => {
                     <div className="space-y-1.5">
                       <Label htmlFor="new-passkey" className="flex items-center gap-2">
                         <KeyRound className="h-4 w-4 text-primary" />
-                        New Passkey
+                        {t("auth.new_passkey")}
                       </Label>
                       <div className="relative">
                         <div className="absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none">
@@ -638,7 +638,7 @@ const Login = () => {
                         <Input
                           id="new-passkey"
                           type={showPasskey ? "text" : "password"}
-                          placeholder="Enter new passkey (min 4 chars)"
+                          placeholder={t("auth.enter_new_passkey_placeholder")}
                           className="pl-10 pr-10"
                           value={newPasskey}
                           onChange={(e) => setNewPasskey(e.target.value)}
@@ -652,7 +652,7 @@ const Login = () => {
                     <div className="space-y-1.5">
                       <Label htmlFor="confirm-new-passkey" className="flex items-center gap-2">
                         <KeyRound className="h-4 w-4 text-primary" />
-                        Confirm New Passkey
+                        {t("auth.confirm_new_passkey")}
                       </Label>
                       <div className="relative">
                         <div className="absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none">
@@ -661,7 +661,7 @@ const Login = () => {
                         <Input
                           id="confirm-new-passkey"
                           type={showPasskey ? "text" : "password"}
-                          placeholder="Re-enter new passkey"
+                          placeholder={t("auth.reenter_new_passkey_placeholder")}
                           className="pl-10"
                           value={confirmNewPasskey}
                           onChange={(e) => setConfirmNewPasskey(e.target.value)}
@@ -677,9 +677,9 @@ const Login = () => {
                       {loading ? (
                         <span className="flex items-center gap-2">
                           <span className="h-4 w-4 border-2 border-primary-foreground/30 border-t-primary-foreground rounded-full animate-spin" />
-                          Resetting...
+                          {t("common.loading")}
                         </span>
-                      ) : "Reset Passkey"}
+                      ) : t("auth.reset_passkey")}
                     </Button>
                   </>
                 )}
@@ -709,8 +709,8 @@ const Login = () => {
             </div>
             <Card className="tricolor-card overflow-hidden">
               <CardHeader className="text-center pb-4">
-                <CardTitle className="text-xl">Verify OTP</CardTitle>
-                <CardDescription>Enter the 6-digit code sent to +91 {formData.phone}</CardDescription>
+                <CardTitle className="text-xl">{t("auth.verify_otp_title")}</CardTitle>
+                <CardDescription>{t("auth.otp_sent_desc")} +91 {formData.phone}</CardDescription>
               </CardHeader>
               <CardContent>
                 <div className="flex justify-center gap-2 mb-6">
@@ -738,14 +738,14 @@ const Login = () => {
                       <span className="h-4 w-4 border-2 border-primary-foreground/30 border-t-primary-foreground rounded-full animate-spin" />
                       {t("common.loading")}
                     </span>
-                  ) : "Verify & Login"}
+                  ) : t("auth.verify_login")}
                 </Button>
                 <div className="mt-4 text-center">
                   {resendTimer > 0 ? (
-                    <p className="text-sm text-muted-foreground">Resend OTP in {resendTimer}s</p>
+                    <p className="text-sm text-muted-foreground">{t("auth.resend_otp_in")} {resendTimer}s</p>
                   ) : (
                     <button onClick={sendOTP} className="text-sm text-primary hover:underline">
-                      Resend OTP
+                      {t("auth.resend_otp")}
                     </button>
                   )}
                 </div>
@@ -774,7 +774,7 @@ const Login = () => {
               <Button variant="ghost" size="icon" onClick={() => {
                 const isDark = document.documentElement.classList.toggle("dark");
                 localStorage.setItem("theme", isDark ? "dark" : "light");
-              }} aria-label="Toggle dark mode">
+              }} aria-label={t("common.toggle_dark_mode")}>
                 <Sun className="h-5 w-5 rotate-0 scale-100 transition-all dark:-rotate-90 dark:scale-0" />
                 <Moon className="absolute h-5 w-5 rotate-90 scale-0 transition-all dark:rotate-0 dark:scale-100" />
               </Button>
@@ -783,7 +783,7 @@ const Login = () => {
           </div>
           <div className="flex items-center justify-center gap-3 mb-6">
             <AshokaChakra size={32} />
-            <h1 className="text-xl font-bold text-gradient-tricolor">Smart Crop Advisory</h1>
+            <h1 className="text-xl font-bold text-gradient-tricolor">{t("header.app_title")}</h1>
           </div>
           <Card className="tricolor-card overflow-hidden">
             <div className="relative h-40 overflow-hidden">
@@ -829,7 +829,7 @@ const Login = () => {
                           setFormData(prev => ({ ...prev, location: val }));
                         }}>
                           <SelectTrigger>
-                            <SelectValue placeholder="Select State" />
+                            <SelectValue placeholder={t("auth.select_state")} />
                           </SelectTrigger>
                           <SelectContent className="max-h-60">
                             {indianStates.map(state => (
@@ -846,7 +846,7 @@ const Login = () => {
                           disabled={!selectedState}
                         >
                           <SelectTrigger>
-                            <SelectValue placeholder="Select City" />
+                            <SelectValue placeholder={t("auth.select_city")} />
                           </SelectTrigger>
                           <SelectContent className="max-h-60">
                             {getCitiesByState(selectedState).map(city => (
@@ -870,7 +870,7 @@ const Login = () => {
                     <Input
                       id="phone"
                       type="tel"
-                      placeholder="9876543210"
+                      placeholder={t("auth.enter_phone")}
                       className="rounded-l-none"
                       maxLength={10}
                       value={formData.phone}
@@ -884,7 +884,7 @@ const Login = () => {
                 <div className="space-y-1.5">
                   <Label htmlFor="aadhaar" className="flex items-center gap-2">
                     <Shield className="h-4 w-4 text-orange-500" />
-                    Aadhaar Number
+                    {t("auth.aadhaar_number")}
                   </Label>
                   <div className="relative">
                     <div className="absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none">
@@ -893,7 +893,7 @@ const Login = () => {
                     <Input
                       id="aadhaar"
                       type="text"
-                      placeholder="XXXX XXXX XXXX"
+                      placeholder={t("auth.aadhaar_placeholder")}
                       className="pl-10"
                       maxLength={14}
                       value={formData.aadhaar}
@@ -911,7 +911,7 @@ const Login = () => {
                 <div className="space-y-1.5">
                   <Label htmlFor="passkey" className="flex items-center gap-2">
                     <KeyRound className="h-4 w-4 text-primary" />
-                    {isLogin ? "Passkey" : "Create Passkey"}
+                    {isLogin ? t("auth.passkey") : t("auth.create_passkey")}
                   </Label>
                   <div className="relative">
                     <div className="absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none">
@@ -920,7 +920,7 @@ const Login = () => {
                     <Input
                       id="passkey"
                       type={showPasskey ? "text" : "password"}
-                      placeholder={isLogin ? "Enter your passkey" : "Create a passkey (min 4 chars)"}
+                      placeholder={isLogin ? t("auth.enter_passkey_placeholder") : t("auth.create_passkey_placeholder")}
                       className="pl-10 pr-10"
                       value={formData.passkey}
                       onChange={(e) => setFormData({ ...formData, passkey: e.target.value })}
@@ -932,7 +932,7 @@ const Login = () => {
                     </button>
                   </div>
                   {!isLogin && (
-                    <p className="text-[11px] text-muted-foreground">Remember this passkey — you'll use it every time you login</p>
+                    <p className="text-[11px] text-muted-foreground">{t("auth.remember_passkey_hint")}</p>
                   )}
                 </div>
 
@@ -941,7 +941,7 @@ const Login = () => {
                   <div className="space-y-1.5">
                     <Label htmlFor="confirm-passkey" className="flex items-center gap-2">
                       <KeyRound className="h-4 w-4 text-primary" />
-                      Confirm Passkey
+                      {t("auth.confirm_passkey")}
                     </Label>
                     <div className="relative">
                       <div className="absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none">
@@ -950,7 +950,7 @@ const Login = () => {
                       <Input
                         id="confirm-passkey"
                         type={showPasskey ? "text" : "password"}
-                        placeholder="Re-enter your passkey"
+                        placeholder={t("auth.reenter_passkey_placeholder")}
                         className="pl-10"
                         value={formData.confirmPasskey}
                         onChange={(e) => setFormData({ ...formData, confirmPasskey: e.target.value })}
@@ -1019,7 +1019,7 @@ const Login = () => {
                   >
                     <Fingerprint className="h-6 w-6 text-primary" />
                     <span className="text-xs font-medium">
-
+                      {bioFingerprintRegistered ? t("auth.login_with_fingerprint") : t("auth.register_fingerprint")}
                     </span>
                   </Button>
                   <Button
@@ -1035,32 +1035,38 @@ const Login = () => {
                   >
                     <ScanFace className="h-6 w-6 text-secondary-foreground" />
                     <span className="text-xs font-medium">
-
+                      {bioFaceRegistered ? t("auth.login_with_face") : t("auth.register_face")}
                     </span>
                   </Button>
                 </div>
               ) : (
                 <div className="space-y-2">
                   <p className="text-xs text-muted-foreground text-center">
-
+                    {t("auth.biometric_optional_signup")}
                   </p>
                   <div className="grid grid-cols-2 gap-3">
                     <Button
+                      variant="outline"
                       type="button"
-
+                      className="h-14 py-0 flex-col gap-0.5"
+                      disabled={loading}
+                      onClick={() => handleSignupBiometricRegister("fingerprint")}
                     >
                       <Fingerprint className="h-6 w-6 text-primary" />
                       <span className="text-xs font-medium">
-
+                        {t("auth.register_fingerprint")}
                       </span>
                     </Button>
                     <Button
+                      variant="outline"
                       type="button"
-
+                      className="h-14 py-0 flex-col gap-0.5"
+                      disabled={loading}
+                      onClick={() => handleSignupBiometricRegister("face")}
                     >
                       <ScanFace className="h-6 w-6 text-secondary-foreground" />
                       <span className="text-xs font-medium">
-
+                        {t("auth.register_face")}
                       </span>
                     </Button>
                   </div>
