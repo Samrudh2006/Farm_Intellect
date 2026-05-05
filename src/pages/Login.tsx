@@ -59,10 +59,10 @@ const Login = () => {
   const [bioRegisterOnSignup, setBioRegisterOnSignup] = useState<BiometricKind | null>(null);
 
   useEffect(() => {
-    isBiometricSupported().then((ok) => {
+    isBiometricSupported().then(async (ok) => {
       setBioSupported(ok);
-      setBioFingerprintRegistered(hasRegistered("fingerprint"));
-      setBioFaceRegistered(hasRegistered("face"));
+      setBioFingerprintRegistered(await hasRegistered("fingerprint"));
+      setBioFaceRegistered(await hasRegistered("face"));
     });
   }, []);
 
