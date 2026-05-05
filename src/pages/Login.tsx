@@ -983,7 +983,7 @@ const Login = () => {
                     }}
                     className="text-sm text-destructive hover:underline font-medium"
                   >
-                    Forgot Passkey?
+                    {t("auth.forgot_passkey")}
                   </button>
                 </div>
               )}
@@ -1002,7 +1002,7 @@ const Login = () => {
 
               {!bioSupported ? (
                 <p className="text-xs text-center text-muted-foreground">
-                  Biometric login is not supported on this device/browser.
+                  {t("auth.biometric_not_supported")}
                 </p>
               ) : isLogin ? (
                 <div className="grid grid-cols-2 gap-3">
@@ -1019,7 +1019,7 @@ const Login = () => {
                   >
                     <Fingerprint className="h-6 w-6 text-primary" />
                     <span className="text-xs font-medium">
-                      {bioFingerprintRegistered ? "Login with Fingerprint" : "Register Fingerprint"}
+
                     </span>
                   </Button>
                   <Button
@@ -1035,14 +1035,14 @@ const Login = () => {
                   >
                     <ScanFace className="h-6 w-6 text-secondary-foreground" />
                     <span className="text-xs font-medium">
-                      {bioFaceRegistered ? "Login with Face" : "Register Face"}
+
                     </span>
                   </Button>
                 </div>
               ) : (
                 <div className="space-y-2">
                   <p className="text-xs text-muted-foreground text-center">
-                    Register a biometric now — fill Aadhaar & Passkey above first, then tap to scan:
+
                   </p>
                   <div className="grid grid-cols-2 gap-3">
                     <Button
