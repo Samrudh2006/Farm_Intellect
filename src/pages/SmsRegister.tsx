@@ -77,7 +77,10 @@ const SmsRegister = () => {
       return;
     }
     setDone(true);
-      toast({ title: "✅ Registered", description: "Free tier is active. You can upgrade to paid plans from admin when enabled." });
+      toast({
+        title: "✅ Registered",
+        description: "Free tier is active. For paid upgrades, contact your local Krishi Sevak/Sarpanch or platform support.",
+      });
   };
 
   return (

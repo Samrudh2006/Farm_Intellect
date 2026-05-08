@@ -99,6 +99,41 @@ const DAYS: Array<{ value: number; label: string }> = [
   { value: 6, label: "Saturday" },
 ];
 
+const normalizeIndianPhone = (raw: string): string | null => {
+  const digits = raw.replace(/\D/g, "");
+  if (digits.length === 10) return `+91${digits}`;
+  if (digits.length === 12 && digits.startsWith("91")) return `+${digits}`;
+  if (raw.startsWith("+91") && digits.length === 12) return `+${digits}`;
+  return null;
+};
+
+const parseCsvLine = (line: string): string[] => {
+  const out: string[] = [];
+  let current = "";
+  let inQuotes = false;
+  for (let i = 0; i < line.length; i += 1) {
+    const char = line[i];
+    if (char === '"') {
+      const next = line[i + 1];
+      if (inQuotes && next === '"') {
+        current += '"';
+        i += 1;
+      } else {
+        inQuotes = !inQuotes;
+      }
+      continue;
+    }
+    if (char === "," && !inQuotes) {
+      out.push(current.trim());
+      current = "";
+      continue;
+    }
+    current += char;
+  }
+  out.push(current.trim());
+  return out;
+};
+
 const AdminSms = () => {
   const { user } = useCurrentUser();
   const { user: authUser } = useAuth();
@@ -162,7 +197,14 @@ const AdminSms = () => {
   };
 
   useEffect(() => {
-    void load();
+    void load().catch((error: unknown) => {
+      toast({
+        title: "Could not load admin SMS data",
+        description: error instanceof Error ? error.message : "Unknown error",
+        variant: "destructive",
+      });
+    });
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const sendBatch = async (kind: SmsKind, retryFailed = false) => {
@@ -207,10 +249,41 @@ const AdminSms = () => {
       .split("\n")
       .map((line) => line.trim())
       .filter(Boolean);
-    const payload = rows.map((line) => {
-      const [name, phone, state, district, crop, language, village, gramPanchayat, planTier] = line.split(",").map((x) => x?.trim());
-      const normalizedPhone = phone?.startsWith("+91") ? phone : `+91${(phone ?? "").replace(/\D/g, "")}`;
-      return {
+    const allowedTiers = new Set(["free", "basic", "pro", "institutional"]);
+    const parsedRows: Array<{
+      name: string;
+      phone: string;
+      state: string;
+      district: string;
+      crop: string | null;
+      language: string;
+      village: string | null;
+      gram_panchayat: string | null;
+      plan_tier: string;
+    }> = [];
+    const validationErrors: string[] = [];
+
+    for (let i = 0; i < rows.length; i += 1) {
+      const row = rows[i];
+      const columns = parseCsvLine(row).map((x) => x?.trim());
+      if (columns.length < 9) {
+        validationErrors.push(`Row ${i + 1}: expected 9 columns, got ${columns.length}.`);
+        continue;
+      }
+      const [name, phone, state, district, crop, language, village, gramPanchayat, planTier] = columns;
+      const normalizedPhone = normalizeIndianPhone(phone ?? "");
+      if (!normalizedPhone) {
+        validationErrors.push(`Row ${i + 1}: invalid phone "${phone}".`);
+        continue;
+      }
+
+      const normalizedTier = (planTier || "free").toLowerCase();
+      if (!allowedTiers.has(normalizedTier)) {
+        validationErrors.push(`Row ${i + 1}: unsupported plan tier "${planTier}".`);
+        continue;
+      }
+
+      parsedRows.push({
         name: name || "Farmer",
         phone: normalizedPhone,
         state: state || "Unknown",
@@ -219,21 +292,77 @@ const AdminSms = () => {
         language: language || "hi",
         village: village || null,
         gram_panchayat: gramPanchayat || null,
+        plan_tier: normalizedTier,
+      });
+    }
+
+    if (validationErrors.length > 0) {
+      toast({
+        title: "CSV validation failed",
+        description: validationErrors.slice(0, 3).join(" | "),
+        variant: "destructive",
+      });
+      return;
+    }
+
+    const phones = parsedRows.map((row) => row.phone);
+    const { data: existingRows, error: existingError } = await supabase
+      .from("sms_subscribers")
+      .select("id, phone")
+      .in("phone", phones);
+    if (existingError) {
+      toast({ title: "Bulk register failed", description: existingError.message, variant: "destructive" });
+      return;
+    }
+
+    const existingByPhone = new Map((existingRows ?? []).map((row) => [row.phone, row.id]));
+    const insertRows = parsedRows
+      .filter((row) => !existingByPhone.has(row.phone))
+      .map((row) => ({
+        ...row,
         source: "sevak_bulk",
         farmer_type: "sevak_registered",
-        plan_tier: (planTier || "free").toLowerCase(),
         plan_status: "active",
         registered_by: authUser?.id ?? null,
         sevak_id: authUser?.id ?? null,
-      };
-    });
+      }));
+    const updateRows = parsedRows.filter((row) => existingByPhone.has(row.phone));
 
-    const { error } = await supabase.from("sms_subscribers").upsert(payload, { onConflict: "phone" });
-    if (error) {
-      toast({ title: "Bulk register failed", description: error.message, variant: "destructive" });
-      return;
+    if (insertRows.length > 0) {
+      const { error: insertError } = await supabase.from("sms_subscribers").insert(insertRows);
+      if (insertError) {
+        toast({ title: "Bulk register failed", description: insertError.message, variant: "destructive" });
+        return;
+      }
     }
-    toast({ title: "Field operations updated", description: `Processed ${payload.length} farmer rows.` });
+
+    for (const row of updateRows) {
+      const { error: updateError } = await supabase
+        .from("sms_subscribers")
+        .update({
+          name: row.name,
+          state: row.state,
+          district: row.district,
+          crop: row.crop,
+          language: row.language,
+          village: row.village,
+          gram_panchayat: row.gram_panchayat,
+          source: "sevak_bulk",
+          farmer_type: "sevak_registered",
+          registered_by: authUser?.id ?? null,
+          sevak_id: authUser?.id ?? null,
+        })
+        .eq("phone", row.phone);
+      if (updateError) {
+        toast({ title: "Bulk update failed", description: updateError.message, variant: "destructive" });
+        return;
+      }
+    }
+
+    toast({
+      title: "Field operations updated",
+      description: `Inserted ${insertRows.length}, updated ${updateRows.length} (total ${parsedRows.length}).`,
+    });
     setBulkCsv("");
     void load();
   };

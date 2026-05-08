@@ -1,4 +1,5 @@
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.0";
+import { toIndianE164 } from "../_shared/phone.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -17,14 +18,6 @@ interface MissedCallPayload {
   language?: string;
   district?: string;
   state?: string;
-}
-
-function toIndianE164(value: string): string {
-  const digits = value.replace(/\D/g, "");
-  if (digits.length === 10) return `+91${digits}`;
-  if (digits.length === 12 && digits.startsWith("91")) return `+${digits}`;
-  if (value.startsWith("+") && digits.length >= 10) return `+${digits}`;
-  throw new Error("Invalid phone in missed call payload");
 }
 
 Deno.serve(async (req) => {
@@ -52,7 +45,7 @@ Deno.serve(async (req) => {
       const { data: inserted, error: insertError } = await supabase
         .from("sms_subscribers")
         .insert({
-          name: "Missed Call Farmer",
+          name: `MissedCall-${(body.district ?? "Unknown").replace(/\s+/g, "")}-${Date.now()}`,
           phone,
           state: body.state ?? "Unknown",
           district: body.district ?? "Unknown",

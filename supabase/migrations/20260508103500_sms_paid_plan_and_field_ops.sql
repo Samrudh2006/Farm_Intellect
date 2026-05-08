@@ -105,8 +105,13 @@ ON CONFLICT (name) DO NOTHING;
 DO $$
 DECLARE
   project_url text := current_setting('app.settings.supabase_url', true);
+  service_role_token text := current_setting('app.settings.service_role_key', true);
 BEGIN
-  IF to_regnamespace('cron') IS NOT NULL AND to_regnamespace('net') IS NOT NULL AND project_url IS NOT NULL THEN
+  IF to_regnamespace('cron') IS NOT NULL
+    AND to_regnamespace('net') IS NOT NULL
+    AND project_url IS NOT NULL
+    AND service_role_token IS NOT NULL
+    AND service_role_token <> '' THEN
     IF EXISTS (SELECT 1 FROM cron.job WHERE jobname = 'sms-weather-mon') THEN
       PERFORM cron.unschedule('sms-weather-mon');
     END IF;
@@ -126,10 +131,11 @@ BEGIN
       format($fmt$
         SELECT net.http_post(
           url := %L,
-          headers := '{"Content-Type":"application/json","Authorization":"Bearer PLACEHOLDER_SERVICE_ROLE"}'::jsonb,
+          headers := %L::jsonb,
           body := '{"kind":"weather","limit":5000}'::jsonb
         );
-      $fmt$, project_url || '/functions/v1/sms-dispatcher')
+      $fmt$, project_url || '/functions/v1/sms-dispatcher',
+      '{"Content-Type":"application/json","Authorization":"Bearer ' || service_role_token || '"}')
     );
 
     PERFORM cron.schedule(
@@ -138,10 +144,11 @@ BEGIN
       format($fmt$
         SELECT net.http_post(
           url := %L,
-          headers := '{"Content-Type":"application/json","Authorization":"Bearer PLACEHOLDER_SERVICE_ROLE"}'::jsonb,
+          headers := %L::jsonb,
           body := '{"kind":"crop","limit":5000}'::jsonb
         );
-      $fmt$, project_url || '/functions/v1/sms-dispatcher')
+      $fmt$, project_url || '/functions/v1/sms-dispatcher',
+      '{"Content-Type":"application/json","Authorization":"Bearer ' || service_role_token || '"}')
     );
 
     PERFORM cron.schedule(
@@ -150,10 +157,11 @@ BEGIN
       format($fmt$
         SELECT net.http_post(
           url := %L,
-          headers := '{"Content-Type":"application/json","Authorization":"Bearer PLACEHOLDER_SERVICE_ROLE"}'::jsonb,
+          headers := %L::jsonb,
           body := '{"kind":"market","limit":5000}'::jsonb
         );
-      $fmt$, project_url || '/functions/v1/sms-dispatcher')
+      $fmt$, project_url || '/functions/v1/sms-dispatcher',
+      '{"Content-Type":"application/json","Authorization":"Bearer ' || service_role_token || '"}')
     );
 
     PERFORM cron.schedule(
@@ -162,10 +170,11 @@ BEGIN
       format($fmt$
         SELECT net.http_post(
           url := %L,
-          headers := '{"Content-Type":"application/json","Authorization":"Bearer PLACEHOLDER_SERVICE_ROLE"}'::jsonb,
+          headers := %L::jsonb,
           body := '{"kind":"scheme","limit":5000}'::jsonb
         );
-      $fmt$, project_url || '/functions/v1/sms-dispatcher')
+      $fmt$, project_url || '/functions/v1/sms-dispatcher',
+      '{"Content-Type":"application/json","Authorization":"Bearer ' || service_role_token || '"}')
     );
   END IF;
 END $$;

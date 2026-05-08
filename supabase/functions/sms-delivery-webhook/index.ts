@@ -1,4 +1,5 @@
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.0";
+import { toIndianE164 } from "../_shared/phone.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -15,14 +16,6 @@ interface DeliveryPayload {
   error?: string;
   phone?: string;
   keyword?: string;
-}
-
-function normalizePhone(phone: string): string {
-  const digits = phone.replace(/\D/g, "");
-  if (digits.length === 10) return `+91${digits}`;
-  if (digits.length === 12 && digits.startsWith("91")) return `+${digits}`;
-  if (phone.startsWith("+") && digits.length >= 10) return `+${digits}`;
-  return phone;
 }
 
 Deno.serve(async (req) => {
@@ -52,7 +45,7 @@ Deno.serve(async (req) => {
     const keyword = (payload.keyword ?? "").trim().toUpperCase();
     const shouldOptOut = keyword === "STOP" || keyword === "UNSUBSCRIBE";
     if (shouldOptOut && payload.phone) {
-      const phone = normalizePhone(payload.phone);
+      const phone = toIndianE164(payload.phone);
       const { data: subscriber } = await supabase
         .from("sms_subscribers")
         .select("id")

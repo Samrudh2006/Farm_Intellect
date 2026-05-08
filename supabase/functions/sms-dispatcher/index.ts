@@ -56,6 +56,12 @@ interface SendResult {
   error?: string;
 }
 
+function truncateSmsBody(body: string): string {
+  const segmenter = new Intl.Segmenter("hi", { granularity: "grapheme" });
+  const segments = Array.from(segmenter.segment(body), (part) => part.segment);
+  return segments.slice(0, 160).join("");
+}
+
 function fallbackBody(kind: Kind, sub: Subscriber): string {
   const crop = sub.crop ?? "फसल";
   const place = sub.district;
@@ -75,7 +81,7 @@ async function getTemplateBody(templateKey: string, language: string, kind: Kind
   const exact = templates?.find((row) => row.language === language)?.body;
   const hindi = templates?.find((row) => row.language === "hi")?.body;
   const english = templates?.find((row) => row.language === "en")?.body;
-  return (exact ?? hindi ?? english ?? fallbackBody(kind, sub)).slice(0, 160);
+  return truncateSmsBody(exact ?? hindi ?? english ?? fallbackBody(kind, sub));
 }
 
 async function sendViaMSG91(phoneE164: string, body: string): Promise<SendResult> {
@@ -211,7 +217,13 @@ Deno.serve(async (req) => {
     const dryRun = payload.dryRun ?? false;
     const retryFailed = payload.retryFailed ?? false;
     const limit = Math.min(Math.max(payload.limit ?? 200, 1), 1000);
-    const provider = (payload.provider ?? (SMS_PROVIDER as Provider)) === "gupshup" ? "gupshup" : "msg91";
+    const requestedProvider = (payload.provider ?? SMS_PROVIDER).toLowerCase();
+    if (requestedProvider !== "msg91" && requestedProvider !== "gupshup") {
+      return new Response(JSON.stringify({ ok: false, error: `invalid provider: ${requestedProvider}` }), {
+        status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+    const provider = requestedProvider as Provider;
 
     if (!["weather", "market", "crop", "scheme"].includes(kind)) {
       return new Response(JSON.stringify({ ok: false, error: "invalid kind" }), {
@@ -282,17 +294,9 @@ Deno.serve(async (req) => {
     }
 
     if (sentSubscriberIds.length > 0) {
-      for (const id of sentSubscriberIds) {
-        await supabase.rpc("increment_sms_counter", { subscriber_id_input: id }).catch(async () => {
-          const { data } = await supabase
-            .from("sms_subscribers")
-            .select("sms_sent_this_month")
-            .eq("id", id)
-            .single();
-          const current = data?.sms_sent_this_month ?? 0;
-          await supabase.from("sms_subscribers").update({ sms_sent_this_month: current + 1 }).eq("id", id);
-        });
-      }
+      await Promise.all(
+        sentSubscriberIds.map((id) => supabase.rpc("increment_sms_counter", { subscriber_id_input: id })),
+      );
     }
 
     return new Response(JSON.stringify({
