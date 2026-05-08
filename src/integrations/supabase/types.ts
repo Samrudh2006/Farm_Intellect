@@ -434,6 +434,134 @@ export type Database = {
         }
         Relationships: []
       }
+      sms_log: {
+        Row: {
+          body: string
+          cost_paise: number | null
+          created_at: string
+          error: string | null
+          id: string
+          provider_msg_id: string | null
+          sent_at: string | null
+          status: string
+          subscriber_id: string | null
+          template_key: string
+        }
+        Insert: {
+          body: string
+          cost_paise?: number | null
+          created_at?: string
+          error?: string | null
+          id?: string
+          provider_msg_id?: string | null
+          sent_at?: string | null
+          status?: string
+          subscriber_id?: string | null
+          template_key: string
+        }
+        Update: {
+          body?: string
+          cost_paise?: number | null
+          created_at?: string
+          error?: string | null
+          id?: string
+          provider_msg_id?: string | null
+          sent_at?: string | null
+          status?: string
+          subscriber_id?: string | null
+          template_key?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "sms_log_subscriber_id_fkey"
+            columns: ["subscriber_id"]
+            isOneToOne: false
+            referencedRelation: "sms_subscribers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      sms_subscribers: {
+        Row: {
+          active: boolean
+          consent_at: string
+          created_at: string
+          crop: string | null
+          district: string
+          id: string
+          language: string
+          name: string
+          phone: string
+          registered_by: string | null
+          source: string
+          state: string
+          updated_at: string
+          user_id: string | null
+        }
+        Insert: {
+          active?: boolean
+          consent_at?: string
+          created_at?: string
+          crop?: string | null
+          district: string
+          id?: string
+          language?: string
+          name: string
+          phone: string
+          registered_by?: string | null
+          source?: string
+          state: string
+          updated_at?: string
+          user_id?: string | null
+        }
+        Update: {
+          active?: boolean
+          consent_at?: string
+          created_at?: string
+          crop?: string | null
+          district?: string
+          id?: string
+          language?: string
+          name?: string
+          phone?: string
+          registered_by?: string | null
+          source?: string
+          state?: string
+          updated_at?: string
+          user_id?: string | null
+        }
+        Relationships: []
+      }
+      sms_templates: {
+        Row: {
+          body: string
+          created_at: string
+          dlt_template_id: string | null
+          id: string
+          key: string
+          language: string
+          updated_at: string
+        }
+        Insert: {
+          body: string
+          created_at?: string
+          dlt_template_id?: string | null
+          id?: string
+          key: string
+          language: string
+          updated_at?: string
+        }
+        Update: {
+          body?: string
+          created_at?: string
+          dlt_template_id?: string | null
+          id?: string
+          key?: string
+          language?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       user_roles: {
         Row: {
           id: string

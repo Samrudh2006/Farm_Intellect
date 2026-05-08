@@ -189,6 +189,27 @@ const Index = () => {
         </div>
       </section>
 
+      {/* SMS-for-feature-phones banner */}
+      <section className="py-10 bg-gradient-to-r from-primary/10 via-accent/10 to-primary/10 border-y border-primary/20">
+        <div className="container mx-auto px-4">
+          <div className="flex flex-col items-center gap-4 text-center md:flex-row md:text-left md:justify-between">
+            <div className="max-w-2xl">
+              <Badge className="mb-2">📱 New • Inclusive</Badge>
+              <h2 className="text-2xl font-bold sm:text-3xl">No smartphone? Get free crop SMS in your language.</h2>
+              <p className="mt-2 text-sm text-muted-foreground sm:text-base">
+                Weather warnings, mandi prices, pest alerts and government scheme updates — delivered straight to any
+                ₹500 keypad phone. Built for Bharat's 8 crore feature-phone farmers.
+              </p>
+            </div>
+            <Link to="/sms-register">
+              <Button size="lg" className="shadow-lg">
+                Register for SMS Alerts <ArrowRight className="ml-2 h-4 w-4" />
+              </Button>
+            </Link>
+          </div>
+        </div>
+      </section>
+
       {/* Features Section */}
       <section className="py-20 bg-muted/40 relative">
         <div className="container mx-auto px-4">
