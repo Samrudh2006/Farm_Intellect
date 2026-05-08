@@ -195,10 +195,10 @@ const Index = () => {
           <div className="flex flex-col items-center gap-4 text-center md:flex-row md:text-left md:justify-between">
             <div className="max-w-2xl">
               <Badge className="mb-2">📱 New • Inclusive</Badge>
-              <h2 className="text-2xl font-bold sm:text-3xl">No smartphone? Get free crop SMS in your language.</h2>
+              <h2 className="text-2xl font-bold sm:text-3xl">No smartphone? Start free SMS and upgrade to paid plans.</h2>
               <p className="mt-2 text-sm text-muted-foreground sm:text-base">
                 Weather warnings, mandi prices, pest alerts and government scheme updates — delivered straight to any
-                ₹500 keypad phone. Built for Bharat's 8 crore feature-phone farmers.
+                ₹500 keypad phone. Built for Bharat's 8 crore feature-phone farmers with free + paid plan support.
               </p>
             </div>
             <Link to="/sms-register">

@@ -1,8 +1,12 @@
-// SMS dispatcher: sends weather / market / crop alerts to active sms_subscribers
-// via MSG91. If MSG91 secrets are missing, logs entries as `queued` and returns
-// counts — useful for staging / dry runs before DLT approval is in place.
-//
-// Body: { kind: "weather"|"market"|"crop", dryRun?: boolean, limit?: number }
+// SMS dispatcher with plan enforcement and provider adapter.
+// Body:
+// {
+//   kind: "weather"|"market"|"crop"|"scheme",
+//   dryRun?: boolean,
+//   limit?: number,
+//   provider?: "msg91"|"gupshup",
+//   retryFailed?: boolean
+// }
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.0";
 
 const corsHeaders = {
@@ -12,31 +16,70 @@ const corsHeaders = {
 
 const SUPABASE_URL = Deno.env.get("SUPABASE_URL")!;
 const SERVICE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
+const SUPABASE_ANON_KEY = Deno.env.get("SUPABASE_ANON_KEY")!;
 const MSG91_AUTH_KEY = Deno.env.get("MSG91_AUTH_KEY") ?? "";
 const MSG91_SENDER_ID = Deno.env.get("MSG91_SENDER_ID") ?? "KSARTH";
+const GUPSHUP_API_KEY = Deno.env.get("GUPSHUP_API_KEY") ?? "";
+const GUPSHUP_SOURCE = Deno.env.get("GUPSHUP_SOURCE") ?? "";
+const SMS_PROVIDER = (Deno.env.get("SMS_PROVIDER") ?? "msg91").toLowerCase();
 
 const supabase = createClient(SUPABASE_URL, SERVICE_KEY, { auth: { persistSession: false } });
 
-type Kind = "weather" | "market" | "crop";
+type Kind = "weather" | "market" | "crop" | "scheme";
+type Provider = "msg91" | "gupshup";
 
 interface Subscriber {
-  id: string; phone: string; language: string; crop: string | null;
-  state: string; district: string;
+  id: string;
+  phone: string;
+  language: string;
+  crop: string | null;
+  state: string;
+  district: string;
+  active: boolean;
+  plan_tier: "free" | "basic" | "pro" | "institutional";
+  plan_status: "trial" | "active" | "paused" | "cancelled";
+  monthly_sms_quota: number;
+  sms_sent_this_month: number;
 }
 
-// Minimal vernacular fallback templates. In production these come from the
-// sms_templates table after DLT approval. Hindi-only fallback keeps cost low.
+interface DispatchPayload {
+  kind?: Kind;
+  dryRun?: boolean;
+  limit?: number;
+  provider?: Provider;
+  retryFailed?: boolean;
+}
+
+interface SendResult {
+  ok: boolean;
+  id?: string;
+  error?: string;
+}
+
 function fallbackBody(kind: Kind, sub: Subscriber): string {
   const crop = sub.crop ?? "फसल";
   const place = sub.district;
   if (kind === "weather") return `${place}: अगले 2 दिन हल्की बारिश संभव। छिड़काव टालें। -KrishiSarthi`;
-  if (kind === "market")  return `${place} मंडी ${crop} आज का भाव देखने हेतु ऐप खोलें या PRICE ${crop.toUpperCase()} reply करें। -KrishiSarthi`;
+  if (kind === "market") return `${place} मंडी ${crop} आज का भाव देखने हेतु ऐप खोलें या PRICE ${crop.toUpperCase()} reply करें। -KrishiSarthi`;
+  if (kind === "scheme") return `${place}: PM-Kisan, बीज अनुदान व सिंचाई योजनाओं की नई अपडेट उपलब्ध। सहायता हेतु ग्राम सेवक से मिलें। -KrishiSarthi`;
   return `${crop} में रोग/कीट का खतरा। नीम तेल 5ml/L छिड़काव करें। विवरण ऐप में। -KrishiSarthi`;
 }
 
-async function sendViaMsg91(phoneE164: string, body: string): Promise<{ ok: boolean; id?: string; error?: string }> {
+async function getTemplateBody(templateKey: string, language: string, kind: Kind, sub: Subscriber): Promise<string> {
+  const { data: templates } = await supabase
+    .from("sms_templates")
+    .select("body, language")
+    .eq("key", templateKey)
+    .in("language", [language, "hi", "en"]);
+
+  const exact = templates?.find((row) => row.language === language)?.body;
+  const hindi = templates?.find((row) => row.language === "hi")?.body;
+  const english = templates?.find((row) => row.language === "en")?.body;
+  return (exact ?? hindi ?? english ?? fallbackBody(kind, sub)).slice(0, 160);
+}
+
+async function sendViaMSG91(phoneE164: string, body: string): Promise<SendResult> {
   if (!MSG91_AUTH_KEY) return { ok: false, error: "MSG91_AUTH_KEY not configured" };
-  // Strip + for MSG91 mobiles param (expects 91XXXXXXXXXX).
   const mobile = phoneE164.replace(/^\+/, "");
   try {
     const r = await fetch("https://api.msg91.com/api/v5/flow/", {
@@ -53,9 +96,84 @@ async function sendViaMsg91(phoneE164: string, body: string): Promise<{ ok: bool
     const text = await r.text();
     if (!r.ok) return { ok: false, error: `MSG91 ${r.status}: ${text.slice(0, 180)}` };
     return { ok: true, id: text.slice(0, 64) };
-  } catch (e) {
-    return { ok: false, error: (e as Error).message };
+  } catch (error) {
+    return { ok: false, error: (error as Error).message };
   }
+}
+
+async function sendViaGupshup(phoneE164: string, body: string): Promise<SendResult> {
+  if (!GUPSHUP_API_KEY || !GUPSHUP_SOURCE) return { ok: false, error: "GUPSHUP credentials not configured" };
+  const mobile = phoneE164.replace(/^\+/, "");
+  const params = new URLSearchParams({
+    channel: "sms",
+    source: GUPSHUP_SOURCE,
+    destination: mobile,
+    message: body,
+  });
+
+  try {
+    const response = await fetch("https://api.gupshup.io/sm/api/v1/msg", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/x-www-form-urlencoded",
+        apikey: GUPSHUP_API_KEY,
+      },
+      body: params,
+    });
+    const text = await response.text();
+    if (!response.ok) return { ok: false, error: `Gupshup ${response.status}: ${text.slice(0, 180)}` };
+    return { ok: true, id: text.slice(0, 64) };
+  } catch (error) {
+    return { ok: false, error: (error as Error).message };
+  }
+}
+
+async function sendSMS(provider: Provider, phone: string, body: string): Promise<SendResult> {
+  if (provider === "gupshup") return sendViaGupshup(phone, body);
+  return sendViaMSG91(phone, body);
+}
+
+function canSendByPlan(subscriber: Subscriber): { ok: boolean; reason?: string } {
+  if (!subscriber.active) return { ok: false, reason: "inactive_subscriber" };
+  if (!["trial", "active"].includes(subscriber.plan_status)) {
+    return { ok: false, reason: `plan_status_${subscriber.plan_status}` };
+  }
+  if (subscriber.sms_sent_this_month >= subscriber.monthly_sms_quota) {
+    return { ok: false, reason: "plan_limit_reached" };
+  }
+  return { ok: true };
+}
+
+async function loadSubscribers(kind: Kind, limit: number, retryFailed: boolean): Promise<Subscriber[]> {
+  if (retryFailed) {
+    const { data: failedRows } = await supabase
+      .from("sms_log")
+      .select("subscriber_id")
+      .in("status", ["failed", "retry_pending"])
+      .like("template_key", `${kind}_%`)
+      .order("created_at", { ascending: false })
+      .limit(limit);
+
+    const ids = Array.from(
+      new Set((failedRows ?? []).map((row) => row.subscriber_id).filter((id): id is string => !!id)),
+    );
+    if (ids.length === 0) return [];
+
+    const { data: retrySubs, error: retrySubsError } = await supabase
+      .from("sms_subscribers")
+      .select("id, phone, language, crop, state, district, active, plan_tier, plan_status, monthly_sms_quota, sms_sent_this_month")
+      .in("id", ids.slice(0, limit));
+    if (retrySubsError) throw retrySubsError;
+    return (retrySubs ?? []) as Subscriber[];
+  }
+
+  const { data: subs, error } = await supabase
+    .from("sms_subscribers")
+    .select("id, phone, language, crop, state, district, active, plan_tier, plan_status, monthly_sms_quota, sms_sent_this_month")
+    .eq("active", true)
+    .limit(limit);
+  if (error) throw error;
+  return (subs ?? []) as Subscriber[];
 }
 
 Deno.serve(async (req) => {
@@ -70,7 +188,7 @@ Deno.serve(async (req) => {
         status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
-    const userClient = createClient(SUPABASE_URL, Deno.env.get("SUPABASE_ANON_KEY")!, {
+    const userClient = createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
       global: { headers: { Authorization: `Bearer ${token}` } },
       auth: { persistSession: false },
     });
@@ -88,43 +206,73 @@ Deno.serve(async (req) => {
       });
     }
 
-    const { kind = "weather", dryRun = false, limit = 200 } = await req.json().catch(() => ({}));
-    if (!["weather", "market", "crop"].includes(kind)) {
+    const payload = (await req.json().catch(() => ({}))) as DispatchPayload;
+    const kind: Kind = payload.kind ?? "weather";
+    const dryRun = payload.dryRun ?? false;
+    const retryFailed = payload.retryFailed ?? false;
+    const limit = Math.min(Math.max(payload.limit ?? 200, 1), 1000);
+    const provider = (payload.provider ?? (SMS_PROVIDER as Provider)) === "gupshup" ? "gupshup" : "msg91";
+
+    if (!["weather", "market", "crop", "scheme"].includes(kind)) {
       return new Response(JSON.stringify({ ok: false, error: "invalid kind" }), {
         status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
 
-    const { data: subs, error } = await supabase
-      .from("sms_subscribers")
-      .select("id, phone, language, crop, state, district")
-      .eq("active", true)
-      .limit(Math.min(Math.max(limit, 1), 1000));
-    if (error) throw error;
+    const subscribers = await loadSubscribers(kind, limit, retryFailed);
 
-    let sent = 0, failed = 0, skipped = 0;
+    let sent = 0;
+    let failed = 0;
+    let skipped = 0;
+    let blocked = 0;
     const logs: Array<Record<string, unknown>> = [];
+    const sentSubscriberIds: string[] = [];
 
-    for (const s of (subs ?? []) as Subscriber[]) {
-      const body = fallbackBody(kind as Kind, s).slice(0, 320);
-      if (dryRun || !MSG91_AUTH_KEY) {
+    for (const subscriber of subscribers) {
+      const templateKey = `${kind}_default`;
+      const body = await getTemplateBody(templateKey, subscriber.language, kind, subscriber);
+      const planCheck = canSendByPlan(subscriber);
+      if (!planCheck.ok) {
+        blocked++;
         logs.push({
-          subscriber_id: s.id, template_key: `${kind}_default`, body,
-          status: dryRun ? "skipped" : "queued",
-          error: dryRun ? "dry-run" : "MSG91 not configured",
+          subscriber_id: subscriber.id,
+          template_key: templateKey,
+          body,
+          status: "blocked_plan_limit",
+          error: planCheck.reason ?? "blocked",
         });
-        if (dryRun) skipped++; else skipped++;
         continue;
       }
-      const r = await sendViaMsg91(s.phone, body);
+
+      const providerConfigured = provider === "msg91" ? !!MSG91_AUTH_KEY : !!(GUPSHUP_API_KEY && GUPSHUP_SOURCE);
+      if (dryRun || !providerConfigured) {
+        skipped++;
+        logs.push({
+          subscriber_id: subscriber.id,
+          template_key: templateKey,
+          body,
+          status: dryRun ? "skipped" : "queued",
+          error: dryRun ? "dry-run" : `${provider} not configured`,
+        });
+        continue;
+      }
+
+      const sendResult = await sendSMS(provider, subscriber.phone, body);
       logs.push({
-        subscriber_id: s.id, template_key: `${kind}_default`, body,
-        status: r.ok ? "sent" : "failed",
-        provider_msg_id: r.id ?? null,
-        error: r.error ?? null,
-        sent_at: r.ok ? new Date().toISOString() : null,
+        subscriber_id: subscriber.id,
+        template_key: templateKey,
+        body,
+        status: sendResult.ok ? "sent" : "failed",
+        provider_msg_id: sendResult.id ?? null,
+        error: sendResult.error ?? null,
+        sent_at: sendResult.ok ? new Date().toISOString() : null,
       });
-      if (r.ok) sent++; else failed++;
+      if (sendResult.ok) {
+        sent++;
+        sentSubscriberIds.push(subscriber.id);
+      } else {
+        failed++;
+      }
     }
 
     if (logs.length > 0) {
@@ -133,11 +281,35 @@ Deno.serve(async (req) => {
       }
     }
 
-    return new Response(JSON.stringify({ ok: true, kind, total: subs?.length ?? 0, sent, failed, skipped }), {
+    if (sentSubscriberIds.length > 0) {
+      for (const id of sentSubscriberIds) {
+        await supabase.rpc("increment_sms_counter", { subscriber_id_input: id }).catch(async () => {
+          const { data } = await supabase
+            .from("sms_subscribers")
+            .select("sms_sent_this_month")
+            .eq("id", id)
+            .single();
+          const current = data?.sms_sent_this_month ?? 0;
+          await supabase.from("sms_subscribers").update({ sms_sent_this_month: current + 1 }).eq("id", id);
+        });
+      }
+    }
+
+    return new Response(JSON.stringify({
+      ok: true,
+      kind,
+      provider,
+      retryFailed,
+      total: subscribers.length,
+      sent,
+      failed,
+      skipped,
+      blocked,
+    }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
-  } catch (e) {
-    return new Response(JSON.stringify({ ok: false, error: (e as Error).message }), {
+  } catch (error) {
+    return new Response(JSON.stringify({ ok: false, error: (error as Error).message }), {
       status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
   }

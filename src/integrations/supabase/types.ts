@@ -65,6 +65,50 @@ export type Database = {
         }
         Relationships: []
       }
+      billing_accounts: {
+        Row: {
+          account_name: string
+          account_type: string
+          billing_status: string
+          created_at: string
+          id: string
+          monthly_budget_paise: number
+          plan_tier: string
+          subscriber_id: string | null
+          updated_at: string
+        }
+        Insert: {
+          account_name: string
+          account_type?: string
+          billing_status?: string
+          created_at?: string
+          id?: string
+          monthly_budget_paise?: number
+          plan_tier?: string
+          subscriber_id?: string | null
+          updated_at?: string
+        }
+        Update: {
+          account_name?: string
+          account_type?: string
+          billing_status?: string
+          created_at?: string
+          id?: string
+          monthly_budget_paise?: number
+          plan_tier?: string
+          subscriber_id?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "billing_accounts_subscriber_id_fkey"
+            columns: ["subscriber_id"]
+            isOneToOne: false
+            referencedRelation: "sms_subscribers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       consultations: {
         Row: {
           category: string | null
@@ -109,6 +153,97 @@ export type Database = {
           updated_at?: string
         }
         Relationships: []
+      }
+      missed_call_events: {
+        Row: {
+          created_at: string
+          id: string
+          payload: Json
+          phone: string
+          processed_at: string | null
+          provider: string
+          provider_call_id: string | null
+          status: string
+          subscriber_id: string | null
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          payload?: Json
+          phone: string
+          processed_at?: string | null
+          provider?: string
+          provider_call_id?: string | null
+          status?: string
+          subscriber_id?: string | null
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          payload?: Json
+          phone?: string
+          processed_at?: string | null
+          provider?: string
+          provider_call_id?: string | null
+          status?: string
+          subscriber_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "missed_call_events_subscriber_id_fkey"
+            columns: ["subscriber_id"]
+            isOneToOne: false
+            referencedRelation: "sms_subscribers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      payment_transactions: {
+        Row: {
+          amount_paise: number
+          billing_account_id: string | null
+          created_at: string
+          currency: string
+          id: string
+          metadata: Json
+          paid_at: string | null
+          payment_provider: string
+          provider_ref: string | null
+          status: string
+        }
+        Insert: {
+          amount_paise: number
+          billing_account_id?: string | null
+          created_at?: string
+          currency?: string
+          id?: string
+          metadata?: Json
+          paid_at?: string | null
+          payment_provider?: string
+          provider_ref?: string | null
+          status?: string
+        }
+        Update: {
+          amount_paise?: number
+          billing_account_id?: string | null
+          created_at?: string
+          currency?: string
+          id?: string
+          metadata?: Json
+          paid_at?: string | null
+          payment_provider?: string
+          provider_ref?: string | null
+          status?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "payment_transactions_billing_account_id_fkey"
+            columns: ["billing_account_id"]
+            isOneToOne: false
+            referencedRelation: "billing_accounts"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       crop_plans: {
         Row: {
@@ -484,51 +619,158 @@ export type Database = {
       sms_subscribers: {
         Row: {
           active: boolean
+          billing_cycle_start: string
           consent_at: string
           created_at: string
           crop: string | null
           district: string
+          farmer_type: string
+          gram_panchayat: string | null
           id: string
           language: string
+          monthly_sms_quota: number
           name: string
+          plan_started_at: string
+          plan_status: string
+          plan_tier: string
           phone: string
           registered_by: string | null
+          sevak_id: string | null
+          sms_sent_this_month: number
           source: string
           state: string
           updated_at: string
           user_id: string | null
+          village: string | null
         }
         Insert: {
           active?: boolean
+          billing_cycle_start?: string
           consent_at?: string
           created_at?: string
           crop?: string | null
           district: string
+          farmer_type?: string
+          gram_panchayat?: string | null
           id?: string
           language?: string
+          monthly_sms_quota?: number
           name: string
+          plan_started_at?: string
+          plan_status?: string
+          plan_tier?: string
           phone: string
           registered_by?: string | null
+          sevak_id?: string | null
+          sms_sent_this_month?: number
           source?: string
           state: string
           updated_at?: string
           user_id?: string | null
+          village?: string | null
         }
         Update: {
           active?: boolean
+          billing_cycle_start?: string
           consent_at?: string
           created_at?: string
           crop?: string | null
           district?: string
+          farmer_type?: string
+          gram_panchayat?: string | null
           id?: string
           language?: string
+          monthly_sms_quota?: number
           name?: string
+          plan_started_at?: string
+          plan_status?: string
+          plan_tier?: string
           phone?: string
           registered_by?: string | null
+          sevak_id?: string | null
+          sms_sent_this_month?: number
           source?: string
           state?: string
           updated_at?: string
           user_id?: string | null
+          village?: string | null
+        }
+        Relationships: []
+      }
+      sms_opt_out_events: {
+        Row: {
+          created_at: string
+          id: string
+          keyword: string
+          payload: Json
+          phone: string
+          source: string
+          subscriber_id: string | null
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          keyword: string
+          payload?: Json
+          phone: string
+          source?: string
+          subscriber_id?: string | null
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          keyword?: string
+          payload?: Json
+          phone?: string
+          source?: string
+          subscriber_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "sms_opt_out_events_subscriber_id_fkey"
+            columns: ["subscriber_id"]
+            isOneToOne: false
+            referencedRelation: "sms_subscribers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      sms_schedules: {
+        Row: {
+          active: boolean
+          created_at: string
+          created_by: string | null
+          day_of_week: number
+          id: string
+          kind: string
+          name: string
+          send_time: string
+          template_key: string
+          updated_at: string
+        }
+        Insert: {
+          active?: boolean
+          created_at?: string
+          created_by?: string | null
+          day_of_week: number
+          id?: string
+          kind: string
+          name: string
+          send_time?: string
+          template_key: string
+          updated_at?: string
+        }
+        Update: {
+          active?: boolean
+          created_at?: string
+          created_by?: string | null
+          day_of_week?: number
+          id?: string
+          kind?: string
+          name?: string
+          send_time?: string
+          template_key?: string
+          updated_at?: string
         }
         Relationships: []
       }
@@ -639,6 +881,10 @@ export type Database = {
           _user_id: string
         }
         Returns: boolean
+      }
+      increment_sms_counter: {
+        Args: { subscriber_id_input: string }
+        Returns: undefined
       }
     }
     Enums: {

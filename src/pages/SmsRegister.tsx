@@ -26,6 +26,7 @@ const schema = z.object({
   district: z.string().min(1, "Select district"),
   crop: z.string().min(1, "Select crop"),
   language: z.string().min(1),
+  farmerType: z.enum(["self", "sevak_registered"]),
   consent: z.literal(true, { errorMap: () => ({ message: "Consent is required to send SMS" }) }),
 });
 
@@ -40,6 +41,7 @@ const SmsRegister = () => {
     district: "",
     crop: "",
     language: "hi",
+    farmerType: "self" as "self" | "sevak_registered",
     consent: false,
   });
 
@@ -61,6 +63,9 @@ const SmsRegister = () => {
       district: parsed.data.district,
       crop: parsed.data.crop,
       language: parsed.data.language,
+      farmer_type: parsed.data.farmerType,
+      plan_tier: "free",
+      plan_status: "active",
       source: "web",
     });
     setSubmitting(false);
@@ -72,7 +77,7 @@ const SmsRegister = () => {
       return;
     }
     setDone(true);
-    toast({ title: "✅ Registered", description: "You'll start receiving free crop & weather SMS in your language." });
+      toast({ title: "✅ Registered", description: "Free tier is active. You can upgrade to paid plans from admin when enabled." });
   };
 
   return (
@@ -91,7 +96,7 @@ const SmsRegister = () => {
               </div>
               <CardTitle className="text-2xl sm:text-3xl">No smartphone? No problem.</CardTitle>
               <p className="text-sm text-muted-foreground">
-                Get free weather warnings, mandi prices, pest alerts and government scheme updates as
+                Start on free alerts and move to paid plans later. Get weather warnings, mandi prices, pest alerts and government scheme updates as
                 <strong> simple SMS in your language</strong> — works on any ₹500 keypad phone.
               </p>
             </CardHeader>
@@ -150,6 +155,16 @@ const SmsRegister = () => {
 
                   <div className="grid gap-4 sm:grid-cols-2">
                     <div className="space-y-2">
+                      <Label>Registration type</Label>
+                      <Select value={form.farmerType} onValueChange={(v) => setForm({ ...form, farmerType: v as "self" | "sevak_registered" })}>
+                        <SelectTrigger><SelectValue /></SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="self">Self registration</SelectItem>
+                          <SelectItem value="sevak_registered">Registered by Sevak/Sarpanch</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    <div className="space-y-2">
                       <Label>Primary crop</Label>
                       <Select value={form.crop} onValueChange={(v) => setForm({ ...form, crop: v })}>
                         <SelectTrigger><SelectValue placeholder="Select crop" /></SelectTrigger>
@@ -174,20 +189,20 @@ const SmsRegister = () => {
                   <label className="flex items-start gap-3 rounded-md border border-border bg-muted/40 p-3 text-sm">
                     <Checkbox checked={form.consent} onCheckedChange={(v) => setForm({ ...form, consent: !!v })} className="mt-0.5" />
                     <span className="text-muted-foreground">
-                      I agree to receive free SMS from KrishiSarthi about weather, mandi prices, pest alerts and government schemes.
+                      I agree to receive SMS from KrishiSarthi (free tier and future paid plans) about weather, mandi prices, pest alerts and government schemes.
                       Reply <strong>STOP</strong> to opt out anytime. Standard SMS rates do not apply (we pay for the SMS).
                     </span>
                   </label>
 
                   <Button type="submit" disabled={submitting} className="w-full" size="lg">
-                    {submitting ? "Registering…" : "Register for free SMS alerts"}
+                    {submitting ? "Registering…" : "Register for SMS alerts"}
                   </Button>
 
                   <div className="rounded-md border border-dashed border-primary/40 bg-primary/5 p-3 text-xs text-muted-foreground">
                     <div className="flex items-center gap-2 font-semibold text-foreground">
                       <PhoneCall className="h-4 w-4 text-primary" /> Or give a missed call
                     </div>
-                    <p className="mt-1">Once our toll-free number goes live, farmers can simply give a missed call to subscribe — no form needed. Coming soon.</p>
+                    <p className="mt-1">Once our toll-free number goes live, farmers can give a missed call to subscribe. By calling, they consent to receive KrishiSarthi SMS alerts. Coming soon.</p>
                   </div>
                 </form>
               )}

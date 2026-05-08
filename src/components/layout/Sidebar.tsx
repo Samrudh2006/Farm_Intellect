@@ -20,7 +20,8 @@ import {
   Vote,
   Building,
   Landmark,
-  Video
+  Video,
+  Smartphone
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
@@ -76,6 +77,7 @@ const getNavigationItems = (t: (key: string) => string) => ({
     { icon: LayoutDashboard, label: t('sidebar.admin_control'), href: "/admin/dashboard" },
     { icon: Users, label: t('nav.users'), href: "/admin/users" },
     { icon: TrendingUp, label: t('nav.analytics'), href: "/admin/analytics" },
+    { icon: Smartphone, label: "📩 SMS & Field Ops", href: "/admin/sms" },
     { icon: Activity, label: "📋 Audit Log", href: "/admin/audit-log" },
     { icon: Bot, label: t('nav.ai_assistant'), href: "/admin/chat" },
     { icon: Settings, label: t('nav.settings'), href: "/admin/settings" },
