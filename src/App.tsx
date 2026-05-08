@@ -75,6 +75,8 @@ const AdminSettings = lazy(() => import("./pages/admin/AdminSettings"));
 const AdminNotifications = lazy(() => import("./pages/admin/AdminNotifications"));
 const AdminChat = lazy(() => import("./pages/admin/AdminChat"));
 const AdminAuditLog = lazy(() => import("./pages/admin/AdminAuditLog"));
+const AdminSms = lazy(() => import("./pages/admin/AdminSms"));
+const SmsRegister = lazy(() => import("./pages/SmsRegister"));
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -131,6 +133,7 @@ const AnimatedRoutes = () => {
         <Route path="/" element={renderPage(Index)} />
         <Route path="/login" element={renderPage(Login)} />
         <Route path="/reset-password" element={renderPage(ResetPassword)} />
+        <Route path="/sms-register" element={renderPage(SmsRegister)} />
         
         {/* Farmer Routes */}
         <Route path="/farmer/dashboard" element={renderProtectedPage(FarmerDashboard, ["farmer"])} />
@@ -183,6 +186,7 @@ const AnimatedRoutes = () => {
         <Route path="/admin/chat" element={renderProtectedPage(AdminChat, ["admin"])} />
         <Route path="/admin/settings" element={renderProtectedPage(AdminSettings, ["admin"])} />
         <Route path="/admin/notifications" element={renderProtectedPage(AdminNotifications, ["admin"])} />
+        <Route path="/admin/sms" element={renderProtectedPage(AdminSms, ["admin"])} />
         <Route path="/admin/profile" element={renderProtectedPage(Profile, ["admin"])} />
         
         {/* Legacy Routes */}
