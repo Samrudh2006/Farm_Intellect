@@ -22,3 +22,9 @@ verify_jwt = false
 
 [functions.sms-dispatcher]
 verify_jwt = false
+
+[functions.missed-call-webhook]
+verify_jwt = false
+
+[functions.sms-delivery-webhook]
+verify_jwt = false
