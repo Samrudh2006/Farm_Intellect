@@ -368,7 +368,7 @@ const AdminSms = () => {
   };
 
   const addSchedule = async () => {
-    const { error } = await supabase.from("sms_schedules").insert({
+    const { error } = await (supabase as any).from("sms_schedules").insert({
       name: newSchedule.name,
       kind: newSchedule.kind,
       template_key: newSchedule.template_key,
