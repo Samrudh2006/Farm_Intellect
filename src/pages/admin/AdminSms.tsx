@@ -179,20 +179,20 @@ const AdminSms = () => {
     ] = await Promise.all([
       supabase.from("sms_subscribers").select("*").order("created_at", { ascending: false }).limit(500),
       supabase.from("sms_log").select("id, subscriber_id, template_key, status, body, sent_at, error").order("created_at", { ascending: false }).limit(200),
-      supabase.from("sms_schedules").select("*").order("day_of_week", { ascending: true }),
+      (supabase as any).from("sms_schedules").select("*").order("day_of_week", { ascending: true }),
       supabase.from("sms_templates").select("*").order("key", { ascending: true }).limit(200),
-      supabase.from("billing_accounts").select("*").order("created_at", { ascending: false }).limit(200),
-      supabase.from("payment_transactions").select("id, amount_paise, status, payment_provider, created_at").order("created_at", { ascending: false }).limit(200),
-      supabase.from("sms_opt_out_events").select("id, phone, keyword, source, created_at").order("created_at", { ascending: false }).limit(200),
+      (supabase as any).from("billing_accounts").select("*").order("created_at", { ascending: false }).limit(200),
+      (supabase as any).from("payment_transactions").select("id, amount_paise, status, payment_provider, created_at").order("created_at", { ascending: false }).limit(200),
+      (supabase as any).from("sms_opt_out_events").select("id, phone, keyword, source, created_at").order("created_at", { ascending: false }).limit(200),
     ]);
 
-    setSubs((subsRes.data as Subscriber[]) ?? []);
+    setSubs((subsRes.data as unknown as Subscriber[]) ?? []);
     setLogs((logsRes.data as LogRow[]) ?? []);
-    setSchedules((schedulesRes.data as ScheduleRow[]) ?? []);
+    setSchedules((schedulesRes.data as unknown as ScheduleRow[]) ?? []);
     setTemplates((templatesRes.data as TemplateRow[]) ?? []);
-    setBillingAccounts((billingRes.data as BillingAccountRow[]) ?? []);
-    setPayments((paymentsRes.data as PaymentRow[]) ?? []);
-    setOptOutEvents((optOutRes.data as OptOutRow[]) ?? []);
+    setBillingAccounts((billingRes.data as unknown as BillingAccountRow[]) ?? []);
+    setPayments((paymentsRes.data as unknown as PaymentRow[]) ?? []);
+    setOptOutEvents((optOutRes.data as unknown as OptOutRow[]) ?? []);
     setLoading(false);
   };
 
@@ -368,7 +368,7 @@ const AdminSms = () => {
   };
 
   const addSchedule = async () => {
-    const { error } = await supabase.from("sms_schedules").insert({
+    const { error } = await (supabase as any).from("sms_schedules").insert({
       name: newSchedule.name,
       kind: newSchedule.kind,
       template_key: newSchedule.template_key,
