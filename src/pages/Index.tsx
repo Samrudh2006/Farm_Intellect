@@ -50,14 +50,14 @@ const Index = () => {
   }
 
   const features = [
-    { icon: Brain, title: "AI-Powered Recommendations", description: "Get personalised crop advice powered by machine learning algorithms", iconBg: "bg-accent/10", iconColor: "text-accent" },
-    { icon: CloudSun, title: "Weather Integration", description: "Real-time weather data and forecasts for optimal farming decisions", iconBg: "bg-navy/10", iconColor: "text-navy" },
-    { icon: TrendingUp, title: "Yield Optimisation", description: "Maximise your crop yields with data-driven insights", iconBg: "bg-primary/10", iconColor: "text-primary" },
-    { icon: Shield, title: "Pest & Disease Control", description: "Early detection and prevention of crop threats", iconBg: "bg-accent/10", iconColor: "text-accent" },
-    { icon: Zap, title: "Smart Irrigation", description: "Optimise water usage with IoT sensor data and AI predictions", iconBg: "bg-navy/10", iconColor: "text-navy" },
-    { icon: BarChart3, title: "Market Analytics", description: "Live mandi prices and profit predictions for better selling decisions", iconBg: "bg-primary/10", iconColor: "text-primary" },
-    { icon: Leaf, title: "Organic Farming Guide", description: "Comprehensive organic farming techniques and certification help", iconBg: "bg-accent/10", iconColor: "text-accent" },
-    { icon: Sparkles, title: "AI Crop Scanner", description: "Snap a photo to identify diseases, pests, and nutrient deficiencies", iconBg: "bg-navy/10", iconColor: "text-navy" },
+    { icon: Brain, title: "AI-Powered Recommendations", description: "Get personalised crop advice powered by machine learning algorithms", iconBg: "bg-accent/10", iconColor: "text-accent", bgImage: "/images/feature-ai-recommendations.jpg" },
+    { icon: CloudSun, title: "Weather Integration", description: "Real-time weather data and forecasts for optimal farming decisions", iconBg: "bg-navy/10", iconColor: "text-navy", bgImage: "/images/feature-weather-integration.jpg" },
+    { icon: TrendingUp, title: "Yield Optimisation", description: "Maximise your crop yields with data-driven insights", iconBg: "bg-primary/10", iconColor: "text-primary", bgImage: "/images/feature-yield-optimization.jpg" },
+    { icon: Shield, title: "Pest & Disease Control", description: "Early detection and prevention of crop threats", iconBg: "bg-accent/10", iconColor: "text-accent", bgImage: "/images/feature-pest-disease-control.jpg" },
+    { icon: Zap, title: "Smart Irrigation", description: "Optimise water usage with IoT sensor data and AI predictions", iconBg: "bg-navy/10", iconColor: "text-navy", bgImage: "/images/feature-smart-irrigation.jpg" },
+    { icon: BarChart3, title: "Market Analytics", description: "Live mandi prices and profit predictions for better selling decisions", iconBg: "bg-primary/10", iconColor: "text-primary", bgImage: "/images/feature-market-analytics.jpg" },
+    { icon: Leaf, title: "Organic Farming Guide", description: "Comprehensive organic farming techniques and certification help", iconBg: "bg-accent/10", iconColor: "text-accent", bgImage: "/images/feature-organic-farming.jpg" },
+    { icon: Sparkles, title: "AI Crop Scanner", description: "Snap a photo to identify diseases, pests, and nutrient deficiencies", iconBg: "bg-navy/10", iconColor: "text-navy", bgImage: "/images/feature-ai-crop-scanner.jpg" },
   ];
 
   const stats = [
@@ -240,8 +240,18 @@ const Index = () => {
                 viewport={{ once: true, margin: "-50px" }}
                 variants={scaleIn}
               >
-                <Card className="tricolor-card text-center p-6 cursor-pointer h-full group">
-                  <CardContent className="space-y-4 pt-6">
+                <Card className="tricolor-card text-center p-6 cursor-pointer h-full group relative overflow-hidden">
+                  {/* Background Image */}
+                  <div 
+                    className="absolute inset-0 bg-cover bg-center transition-transform duration-500 group-hover:scale-110 z-0"
+                    style={{ backgroundImage: `url(${feature.bgImage})` }}
+                  />
+                  
+                  {/* Overlay Gradient */}
+                  <div className="absolute inset-0 bg-gradient-to-b from-background/50 via-background/70 to-background/90 z-[1]" />
+                  
+                  {/* Content */}
+                  <CardContent className="space-y-4 pt-6 relative z-[2]">
                     <motion.div
                       whileHover={{ rotate: [0, -10, 10, 0], scale: 1.1 }}
                       transition={{ duration: 0.4 }}
