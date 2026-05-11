@@ -49,7 +49,7 @@ export function createMetaTags(metadata: PageMetadata) {
 }
 
 /**
- * Generate Open Graph and Twitter card meta tags
+ * Generate Open Graph and Twitter card meta tags with full support
  */
 export function generateSocialMetaTags(metadata: PageMetadata): SocialMetaTags {
   return {
@@ -60,6 +60,100 @@ export function generateSocialMetaTags(metadata: PageMetadata): SocialMetaTags {
     twitterCard: "summary_large_image",
     twitterCreator: "@FarmIntellect",
   };
+}
+
+/**
+ * Set Open Graph meta tags in document head
+ */
+export function setOpenGraphTags(metadata: PageMetadata): void {
+  const socialTags = generateSocialMetaTags(metadata);
+  
+  // og:title
+  setMetaTag("og:title", socialTags.ogTitle);
+  
+  // og:description
+  setMetaTag("og:description", socialTags.ogDescription);
+  
+  // og:image
+  setMetaTag("og:image", socialTags.ogImage);
+  
+  // og:image:alt
+  setMetaTag("og:image:alt", socialTags.ogDescription);
+  
+  // og:type
+  setMetaTag("og:type", socialTags.ogType);
+  
+  // og:url
+  const canonicalUrl = typeof window !== "undefined" ? window.location.href : SITE_URL;
+  setMetaTag("og:url", canonicalUrl);
+  
+  // og:site_name
+  setMetaTag("og:site_name", SITE_NAME);
+  
+  // og:locale
+  setMetaTag("og:locale", "en_IN");
+}
+
+/**
+ * Set Twitter Card meta tags in document head
+ */
+export function setTwitterCardTags(metadata: PageMetadata): void {
+  const socialTags = generateSocialMetaTags(metadata);
+  
+  // twitter:card
+  setMetaTag("twitter:card", socialTags.twitterCard);
+  
+  // twitter:title
+  setMetaTag("twitter:title", socialTags.ogTitle);
+  
+  // twitter:description
+  setMetaTag("twitter:description", socialTags.ogDescription);
+  
+  // twitter:image
+  setMetaTag("twitter:image", socialTags.ogImage);
+  
+  // twitter:creator
+  setMetaTag("twitter:creator", socialTags.twitterCreator);
+  
+  // twitter:site
+  setMetaTag("twitter:site", "@FarmIntellect");
+}
+
+/**
+ * Helper function to set or update a meta tag
+ */
+function setMetaTag(property: string, content: string): void {
+  if (typeof document === "undefined") return;
+  
+  let tag = document.querySelector(`meta[property="${property}"]`) ||
+            document.querySelector(`meta[name="${property}"]`);
+  
+  if (!tag) {
+    tag = document.createElement("meta");
+    if (property.startsWith("og:") || property.startsWith("twitter:")) {
+      tag.setAttribute("property", property);
+    } else {
+      tag.setAttribute("name", property);
+    }
+    document.head.appendChild(tag);
+  }
+  
+  tag.setAttribute("content", content);
+}
+
+/**
+ * Generate Facebook App ID meta tag
+ */
+export function setFacebookAppId(appId: string): void {
+  setMetaTag("fb:app_id", appId);
+}
+
+/**
+ * Set all social meta tags at once
+ */
+export function setSocialMetaTags(metadata: PageMetadata): void {
+  setOpenGraphTags(metadata);
+  setTwitterCardTags(metadata);
 }
 
 /**
