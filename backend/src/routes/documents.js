@@ -24,8 +24,7 @@ function safeUnlink(filePath) {
     return;
   }
 
-  }
-}
+
 
 function resolveSafeDocumentPath(filePath) {
   if (!filePath || !isPathInside(DOCUMENT_UPLOADS_ROOT, filePath)) {

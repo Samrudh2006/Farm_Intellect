@@ -24,7 +24,6 @@ function resolveSafeImagePath(imagePath) {
     throw new Error('Invalid image path');
   }
 
-}
 
 // ─── Image Feature Extraction (pure JS, no native deps) ─────────────────────
 
