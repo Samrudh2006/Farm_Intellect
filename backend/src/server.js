@@ -30,6 +30,7 @@ import { logger } from './utils/logger.js';
 dotenv.config();
 
 const app = express();
+app.disable('x-powered-by');
 const server = createServer(app);
 const io = new Server(server, {
   cors: {
@@ -97,6 +98,26 @@ app.use(
     },
   }),
 );
+
+const MAINTENANCE_MODE = process.env.MAINTENANCE_MODE === 'true';
+
+app.use((req, res, next) => {
+  if (!MAINTENANCE_MODE) {
+    next();
+    return;
+  }
+
+  if (req.path === '/health') {
+    next();
+    return;
+  }
+
+  res.status(503).json({
+    error: 'Service temporarily unavailable for maintenance',
+    maintenance: true,
+  });
+});
+
 app.use(cors({ origin: allowedOrigin, credentials: true }));
 app.use(limiter);
 app.use(express.json({ limit: '10mb' }));
@@ -123,7 +144,7 @@ app.use('/api/datasets', datasetRoutes);
 
 // Health check
 app.get('/health', (req, res) => {
-  res.json({ status: 'OK', timestamp: new Date().toISOString() });
+  res.json({ status: 'OK', maintenance: MAINTENANCE_MODE, timestamp: new Date().toISOString() });
 });
 
 app.get('/metrics', authenticate, authorize('ADMIN'), metricsHandler);
