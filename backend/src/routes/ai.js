@@ -13,6 +13,24 @@ import { runInference } from '../services/inferenceClient.js';
 
 const router = express.Router();
 
+const AI_UPLOADS_ROOT = path.resolve(process.cwd(), 'uploads', 'ai-images');
+
+function isPathInside(baseDir, targetPath) {
+  const resolvedBase = path.resolve(baseDir);
+  const resolvedTarget = path.resolve(targetPath);
+  return resolvedTarget === resolvedBase || resolvedTarget.startsWith(`${resolvedBase}${path.sep}`);
+}
+
+function safeUnlink(filePath) {
+  if (!filePath || !isPathInside(AI_UPLOADS_ROOT, filePath)) {
+    logger.warn('Refused to delete file outside AI uploads directory', { filePath });
+    return;
+  }
+  if (fs.existsSync(filePath)) {
+    fs.unlinkSync(filePath);
+  }
+}
+
 const MODEL_VERSIONS = {
   cropRecommendation: { name: 'crop-recommendation', version: '1.0.0' },
   yieldPrediction: { name: 'yield-prediction', version: '1.0.0' },
@@ -110,9 +128,7 @@ router.post('/detect-disease', authenticate, upload.single('image'), logActivity
 
     // Clean up uploaded file after processing
     setTimeout(() => {
-      if (fs.existsSync(req.file.path)) {
-        fs.unlinkSync(req.file.path);
-      }
+      safeUnlink(req.file.path);
     }, 60000); // Delete after 1 minute
 
     res.json({
@@ -125,8 +141,8 @@ router.post('/detect-disease', authenticate, upload.single('image'), logActivity
     });
   } catch (error) {
     logger.error('Disease detection error:', error);
-    if (req.file && fs.existsSync(req.file.path)) {
-      fs.unlinkSync(req.file.path);
+    if (req.file) {
+      safeUnlink(req.file.path);
     }
     res.status(500).json({ error: 'Failed to detect disease' });
   }

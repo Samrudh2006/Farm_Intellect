@@ -81,20 +81,20 @@ if (process.env.SENTRY_DSN) {
 
 app.use(
   helmet({
-    contentSecurityPolicy: process.env.NODE_ENV === 'production'
-      ? {
-          directives: {
-            defaultSrc: ["'self'"],
-            scriptSrc: ["'self'", "'unsafe-inline'", "'unsafe-eval'"],
-            styleSrc: ["'self'", "'unsafe-inline'"],
-            imgSrc: ["'self'", 'data:', 'https:'],
-            connectSrc: ["'self'", 'https:', 'wss:'],
-            fontSrc: ["'self'", 'https:', 'data:'],
-            objectSrc: ["'none'"],
-            frameAncestors: ["'none'"],
-          },
-        }
-      : false,
+    contentSecurityPolicy: {
+      directives: {
+        defaultSrc: ["'self'"],
+        scriptSrc: ["'self'"],
+        styleSrc: ["'self'", "'unsafe-inline'"],
+        imgSrc: ["'self'", 'data:', 'https:'],
+        connectSrc: ["'self'", 'https:', 'wss:'],
+        fontSrc: ["'self'", 'https:', 'data:'],
+        objectSrc: ["'none'"],
+        frameAncestors: ["'none'"],
+        baseUri: ["'self'"],
+        formAction: ["'self'"],
+      },
+    },
   }),
 );
 app.use(cors({ origin: allowedOrigin, credentials: true }));
