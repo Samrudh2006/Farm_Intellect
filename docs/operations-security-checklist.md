@@ -62,9 +62,7 @@ This repository follows a **three-environment model** and uses **migration-first
 
 ## Implementation Status (50-control snapshot)
 
-Completed in codebase now: **24 / 50**
 
-Not yet completed: **26 / 50**
 
 ### Not completed yet (to implement)
 1. Automated external daily backup job.
@@ -77,14 +75,7 @@ Not yet completed: **26 / 50**
 8. Separate admin login surface with enforced MFA.
 9. Admin action audit trail with old/new diffs.
 10. Dedicated staging admin accounts lifecycle policy.
-11. Full server-side schema validation on every route.
-12. Upload extension allowlist enforcement in addition to MIME checks.
-13. Rate limiting for OTP/password reset specific routes.
-14. Systematic HTML sanitization for all user-generated text inputs.
-15. Per-user AI token/request quota enforcement middleware.
-16. Retry/timeout/loop safeguards for every paid upstream integration.
-17. Real-time billing alert pipeline integration.
-18. Production-enforced HTTPS redirect at edge/app gateway.
+
 19. SPF/DKIM/DMARC deployment verification automation.
 20. Centralized log retention policy enforcement >= 30 days.
 21. Privacy policy + terms publication and versioning process.

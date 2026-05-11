@@ -15,6 +15,7 @@ const router = express.Router();
 
 const AI_UPLOADS_ROOT = path.resolve(process.cwd(), 'uploads', 'ai-images');
 
+
 function isPathInside(baseDir, targetPath) {
   const resolvedBase = path.resolve(baseDir);
   const resolvedTarget = path.resolve(targetPath);
@@ -28,7 +29,6 @@ function safeUnlink(filePath) {
   }
 
 
-  }
 }
 
 const MODEL_VERSIONS = {
@@ -58,17 +58,18 @@ const storage = multer.diskStorage({
 const upload = multer({
   storage,
   fileFilter: (req, file, cb) => {
-    if (file.mimetype.startsWith('image/')) {
+    const ext = path.extname(file.originalname).toLowerCase();
+    if (file.mimetype.startsWith('image/') && ALLOWED_IMAGE_EXTENSIONS.has(ext)) {
       cb(null, true);
     } else {
-      cb(new Error('Only image files are allowed'), false);
+      cb(new Error('Only JPG, JPEG, PNG and WEBP image files are allowed'), false);
     }
   },
   limits: { fileSize: 5 * 1024 * 1024 } // 5MB
 });
 
 // Crop recommendation based on location and soil data
-router.post('/recommend-crops', authenticate, logActivity, async (req, res) => {
+router.post('/recommend-crops', authenticate, enforceDailyAiQuota, validateRequiredFields(['season']), logActivity, async (req, res) => {
   try {
     const { location, soilType, season, farmSize, experience, nitrogen, phosphorus, potassium, ph, temperature, humidity, rainfall } = req.body;
 
@@ -115,7 +116,7 @@ router.post('/recommend-crops', authenticate, logActivity, async (req, res) => {
 });
 
 // Crop disease detection from image
-router.post('/detect-disease', authenticate, upload.single('image'), logActivity, async (req, res) => {
+router.post('/detect-disease', authenticate, enforceDailyAiQuota, upload.single('image'), logActivity, async (req, res) => {
   try {
     if (!req.file) {
       return res.status(400).json({ error: 'Image is required' });
@@ -173,7 +174,7 @@ router.get('/suggestions', authenticate, async (req, res) => {
 });
 
 // Generate yield prediction
-router.post('/predict-yield', authenticate, logActivity, async (req, res) => {
+router.post('/predict-yield', authenticate, enforceDailyAiQuota, validateRequiredFields(['cropType', 'farmSize']), logActivity, async (req, res) => {
   try {
     const { cropType, farmSize, soilQuality, soilParams, irrigation, irrigationMethod, fertilizer, fertilizerTiming, weather, pestPressure } = req.body;
 

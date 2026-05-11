@@ -101,6 +101,7 @@ app.use(
 
 const MAINTENANCE_MODE = process.env.MAINTENANCE_MODE === 'true';
 
+
 app.use((req, res, next) => {
   if (!MAINTENANCE_MODE) {
     next();
@@ -117,6 +118,7 @@ app.use((req, res, next) => {
     maintenance: true,
   });
 });
+
 
 app.use(cors({ origin: allowedOrigin, credentials: true }));
 app.use(limiter);

@@ -12,6 +12,7 @@ const router = express.Router();
 
 const DOCUMENT_UPLOADS_ROOT = path.resolve(process.cwd(), 'uploads', 'documents');
 
+
 function isPathInside(baseDir, targetPath) {
   const resolvedBase = path.resolve(baseDir);
   const resolvedTarget = path.resolve(targetPath);
@@ -60,10 +61,12 @@ const fileFilter = (req, file, cb) => {
     'application/vnd.openxmlformats-officedocument.wordprocessingml.document'
   ];
 
-  if (allowedTypes.includes(file.mimetype)) {
+  const ext = path.extname(file.originalname).toLowerCase();
+
+  if (allowedTypes.includes(file.mimetype) && ALLOWED_DOCUMENT_EXTENSIONS.has(ext)) {
     cb(null, true);
   } else {
-    cb(new Error('Invalid file type. Only JPEG, PNG, PDF, DOC, and DOCX files are allowed.'), false);
+    cb(new Error('Invalid file type. Only JPEG, PNG, PDF, DOC, and DOCX files with matching extensions are allowed.'), false);
   }
 };
 
