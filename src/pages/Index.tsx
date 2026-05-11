@@ -326,16 +326,16 @@ const Index = () => {
                     <motion.div
                       whileHover={{ rotate: [0, -10, 10, 0], scale: 1.15 }}
                       transition={{ duration: 0.4 }}
-                      className="flex items-center justify-center w-32 h-32 mx-auto"
+                      className="flex items-center justify-center w-32 h-32 mx-auto rounded-full overflow-hidden bg-white shadow-md"
                     >
                       {feature.image ? (
                         <img 
                           src={feature.image} 
                           alt={feature.title}
-                          className="h-32 w-32 object-contain rounded-full shadow-lg hover:shadow-xl transition-shadow"
+                          className="h-full w-full object-cover rounded-full"
                         />
                       ) : (
-                        <div className={`flex items-center justify-center w-32 h-32 rounded-full ${feature.iconBg} group-hover:shadow-lg transition-shadow`}>
+                        <div className={`flex items-center justify-center w-full h-full rounded-full ${feature.iconBg}`}>
                           <feature.icon className={`h-16 w-16 ${feature.iconColor}`} />
                         </div>
                       )}
@@ -364,20 +364,22 @@ const Index = () => {
           <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
             <DialogHeader>
               <div className="flex items-center gap-4 mb-4">
-                {features[selectedFeature].image ? (
-                  <img 
-                    src={features[selectedFeature].image} 
-                    alt={features[selectedFeature].title}
-                    className="h-28 w-28 object-contain rounded-full flex-shrink-0"
-                  />
-                ) : (
-                  <div className={`flex items-center justify-center w-28 h-28 rounded-full ${features[selectedFeature].iconBg} flex-shrink-0`}>
-                    {(() => {
-                      const Icon = features[selectedFeature].icon;
-                      return <Icon className={`h-12 w-12 ${features[selectedFeature].iconColor}`} />;
-                    })()}
-                  </div>
-                )}
+                <div className="flex items-center justify-center w-28 h-28 rounded-full overflow-hidden flex-shrink-0 bg-white shadow-md">
+                  {features[selectedFeature].image ? (
+                    <img 
+                      src={features[selectedFeature].image} 
+                      alt={features[selectedFeature].title}
+                      className="h-full w-full object-cover rounded-full"
+                    />
+                  ) : (
+                    <div className={`flex items-center justify-center w-full h-full rounded-full ${features[selectedFeature].iconBg}`}>
+                      {(() => {
+                        const Icon = features[selectedFeature].icon;
+                        return <Icon className={`h-12 w-12 ${features[selectedFeature].iconColor}`} />;
+                      })()}
+                    </div>
+                  )}
+                </div>
                 <div className="text-left">
                   <DialogTitle>{features[selectedFeature].title}</DialogTitle>
                 </div>
