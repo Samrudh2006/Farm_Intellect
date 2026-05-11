@@ -30,7 +30,7 @@ function safeUnlink(filePath) {
     return;
   }
 
-  const safeFilePath = path.join(AI_UPLOADS_ROOT, path.basename(filePath));
+const safeFilePath = path.join(AI_UPLOADS_ROOT, path.basename(filePath));
   try {
     fs.unlinkSync(safeFilePath);
   } catch (error) {
@@ -71,6 +71,7 @@ function validateRequiredFields(requiredFields) {
     }
     next();
   };
+}
 }
 
 const MODEL_VERSIONS = {

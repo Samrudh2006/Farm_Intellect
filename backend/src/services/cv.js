@@ -24,7 +24,7 @@ function resolveSafeImagePath(imagePath) {
     throw new Error('Invalid image path');
   }
 
-  return path.join(AI_UPLOADS_ROOT, path.basename(imagePath));
+return path.join(AI_UPLOADS_ROOT, path.basename(imagePath));
 }
 
 // ─── Image Feature Extraction (pure JS, no native deps) ─────────────────────
@@ -144,8 +144,7 @@ function extractTextureFeatures(pixelBuffer, width, height) {
 function decodeImageToPixels(imagePath) {
   const safeImagePath = resolveSafeImagePath(imagePath);
   const buffer = fs.readFileSync(safeImagePath);
-  const ext = path.extname(safeImagePath).toLowerCase();
-
+const ext = path.extname(safeImagePath).toLowerCase();
   // For BMP files, parse header and extract pixel data
   if (ext === '.bmp' && buffer[0] === 0x42 && buffer[1] === 0x4D) {
     const offset = buffer.readUInt32LE(10);
