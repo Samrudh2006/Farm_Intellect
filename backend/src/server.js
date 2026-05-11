@@ -100,7 +100,7 @@ app.use(
 );
 
 const MAINTENANCE_MODE = process.env.MAINTENANCE_MODE === 'true';
-const FORCE_HTTPS = process.env.NODE_ENV === 'production' && process.env.FORCE_HTTPS === 'true';
+
 
 app.use((req, res, next) => {
   if (!MAINTENANCE_MODE) {
@@ -119,17 +119,6 @@ app.use((req, res, next) => {
   });
 });
 
-
-if (FORCE_HTTPS) {
-  app.enable('trust proxy');
-  app.use((req, res, next) => {
-    const forwardedProto = req.get('x-forwarded-proto');
-    if (forwardedProto && forwardedProto !== 'https') {
-      return res.redirect(301, `https://${req.get('host')}${req.originalUrl}`);
-    }
-    next();
-  });
-}
 
 app.use(cors({ origin: allowedOrigin, credentials: true }));
 app.use(limiter);

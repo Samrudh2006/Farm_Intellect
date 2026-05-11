@@ -11,7 +11,7 @@ import { scanFileForThreats } from '../utils/fileScan.js';
 const router = express.Router();
 
 const DOCUMENT_UPLOADS_ROOT = path.resolve(process.cwd(), 'uploads', 'documents');
-const ALLOWED_DOCUMENT_EXTENSIONS = new Set(['.jpg', '.jpeg', '.png', '.pdf', '.doc', '.docx']);
+
 
 function isPathInside(baseDir, targetPath) {
   const resolvedBase = path.resolve(baseDir);
@@ -25,15 +25,7 @@ function safeUnlink(filePath) {
     return;
   }
 
-  const safeFilePath = path.join(DOCUMENT_UPLOADS_ROOT, path.basename(filePath));
-  try {
-    fs.unlinkSync(safeFilePath);
-  } catch (error) {
-    if (error?.code !== 'ENOENT') {
-      throw error;
-    }
-  }
-}
+
 
 function resolveSafeDocumentPath(filePath) {
   if (!filePath || !isPathInside(DOCUMENT_UPLOADS_ROOT, filePath)) {
