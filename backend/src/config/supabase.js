@@ -1,7 +1,8 @@
 import { createClient } from '@supabase/supabase-js';
+import { getScopedEnv } from './environment.js';
 
-const supabaseUrl = process.env.SUPABASE_URL || process.env.VITE_SUPABASE_URL;
-const supabaseAnonKey = process.env.SUPABASE_ANON_KEY || process.env.VITE_SUPABASE_PUBLISHABLE_KEY;
+const supabaseUrl = getScopedEnv('SUPABASE_URL') || process.env.VITE_SUPABASE_URL;
+const supabaseAnonKey = getScopedEnv('SUPABASE_ANON_KEY') || process.env.VITE_SUPABASE_PUBLISHABLE_KEY;
 
 export const hasSupabaseAuthConfig = Boolean(supabaseUrl && supabaseAnonKey);
 

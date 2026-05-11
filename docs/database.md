@@ -104,3 +104,18 @@ flowchart LR
 - if stored in future, encrypt at rest and mask in application views
 - version dataset imports separately from transactional data
 - add retention policies for logs, OTP records, and file uploads
+
+## Soft-delete policy (backend Prisma)
+
+Critical user-impacting entities now use soft-delete markers (`deletedAt`) instead of hard deletion:
+
+- `Document`
+- `Notification`
+- `ChatMessage`
+- `CropCalendar`
+
+Operational behavior:
+
+- delete endpoints archive records by setting `deletedAt`
+- read/list/count queries exclude rows where `deletedAt` is not null
+- restoration remains possible through controlled admin tooling/runbooks

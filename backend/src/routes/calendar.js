@@ -14,6 +14,7 @@ router.get('/', authenticate, async (req, res) => {
 
     const where = {
       userId: req.user.id,
+      deletedAt: null,
       ...(stage && { stage }),
       ...(cropType && { cropType: { contains: cropType, mode: 'insensitive' } })
     };
@@ -94,7 +95,7 @@ router.patch('/:id', authenticate, logActivity, async (req, res) => {
     const { cropType, plantingDate, harvestDate, stage, reminders, notes } = req.body;
 
     const existingEntry = await prisma.cropCalendar.findFirst({
-      where: { id, userId: req.user.id }
+      where: { id, userId: req.user.id, deletedAt: null }
     });
 
     if (!existingEntry) {
@@ -126,18 +127,19 @@ router.delete('/:id', authenticate, logActivity, async (req, res) => {
     const { id } = req.params;
 
     const entry = await prisma.cropCalendar.findFirst({
-      where: { id, userId: req.user.id }
+      where: { id, userId: req.user.id, deletedAt: null }
     });
 
     if (!entry) {
       return res.status(404).json({ error: 'Calendar entry not found' });
     }
 
-    await prisma.cropCalendar.delete({
-      where: { id }
+    await prisma.cropCalendar.update({
+      where: { id },
+      data: { deletedAt: new Date() }
     });
 
-    res.json({ message: 'Calendar entry deleted successfully' });
+    res.json({ message: 'Calendar entry archived successfully' });
   } catch (error) {
     logger.error('Delete calendar entry error:', error);
     res.status(500).json({ error: 'Failed to delete calendar entry' });
@@ -153,6 +155,7 @@ router.get('/reminders', authenticate, async (req, res) => {
     const entries = await prisma.cropCalendar.findMany({
       where: {
         userId: req.user.id,
+        deletedAt: null,
         reminders: { not: null }
       }
     });

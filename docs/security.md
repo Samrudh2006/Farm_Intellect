@@ -95,6 +95,11 @@ Because some current UI components still rely on inline style patterns, CSP must
 4. rotate any webhook signing secrets
 5. verify access logs for unexpected usage during rotation
 
+### Immediate rotation trigger
+- if any secret is pasted into AI chat, issue comments, logs, or screenshots, treat it as compromised immediately
+- rotate the leaked credential at once and update all environments (`local/staging/production`) independently
+- document incident timestamp, impacted services, and completion of rotation in the security log
+
 ### Token/session revocation
 - rotate JWT signing keys and invalidate existing sessions on critical incidents
 - revoke Supabase refresh tokens for compromised users
