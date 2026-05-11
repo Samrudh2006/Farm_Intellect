@@ -5,7 +5,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Dialog, DialogContent } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { AshokaChakra } from "@/components/ui/ashoka-chakra";
 import { FloatingAIAssistant } from "@/components/home/FloatingAIAssistant";
 import { ScrollReveal, CountUp, ParallaxFloat } from "@/components/home/ScrollReveal";
@@ -13,7 +13,7 @@ import { LanguageSelector } from "@/components/ui/language-selector";
 import { useLanguage } from "@/contexts/LanguageContext";
 import {
   Wheat, Brain, CloudSun, TrendingUp, Shield, Users,
-  ArrowRight, CheckCircle, Sparkles, Zap, BarChart3, Leaf, Play
+  ArrowRight, CheckCircle, Sparkles, Zap, BarChart3, Leaf, Play, X
 } from "lucide-react";
 
 const fadeUp = {
@@ -36,6 +36,7 @@ const Index = () => {
   const { t } = useLanguage();
   const { user, profile, loading } = useAuth();
   const [demoOpen, setDemoOpen] = useState(false);
+  const [selectedFeature, setSelectedFeature] = useState<number | null>(null);
   const audioRef = useRef<HTMLAudioElement>(null);
 
   // Auto-redirect authenticated users to their role dashboard
@@ -50,14 +51,94 @@ const Index = () => {
   }
 
   const features = [
-    { icon: Brain, title: "AI-Powered Recommendations", description: "Get personalised crop advice powered by machine learning algorithms", iconBg: "bg-accent/10", iconColor: "text-accent" },
-    { icon: CloudSun, title: "Weather Integration", description: "Real-time weather data and forecasts for optimal farming decisions", iconBg: "bg-navy/10", iconColor: "text-navy" },
-    { icon: TrendingUp, title: "Yield Optimisation", description: "Maximise your crop yields with data-driven insights", iconBg: "bg-primary/10", iconColor: "text-primary" },
-    { icon: Shield, title: "Pest & Disease Control", description: "Early detection and prevention of crop threats", iconBg: "bg-accent/10", iconColor: "text-accent" },
-    { icon: Zap, title: "Smart Irrigation", description: "Optimise water usage with IoT sensor data and AI predictions", iconBg: "bg-navy/10", iconColor: "text-navy" },
-    { icon: BarChart3, title: "Market Analytics", description: "Live mandi prices and profit predictions for better selling decisions", iconBg: "bg-primary/10", iconColor: "text-primary" },
-    { icon: Leaf, title: "Organic Farming Guide", description: "Comprehensive organic farming techniques and certification help", iconBg: "bg-accent/10", iconColor: "text-accent" },
-    { icon: Sparkles, title: "AI Crop Scanner", description: "Snap a photo to identify diseases, pests, and nutrient deficiencies", iconBg: "bg-navy/10", iconColor: "text-navy" },
+    { 
+      icon: null,
+      image: "/icons/ai-recommendations.jpg",
+      title: "AI-Powered Recommendations", 
+      description: "Get personalised crop advice powered by machine learning algorithms",
+      iconBg: "bg-orange-100 dark:bg-orange-900",
+      borderColor: "border-orange-400",
+      iconColor: "text-orange-600 dark:text-orange-300",
+      detailedDesc: "Our advanced ML algorithms analyze your farm data, soil conditions, weather patterns, and historical yields to provide personalized crop recommendations. Get AI-powered insights on optimal planting times, crop varieties, and farming practices tailored to your region and farm type.",
+      benefits: ["Personalized recommendations", "Historical data analysis", "Market trend integration", "Multi-crop comparison"]
+    },
+    { 
+      icon: null,
+      image: "/icons/weather-integration.jpg",
+      title: "Weather Integration", 
+      description: "Real-time weather data and forecasts for optimal farming decisions",
+      iconBg: "bg-blue-100 dark:bg-blue-900",
+      borderColor: "border-blue-400",
+      iconColor: "text-blue-600 dark:text-blue-300",
+      detailedDesc: "Access real-time weather data with precision forecasts up to 15 days ahead. Receive alerts for extreme weather conditions, optimal irrigation timing, and pest emergence predictions based on weather patterns.",
+      benefits: ["Real-time weather updates", "15-day forecasts", "Extreme weather alerts", "Irrigation optimization"]
+    },
+    { 
+      icon: null,
+      image: "/icons/yield-optimization.jpg",
+      title: "Yield Optimisation", 
+      description: "Maximise your crop yields with data-driven insights",
+      iconBg: "bg-green-100 dark:bg-green-900",
+      borderColor: "border-green-400",
+      iconColor: "text-green-600 dark:text-green-300",
+      detailedDesc: "Leverage predictive analytics to optimize every aspect of your farming. From fertilizer timing to harvest scheduling, our AI provides data-driven recommendations to maximize your yields while minimizing costs and environmental impact.",
+      benefits: ["Yield predictions", "Cost optimization", "Resource management", "Environmental impact tracking"]
+    },
+    { 
+      icon: null,
+      image: "/icons/pest-disease-control.jpg",
+      title: "Pest & Disease Control", 
+      description: "Early detection and prevention of crop threats",
+      iconBg: "bg-orange-100 dark:bg-orange-900",
+      borderColor: "border-orange-400",
+      iconColor: "text-orange-600 dark:text-orange-300",
+      detailedDesc: "AI-powered image recognition identifies diseases and pests early, often before visible symptoms appear. Receive timely treatment recommendations and preventive measures to protect your crops from potential threats.",
+      benefits: ["Early pest detection", "Disease identification", "Treatment recommendations", "Prevention strategies"]
+    },
+    { 
+      icon: null,
+      image: "/icons/smart-irrigation.jpg",
+      title: "Smart Irrigation", 
+      description: "Optimise water usage with IoT sensor data and AI predictions",
+      iconBg: "bg-blue-100 dark:bg-blue-900",
+      borderColor: "border-blue-400",
+      iconColor: "text-blue-600 dark:text-blue-300",
+      detailedDesc: "Connect IoT soil moisture sensors for real-time water status. Our AI algorithms optimize irrigation schedules based on weather forecasts, soil conditions, and crop requirements, reducing water waste while improving yields.",
+      benefits: ["Water usage optimization", "IoT sensor integration", "Cost savings", "Environmental conservation"]
+    },
+    { 
+      icon: null,
+      image: "/icons/market-analytics.jpg",
+      title: "Market Analytics", 
+      description: "Live mandi prices and profit predictions for better selling decisions",
+      iconBg: "bg-green-100 dark:bg-green-900",
+      borderColor: "border-green-400",
+      iconColor: "text-green-600 dark:text-green-300",
+      detailedDesc: "Track live mandi prices across major markets, analyze price trends, and get AI-powered profit predictions. Make informed decisions on when and where to sell your crops for maximum returns.",
+      benefits: ["Live price tracking", "Trend analysis", "Profit predictions", "Market comparisons"]
+    },
+    { 
+      icon: null,
+      image: "/icons/organic-farming.jpg",
+      title: "Organic Farming Guide", 
+      description: "Comprehensive organic farming techniques and certification help",
+      iconBg: "bg-orange-100 dark:bg-orange-900",
+      borderColor: "border-orange-400",
+      iconColor: "text-orange-600 dark:text-orange-300",
+      detailedDesc: "Transition to organic farming with our comprehensive guide covering techniques, certifications, and market opportunities. Access expert knowledge on sustainable practices that increase both yield and profitability.",
+      benefits: ["Organic techniques", "Certification guidance", "Premium market access", "Sustainability tracking"]
+    },
+    { 
+      icon: null,
+      image: "/icons/crop-scanner.jpg",
+      title: "AI Crop Scanner", 
+      description: "Snap a photo to identify diseases, pests, and nutrient deficiencies",
+      iconBg: "bg-purple-100 dark:bg-purple-900",
+      borderColor: "border-purple-400",
+      iconColor: "text-purple-600 dark:text-purple-300",
+      detailedDesc: "Use your smartphone to capture crop images. Our AI instantly identifies diseases, pests, and nutrient deficiencies with treatment recommendations. Instant diagnosis available offline too.",
+      benefits: ["Instant diagnosis", "Offline capability", "High accuracy", "Treatment recommendations"]
+    },
   ];
 
   const stats = [
@@ -211,7 +292,7 @@ const Index = () => {
       </section>
 
       {/* Features Section */}
-      <section className="py-20 bg-muted/40 relative">
+      <section className="py-20 bg-gradient-to-b from-amber-50 via-orange-50 to-amber-50 relative">
         <div className="container mx-auto px-4">
           <motion.div
             initial="hidden"
@@ -240,17 +321,35 @@ const Index = () => {
                 viewport={{ once: true, margin: "-50px" }}
                 variants={scaleIn}
               >
-                <Card className="tricolor-card text-center p-6 cursor-pointer h-full group">
-                  <CardContent className="space-y-4 pt-6">
+                <Card className={`${feature.borderColor} border-2 text-center p-6 cursor-pointer h-full group hover:shadow-xl transition-all duration-300 hover:scale-105`}>
+                  <CardContent className="space-y-4 pt-6 flex flex-col items-center">
                     <motion.div
-                      whileHover={{ rotate: [0, -10, 10, 0], scale: 1.1 }}
+                      whileHover={{ rotate: [0, -10, 10, 0], scale: 1.15 }}
                       transition={{ duration: 0.4 }}
-                      className={`inline-flex p-3 rounded-xl ${feature.iconBg} group-hover:shadow-md transition-shadow`}
+                      className="flex items-center justify-center w-32 h-32 mx-auto rounded-full overflow-hidden bg-white shadow-md"
                     >
-                      <feature.icon className={`h-10 w-10 ${feature.iconColor}`} />
+                      {feature.image ? (
+                        <img 
+                          src={feature.image} 
+                          alt={feature.title}
+                          className="h-full w-full object-cover rounded-full"
+                        />
+                      ) : (
+                        <div className={`flex items-center justify-center w-full h-full rounded-full ${feature.iconBg}`}>
+                          <feature.icon className={`h-16 w-16 ${feature.iconColor}`} />
+                        </div>
+                      )}
                     </motion.div>
-                    <h3 className="text-xl font-semibold text-foreground">{feature.title}</h3>
-                    <p className="text-muted-foreground">{feature.description}</p>
+                    <h3 className="text-lg font-semibold text-foreground">{feature.title}</h3>
+                    <p className="text-sm text-muted-foreground leading-relaxed">{feature.description}</p>
+                    <Button 
+                      variant="outline" 
+                      size="sm"
+                      onClick={() => setSelectedFeature(index)}
+                      className="mt-2 w-full group-hover:bg-primary group-hover:text-primary-foreground transition-colors"
+                    >
+                      Know More →
+                    </Button>
                   </CardContent>
                 </Card>
               </motion.div>
@@ -258,6 +357,61 @@ const Index = () => {
           </div>
         </div>
       </section>
+
+      {/* Feature Details Modal */}
+      {selectedFeature !== null && (
+        <Dialog open={selectedFeature !== null} onOpenChange={() => setSelectedFeature(null)}>
+          <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+            <DialogHeader>
+              <div className="flex items-center gap-4 mb-4">
+                <div className="flex items-center justify-center w-28 h-28 rounded-full overflow-hidden flex-shrink-0 bg-white shadow-md">
+                  {features[selectedFeature].image ? (
+                    <img 
+                      src={features[selectedFeature].image} 
+                      alt={features[selectedFeature].title}
+                      className="h-full w-full object-cover rounded-full"
+                    />
+                  ) : (
+                    <div className={`flex items-center justify-center w-full h-full rounded-full ${features[selectedFeature].iconBg}`}>
+                      {(() => {
+                        const Icon = features[selectedFeature].icon;
+                        return <Icon className={`h-12 w-12 ${features[selectedFeature].iconColor}`} />;
+                      })()}
+                    </div>
+                  )}
+                </div>
+                <div className="text-left">
+                  <DialogTitle>{features[selectedFeature].title}</DialogTitle>
+                </div>
+              </div>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <div>
+                <h4 className="font-semibold text-base mb-2 text-foreground">Overview</h4>
+                <p className="text-muted-foreground leading-relaxed">{features[selectedFeature].detailedDesc}</p>
+              </div>
+              <div>
+                <h4 className="font-semibold text-base mb-3 text-foreground">Key Benefits</h4>
+                <div className="grid grid-cols-2 gap-2">
+                  {features[selectedFeature].benefits.map((benefit, i) => (
+                    <div key={i} className="flex items-start gap-2">
+                      <CheckCircle className="h-4 w-4 text-primary mt-1 flex-shrink-0" />
+                      <span className="text-sm text-muted-foreground">{benefit}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+              <div className="pt-4">
+                <Link to="/login">
+                  <Button className="w-full bg-primary hover:bg-primary/90">
+                    Get Started Now
+                  </Button>
+                </Link>
+              </div>
+            </div>
+          </DialogContent>
+        </Dialog>
+      )}
 
       {/* Stats + Benefits Section */}
       <section className="py-20">
