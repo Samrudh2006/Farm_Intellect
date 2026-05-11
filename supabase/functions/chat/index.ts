@@ -155,7 +155,9 @@ Use Indian product names and brands (Tata Rallis, UPL, Bayer, Syngenta, etc.). R
               if (content) {
                 controller.enqueue(encoder.encode(`data: ${JSON.stringify({ choices: [{ delta: { content } }] })}\n\n`));
               }
-            } catch {}
+            } catch (parseError) {
+              console.warn("Failed to parse streamed JSON chunk", parseError);
+            }
           }
         },
         flush(controller) {
@@ -253,7 +255,9 @@ Use Indian product names and brands (Tata Rallis, UPL, Bayer, Syngenta, etc.). R
               if (content) {
                 controller.enqueue(encoder.encode(`data: ${JSON.stringify({ choices: [{ delta: { content } }] })}\n\n`));
               }
-            } catch {}
+            } catch (parseError) {
+              console.warn("Failed to parse streamed JSON chunk", parseError);
+            }
           }
         },
         flush(controller) {

@@ -44,7 +44,9 @@ export async function streamChat({
       try {
         const payload = await resp.json();
         errMsg = payload.error || errMsg;
-      } catch {}
+      } catch (parseError) {
+        console.warn("Failed to parse stream line", parseError);
+      }
 
       if (resp.status === 429) errMsg = "Too many requests — please wait a moment.";
       if (resp.status === 402) errMsg = "AI credits exhausted. Please add credits.";
@@ -108,7 +110,9 @@ export async function streamChat({
           const parsed = JSON.parse(jsonStr);
           const content = parsed.choices?.[0]?.delta?.content as string | undefined;
           if (content) onDelta(content);
-        } catch {}
+        } catch (parseError) {
+        console.warn("Failed to parse stream line", parseError);
+      }
       }
     }
 
