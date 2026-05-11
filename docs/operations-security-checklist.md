@@ -72,6 +72,8 @@ Not yet completed: **11 / 50**
 3. Universal `created_by`/`updated_by` on every table.
 4. UUID-only public IDs across all routes.
 5. Index review + migrations for all hot query paths.
+6. Session cookie hardening flags everywhere applicable.
+7. Mandatory re-auth for sensitive account mutations.
 8. Separate admin login surface with enforced MFA.
 9. Admin action audit trail with old/new diffs.
 10. Dedicated staging admin accounts lifecycle policy.
