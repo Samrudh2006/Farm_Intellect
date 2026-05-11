@@ -76,15 +76,6 @@ This repository follows a **three-environment model** and uses **migration-first
 9. Admin action audit trail with old/new diffs.
 10. Dedicated staging admin accounts lifecycle policy.
 
-19. SPF/DKIM/DMARC deployment verification automation.
-20. Centralized log retention policy enforcement >= 30 days.
-21. Privacy policy + terms publication and versioning process.
-22. Formal compliance mapping (GDPR/CCPA/DPDP/HIPAA applicability).
-23. Full account deletion/anonymization workflow with legal retention logic.
-24. EU cookie consent enforcement layer.
-25. Written disaster recovery runbook with RTO/RPO targets.
-26. Critical account shared-access + break-glass SOP documentation.
-
 ### Newly implemented in this update
 - Maintenance mode switch via `MAINTENANCE_MODE=true` returning HTTP 503 for non-health endpoints.
 - `x-powered-by` header disabled to reduce fingerprinting.

@@ -25,6 +25,8 @@ function resolveSafeImagePath(imagePath) {
   }
 
 
+
+
 // ─── Image Feature Extraction (pure JS, no native deps) ─────────────────────
 
 /**
