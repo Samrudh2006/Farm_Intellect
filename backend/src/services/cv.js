@@ -10,6 +10,22 @@ import path from 'path';
 import { createSarvamChatCompletion } from './sarvam.js';
 import { logger } from '../utils/logger.js';
 
+
+const AI_UPLOADS_ROOT = path.resolve(process.cwd(), 'uploads', 'ai-images');
+
+function isPathInside(baseDir, targetPath) {
+  const resolvedBase = path.resolve(baseDir);
+  const resolvedTarget = path.resolve(targetPath);
+  return resolvedTarget === resolvedBase || resolvedTarget.startsWith(`${resolvedBase}${path.sep}`);
+}
+
+function resolveSafeImagePath(imagePath) {
+  if (!imagePath || !isPathInside(AI_UPLOADS_ROOT, imagePath)) {
+    throw new Error('Invalid image path');
+  }
+  return path.resolve(imagePath);
+}
+
 // ─── Image Feature Extraction (pure JS, no native deps) ─────────────────────
 
 /**
@@ -125,7 +141,8 @@ function extractTextureFeatures(pixelBuffer, width, height) {
  * For JPEG/PNG, extracts statistical features from raw byte patterns as approximation.
  */
 function decodeImageToPixels(imagePath) {
-  const buffer = fs.readFileSync(imagePath);
+  const safeImagePath = resolveSafeImagePath(imagePath);
+  const buffer = fs.readFileSync(safeImagePath);
   const ext = path.extname(imagePath).toLowerCase();
 
   // For BMP files, parse header and extract pixel data
@@ -351,7 +368,8 @@ function validateAIWithFeatures(aiResult, features) {
 }
 
 async function analyzeWithSarvamVision(imagePath, cropType) {
-  const imageBuffer = fs.readFileSync(imagePath);
+  const safeImagePath = resolveSafeImagePath(imagePath);
+  const imageBuffer = fs.readFileSync(safeImagePath);
   const base64Image = imageBuffer.toString('base64');
   const ext = path.extname(imagePath).toLowerCase().replace('.', '');
   const mimeType = { jpg: 'image/jpeg', jpeg: 'image/jpeg', png: 'image/png', webp: 'image/webp' }[ext] || 'image/jpeg';
