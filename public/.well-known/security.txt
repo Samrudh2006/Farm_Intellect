@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<contact>
+  <email>support@farm-intellect.com</email>
+  <phone>+91-XXXXXXXXXX</phone>
+  <url>https://farm-intellect-65.lovable.app</url>
+  <canonical>https://farm-intellect-65.lovable.app/security.txt</canonical>
+</contact>
+
+<!-- Security Contacts and Support -->
+Contact: mailto:security@farm-intellect.com
+Contact: https://farm-intellect-65.lovable.app/security-report
+
+<!-- Preferred Languages -->
+Preferred-Languages: en, hi, pa
+
+<!-- Expires (recommended to update annually) -->
+Expires: 2025-12-31T23:59:59.000Z
+
+<!-- Policy Page -->
+Policy: https://farm-intellect-65.lovable.app/privacy-policy
+Acknowledgments: https://farm-intellect-65.lovable.app/security

@@ -1,8 +1,14 @@
 User-agent: Googlebot
 Allow: /
+Disallow: /admin/
+Disallow: /api/
+Disallow: /private/
 
 User-agent: Bingbot
 Allow: /
+Disallow: /admin/
+Disallow: /api/
+Disallow: /private/
 
 User-agent: Twitterbot
 Allow: /
@@ -12,3 +18,12 @@ Allow: /
 
 User-agent: *
 Allow: /
+Disallow: /admin/
+Disallow: /api/
+Disallow: /private/
+
+# Crawl-delay for general bots
+Crawl-delay: 1
+
+# Sitemap declaration
+Sitemap: https://farm-intellect-65.lovable.app/sitemap.xml
