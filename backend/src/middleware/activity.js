@@ -1,6 +1,16 @@
 import prisma from '../config/database.js';
 import { logger } from '../utils/logger.js';
 
+const SENSITIVE_KEYS = new Set(['password', 'passkey', 'token', 'otp', 'otpCode', 'authorization']);
+
+function redactSensitive(value) {
+  if (Array.isArray(value)) return value.map(redactSensitive);
+  if (value && typeof value === 'object') {
+    return Object.fromEntries(Object.entries(value).map(([k, v]) => [k, SENSITIVE_KEYS.has(k) ? '[REDACTED]' : redactSensitive(v)]));
+  }
+  return value;
+}
+
 export const logActivity = async (req, res, next) => {
   // Store original end function
   const originalEnd = res.end;
@@ -18,9 +28,9 @@ export const logActivity = async (req, res, next) => {
               ipAddress: req.ip || req.connection.remoteAddress,
               userAgent: req.get('User-Agent'),
               metadata: JSON.stringify({
-                body: req.body,
-                params: req.params,
-                query: req.query
+                body: redactSensitive(req.body),
+                params: redactSensitive(req.params),
+                query: redactSensitive(req.query)
               })
             }
           });

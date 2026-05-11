@@ -1,6 +1,7 @@
 import express from 'express';
 import rateLimit from 'express-rate-limit';
 import { body, validationResult } from 'express-validator';
+import { authenticate } from '../middleware/auth.js';
 import prisma from '../config/database.js';
 import { generateToken, hashPassword, comparePassword } from '../utils/auth.js';
 import { sendOTP, verifyOTP } from '../utils/otp.js';
@@ -161,6 +162,13 @@ router.post('/login', loginValidation, logActivity, async (req, res) => {
     const token = generateToken({ userId: user.id, role: user.role });
     const { password: _, ...userWithoutPassword } = user;
 
+    res.cookie('session_token', token, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'lax',
+      maxAge: 7 * 24 * 60 * 60 * 1000,
+    });
+
     res.json({
       token,
       user: userWithoutPassword,
@@ -289,6 +297,52 @@ router.post('/reset-password', resetLimiter, async (req, res) => {
   } catch (error) {
     logger.error('Reset password error:', error);
     res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
+
+// Delete account (requires re-authentication)
+router.post('/delete-account', authenticate, resetLimiter, async (req, res) => {
+  try {
+    const { password } = req.body;
+    if (!password) {
+      return res.status(400).json({ error: 'Password confirmation is required' });
+    }
+
+    const user = await prisma.user.findUnique({ where: { id: req.user.id } });
+    if (!user || !(await comparePassword(password, user.password))) {
+      return res.status(401).json({ error: 'Invalid password confirmation' });
+    }
+
+    const anonymizedEmail = `deleted_${user.id}_${Date.now()}@deleted.local`;
+
+    await prisma.user.update({
+      where: { id: user.id },
+      data: {
+        name: 'Deleted User',
+        email: anonymizedEmail,
+        phone: null,
+        location: null,
+        isVerified: false,
+      }
+    });
+
+    await prisma.activity.create({
+      data: {
+        userId: user.id,
+        action: 'ACCOUNT_DELETION_REQUEST',
+        description: 'User account anonymized after password re-authentication',
+        ipAddress: req.ip || req.connection.remoteAddress,
+        userAgent: req.get('User-Agent'),
+        metadata: JSON.stringify({ at: new Date().toISOString() })
+      }
+    });
+
+    res.clearCookie('session_token');
+    return res.json({ message: 'Account anonymized successfully' });
+  } catch (error) {
+    logger.error('Delete account error:', error);
+    return res.status(500).json({ error: 'Failed to delete account' });
   }
 });
 
