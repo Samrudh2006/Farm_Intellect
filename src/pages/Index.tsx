@@ -52,7 +52,8 @@ const Index = () => {
 
   const features = [
     { 
-      icon: Brain, 
+      icon: null,
+      image: "/icons/ai-recommendations.jpg",
       title: "AI-Powered Recommendations", 
       description: "Get personalised crop advice powered by machine learning algorithms",
       iconBg: "bg-orange-100 dark:bg-orange-900",
@@ -62,7 +63,8 @@ const Index = () => {
       benefits: ["Personalized recommendations", "Historical data analysis", "Market trend integration", "Multi-crop comparison"]
     },
     { 
-      icon: CloudSun, 
+      icon: null,
+      image: "/icons/weather-integration.jpg",
       title: "Weather Integration", 
       description: "Real-time weather data and forecasts for optimal farming decisions",
       iconBg: "bg-blue-100 dark:bg-blue-900",
@@ -72,7 +74,8 @@ const Index = () => {
       benefits: ["Real-time weather updates", "15-day forecasts", "Extreme weather alerts", "Irrigation optimization"]
     },
     { 
-      icon: TrendingUp, 
+      icon: null,
+      image: "/icons/yield-optimization.jpg",
       title: "Yield Optimisation", 
       description: "Maximise your crop yields with data-driven insights",
       iconBg: "bg-green-100 dark:bg-green-900",
@@ -82,7 +85,8 @@ const Index = () => {
       benefits: ["Yield predictions", "Cost optimization", "Resource management", "Environmental impact tracking"]
     },
     { 
-      icon: Shield, 
+      icon: null,
+      image: "/icons/pest-disease-control.jpg",
       title: "Pest & Disease Control", 
       description: "Early detection and prevention of crop threats",
       iconBg: "bg-orange-100 dark:bg-orange-900",
@@ -92,7 +96,8 @@ const Index = () => {
       benefits: ["Early pest detection", "Disease identification", "Treatment recommendations", "Prevention strategies"]
     },
     { 
-      icon: Zap, 
+      icon: null,
+      image: "/icons/smart-irrigation.jpg",
       title: "Smart Irrigation", 
       description: "Optimise water usage with IoT sensor data and AI predictions",
       iconBg: "bg-blue-100 dark:bg-blue-900",
@@ -102,7 +107,8 @@ const Index = () => {
       benefits: ["Water usage optimization", "IoT sensor integration", "Cost savings", "Environmental conservation"]
     },
     { 
-      icon: BarChart3, 
+      icon: null,
+      image: "/icons/market-analytics.jpg",
       title: "Market Analytics", 
       description: "Live mandi prices and profit predictions for better selling decisions",
       iconBg: "bg-green-100 dark:bg-green-900",
@@ -112,7 +118,8 @@ const Index = () => {
       benefits: ["Live price tracking", "Trend analysis", "Profit predictions", "Market comparisons"]
     },
     { 
-      icon: Leaf, 
+      icon: null,
+      image: "/icons/organic-farming.jpg",
       title: "Organic Farming Guide", 
       description: "Comprehensive organic farming techniques and certification help",
       iconBg: "bg-orange-100 dark:bg-orange-900",
@@ -122,7 +129,8 @@ const Index = () => {
       benefits: ["Organic techniques", "Certification guidance", "Premium market access", "Sustainability tracking"]
     },
     { 
-      icon: Sparkles, 
+      icon: null,
+      image: "/icons/crop-scanner.jpg",
       title: "AI Crop Scanner", 
       description: "Snap a photo to identify diseases, pests, and nutrient deficiencies",
       iconBg: "bg-purple-100 dark:bg-purple-900",
@@ -318,9 +326,19 @@ const Index = () => {
                     <motion.div
                       whileHover={{ rotate: [0, -10, 10, 0], scale: 1.15 }}
                       transition={{ duration: 0.4 }}
-                      className={`inline-flex p-4 rounded-full ${feature.iconBg} group-hover:shadow-lg transition-shadow`}
+                      className={`inline-flex p-0 rounded-full overflow-hidden group-hover:shadow-lg transition-shadow`}
                     >
-                      <feature.icon className={`h-12 w-12 ${feature.iconColor}`} />
+                      {feature.image ? (
+                        <img 
+                          src={feature.image} 
+                          alt={feature.title}
+                          className="h-24 w-24 object-cover rounded-full"
+                        />
+                      ) : (
+                        <div className={`inline-flex p-4 rounded-full ${feature.iconBg}`}>
+                          <feature.icon className={`h-12 w-12 ${feature.iconColor}`} />
+                        </div>
+                      )}
                     </motion.div>
                     <h3 className="text-lg font-semibold text-foreground">{feature.title}</h3>
                     <p className="text-sm text-muted-foreground leading-relaxed">{feature.description}</p>
@@ -346,12 +364,20 @@ const Index = () => {
           <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
             <DialogHeader>
               <div className="flex items-center gap-4 mb-4">
-                <div className={`p-4 rounded-full ${features[selectedFeature].iconBg}`}>
-                  {(() => {
-                    const Icon = features[selectedFeature].icon;
-                    return <Icon className={`h-8 w-8 ${features[selectedFeature].iconColor}`} />;
-                  })()}
-                </div>
+                {features[selectedFeature].image ? (
+                  <img 
+                    src={features[selectedFeature].image} 
+                    alt={features[selectedFeature].title}
+                    className="h-20 w-20 object-cover rounded-full"
+                  />
+                ) : (
+                  <div className={`p-4 rounded-full ${features[selectedFeature].iconBg}`}>
+                    {(() => {
+                      const Icon = features[selectedFeature].icon;
+                      return <Icon className={`h-8 w-8 ${features[selectedFeature].iconColor}`} />;
+                    })()}
+                  </div>
+                )}
                 <div className="text-left">
                   <DialogTitle>{features[selectedFeature].title}</DialogTitle>
                 </div>
