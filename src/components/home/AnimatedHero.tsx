@@ -109,7 +109,8 @@ export const AnimatedHero = () => {
           const y = ch * (0.5 + row * 0.12) +
                     Math.sin(x * 0.008 + time * 0.5 + row) * 20 +
                     Math.cos(x * 0.003 + time * 0.3) * 10;
-          x === 0 ? ctx.moveTo(x, y) : ctx.lineTo(x, y);
+          if (x === 0) ctx.moveTo(x, y);
+          else ctx.lineTo(x, y);
         }
         ctx.stroke();
       }
