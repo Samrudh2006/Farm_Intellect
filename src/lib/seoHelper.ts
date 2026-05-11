@@ -154,6 +154,58 @@ export function setFacebookAppId(appId: string): void {
 export function setSocialMetaTags(metadata: PageMetadata): void {
   setOpenGraphTags(metadata);
   setTwitterCardTags(metadata);
+  setPinterestTags(metadata);
+  setLinkedInTags(metadata);
+  setDiscordTags(metadata);
+}
+
+/**
+ * Set Pinterest meta tags for rich pins
+ */
+export function setPinterestTags(metadata: PageMetadata): void {
+  setMetaTag("pinterest:description", metadata.description);
+  setMetaTag("pinterest:media", metadata.image || DEFAULT_IMAGE);
+  setMetaTag("pinterest-rich-pin", "true");
+}
+
+/**
+ * Set LinkedIn meta tags
+ */
+export function setLinkedInTags(metadata: PageMetadata): void {
+  setMetaTag("linkedin:title", metadata.title);
+  setMetaTag("linkedin:description", metadata.description);
+  setMetaTag("linkedin:url", typeof window !== "undefined" ? window.location.href : SITE_URL);
+}
+
+/**
+ * Set Discord embed tags for bot previews
+ */
+export function setDiscordTags(metadata: PageMetadata): void {
+  // Discord uses Open Graph tags but also supports theme color
+  setMetaTag("theme-color", "#1a7d3a");
+  
+  // Optional: Discord bot specific tags
+  setMetaTag("discord:title", metadata.title);
+  setMetaTag("discord:description", metadata.description);
+}
+
+/**
+ * Set WhatsApp preview tags
+ */
+export function setWhatsAppTags(metadata: PageMetadata): void {
+  setMetaTag("og:title", metadata.title);
+  setMetaTag("og:description", metadata.description);
+  setMetaTag("og:image", metadata.image || DEFAULT_IMAGE);
+  setMetaTag("og:url", typeof window !== "undefined" ? window.location.href : SITE_URL);
+}
+
+/**
+ * Set Slack unfurl optimization tags
+ */
+export function setSlackTags(metadata: PageMetadata): void {
+  setMetaTag("slack-app-id", "farm-intellect");
+  setOpenGraphTags(metadata);
+  setMetaTag("twitter:card", "summary_large_image");
 }
 
 /**
