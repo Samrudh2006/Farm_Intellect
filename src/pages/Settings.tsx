@@ -302,12 +302,12 @@ const Settings = () => {
                       />
                     </div>
                     <div className="space-y-2">
-                      <Label htmlFor="apiKey">API Key</Label>
+                      <Label htmlFor="apiKey">OpenAI API Key</Label>
                       <div className="flex gap-2">
                         <Input
                           id="apiKey"
                           type={showApiKey ? "text" : "password"}
-                          value="sk-1234567890abcdef"
+                          value="sk-zQjinsXk7GC70XJdERZEsUKHaHUn104Dho0e8eC7rVGJVUHK"
                           readOnly
                         />
                         <Button
