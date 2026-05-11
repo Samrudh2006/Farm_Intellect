@@ -10,6 +10,37 @@ import { scanFileForThreats } from '../utils/fileScan.js';
 
 const router = express.Router();
 
+const DOCUMENT_UPLOADS_ROOT = path.resolve(process.cwd(), 'uploads', 'documents');
+
+function isPathInside(baseDir, targetPath) {
+  const resolvedBase = path.resolve(baseDir);
+  const resolvedTarget = path.resolve(targetPath);
+  return resolvedTarget === resolvedBase || resolvedTarget.startsWith(`${resolvedBase}${path.sep}`);
+}
+
+function safeUnlink(filePath) {
+  if (!filePath || !isPathInside(DOCUMENT_UPLOADS_ROOT, filePath)) {
+    logger.warn('Refused to delete file outside document uploads directory', { filePath });
+    return;
+  }
+
+  const safeFilePath = path.join(DOCUMENT_UPLOADS_ROOT, path.basename(filePath));
+  try {
+    fs.unlinkSync(safeFilePath);
+  } catch (error) {
+    if (error?.code !== 'ENOENT') {
+      throw error;
+    }
+  }
+}
+
+function resolveSafeDocumentPath(filePath) {
+  if (!filePath || !isPathInside(DOCUMENT_UPLOADS_ROOT, filePath)) {
+    return null;
+  }
+  return path.resolve(filePath);
+}
+
 // Configure multer for file uploads
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
@@ -67,11 +98,11 @@ router.post('/upload', authenticate, upload.single('document'), logActivity, asy
 
     const scanResult = await scanFileForThreats(req.file.path);
     if (scanResult.status === 'infected') {
-      fs.unlinkSync(req.file.path);
+      safeUnlink(req.file.path);
       return res.status(400).json({ error: 'Malware detected in uploaded file.' });
     }
     if (scanResult.status === 'failed') {
-      fs.unlinkSync(req.file.path);
+      safeUnlink(req.file.path);
       return res.status(500).json({ error: 'File scan failed. Please try again later.' });
     }
 
@@ -102,8 +133,8 @@ router.post('/upload', authenticate, upload.single('document'), logActivity, asy
     logger.error('Document upload error:', error);
     
     // Clean up uploaded file if database operation failed
-    if (req.file && fs.existsSync(req.file.path)) {
-      fs.unlinkSync(req.file.path);
+    if (req.file) {
+      safeUnlink(req.file.path);
     }
     
     res.status(500).json({ error: 'Failed to upload document' });
@@ -151,11 +182,16 @@ router.get('/download/:id', authenticate, async (req, res) => {
       return res.status(404).json({ error: 'Document not found' });
     }
 
-    if (!fs.existsSync(document.filePath)) {
+    const safePath = resolveSafeDocumentPath(document.filePath);
+    if (!safePath) {
+      return res.status(400).json({ error: 'Invalid document path' });
+    }
+
+    if (!fs.existsSync(safePath)) {
       return res.status(404).json({ error: 'File not found on server' });
     }
 
-    res.download(document.filePath, document.originalName);
+    res.download(safePath, document.originalName);
   } catch (error) {
     logger.error('Document download error:', error);
     res.status(500).json({ error: 'Failed to download document' });
