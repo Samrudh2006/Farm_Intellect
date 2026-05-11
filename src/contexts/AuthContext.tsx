@@ -160,7 +160,9 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
     const cleanPhone = phone.replace(/\D/g, "");
     const email = phoneToEmail(cleanPhone);
-    const generatedOTP = String(Math.floor(100000 + Math.random() * 900000));
+    const otpArray = new Uint32Array(1);
+    crypto.getRandomValues(otpArray);
+    const generatedOTP = String(100000 + (otpArray[0] % 900000));
     const tempPassword = `otp_${generatedOTP}_${Date.now()}`;
 
     // Try to sign up first (new user)
