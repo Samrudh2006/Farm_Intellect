@@ -179,9 +179,23 @@ router.delete('/:id', authenticate, logActivity, async (req, res) => {
       return res.status(404).json({ error: 'Document not found' });
     }
 
+    let archivedPath = document.filePath;
+    const archiveDirectory = path.join(process.cwd(), 'uploads', 'archive');
+    if (!fs.existsSync(archiveDirectory)) {
+      fs.mkdirSync(archiveDirectory, { recursive: true });
+    }
+
+    if (fs.existsSync(document.filePath)) {
+      archivedPath = path.join(archiveDirectory, path.basename(document.filePath));
+      fs.renameSync(document.filePath, archivedPath);
+    }
+
     await prisma.document.update({
       where: { id },
-      data: { deletedAt: new Date() }
+      data: {
+        deletedAt: new Date(),
+        filePath: archivedPath,
+      }
     });
 
     res.json({ message: 'Document archived successfully' });
