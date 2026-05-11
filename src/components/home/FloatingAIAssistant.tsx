@@ -40,7 +40,7 @@ export const FloatingAIAssistant = () => {
   const speakText = useCallback((text: string) => {
     if (!("speechSynthesis" in window)) return;
     window.speechSynthesis.cancel();
-    const clean = text.replace(/[*#_~`>\[\]()!]/g, "").replace(/\n+/g, ". ").slice(0, 500);
+    const clean = text.replace(/[*#_~`>[\]()!]/g, "").replace(/\n+/g, ". ").slice(0, 500);
     const utterance = new SpeechSynthesisUtterance(clean);
     utterance.lang = langMap[language] || "en-IN";
     utterance.rate = 0.95;

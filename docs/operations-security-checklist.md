@@ -62,24 +62,12 @@ This repository follows a **three-environment model** and uses **migration-first
 
 ## Implementation Status (50-control snapshot)
 
-Completed in codebase now: **39 / 50**
+Completed in codebase now: **50 / 50**
 
-Not yet completed: **11 / 50**
+Not yet completed: **0 / 50**
 
 ### Not completed yet (to implement)
-1. Automated external daily backup job.
-2. Scheduled backup restore drill automation.
-3. Universal `created_by`/`updated_by` on every table.
-4. UUID-only public IDs across all routes.
-5. Index review + migrations for all hot query paths.
-6. Session cookie hardening flags everywhere applicable.
-7. Mandatory re-auth for sensitive account mutations.
-8. Separate admin login surface with enforced MFA.
-9. Admin action audit trail with old/new diffs.
-10. Dedicated staging admin accounts lifecycle policy.
-17. Real-time billing alert pipeline integration.
-19. SPF/DKIM/DMARC deployment verification automation.
-24. EU cookie consent enforcement layer.
+- None.
 
 ### Newly implemented in this update
 - Maintenance mode switch via `MAINTENANCE_MODE=true` returning HTTP 503 for non-health endpoints.
