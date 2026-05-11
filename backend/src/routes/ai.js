@@ -27,13 +27,6 @@ function safeUnlink(filePath) {
     return;
   }
 
-  const safeFilePath = path.join(AI_UPLOADS_ROOT, path.basename(filePath));
-  try {
-    fs.unlinkSync(safeFilePath);
-  } catch (error) {
-    if (error?.code !== 'ENOENT') {
-      throw error;
-    }
   }
 }
 
