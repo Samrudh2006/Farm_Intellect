@@ -9,6 +9,7 @@ import { LanguageProvider } from "@/contexts/LanguageContext";
 import { AuthProvider, useAuth } from "@/contexts/AuthContext";
 import { PageTransition } from "@/components/layout/PageTransition";
 import { AppErrorBoundary } from "@/components/system/AppErrorBoundary";
+import { SeoHead } from "@/components/system/SeoHead";
 import { AmbientMusic } from "@/components/ui/ambient-music";
 import { InstallPrompt } from "@/components/pwa/InstallPrompt";
 import { PushNotificationProvider } from "@/components/system/PushNotificationProvider";
@@ -226,11 +227,12 @@ const App = () => (
             <Toaster />
             <Sonner />
             <BrowserRouter>
+              <SeoHead schema="website" />
               <PushNotificationProvider />
               <AnimatedRoutes />
               <AmbientMusic />
               <InstallPrompt />
-      <CookieConsentBanner />
+              <CookieConsentBanner />
             </BrowserRouter>
           </TooltipProvider>
         </AuthProvider>
