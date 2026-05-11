@@ -332,7 +332,7 @@ const Index = () => {
                         <img 
                           src={feature.image} 
                           alt={feature.title}
-                          className="h-full w-full object-contain rounded-full p-2"
+                          className="h-full w-full object-cover rounded-full"
                         />
                       ) : (
                         <div className={`flex items-center justify-center w-full h-full rounded-full ${feature.iconBg}`}>
@@ -369,7 +369,7 @@ const Index = () => {
                     <img 
                       src={features[selectedFeature].image} 
                       alt={features[selectedFeature].title}
-                      className="h-full w-full object-contain rounded-full p-1"
+                      className="h-full w-full object-cover rounded-full"
                     />
                   ) : (
                     <div className={`flex items-center justify-center w-full h-full rounded-full ${features[selectedFeature].iconBg}`}>
