@@ -42,7 +42,8 @@ async function fetchWeatherAlertForLocation(location: string) {
     if (typeof temp === "number" && temp <= 5) return { title: "❄️ Frost Warning", message: `Low temperature (${Math.round(temp)}°C) in ${location}. Protect tender crops with mulch or covers tonight.` };
     if (cond === "Thunderstorm" || cond === "Rain") return { title: "⛈️ Rain Alert", message: `${cond} expected in ${location}. Postpone spraying and harvest mature crops if possible.` };
     if (wind >= 15) return { title: "💨 Strong Wind Warning", message: `High winds (${Math.round(wind)} m/s) expected in ${location}. Stake tall crops and secure greenhouse covers.` };
-  } catch {
+  } catch (error) {
+    console.warn("Weather alert fetch failed", error);
     return null;
   }
   return null;

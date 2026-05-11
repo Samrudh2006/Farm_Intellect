@@ -301,11 +301,11 @@ export const AIAssistantHub = () => {
         sendMessage(text);
         setTimeout(() => {
           if (continuousListening && recognitionRef.current) {
-            try { recognitionRef.current.start(); } catch {}
+            try { recognitionRef.current.start(); } catch (error) { console.warn("Speech restart failed", error); }
           }
         }, 2000);
       } else if (continuousListening) {
-        try { recognition.start(); } catch {}
+        try { recognition.start(); } catch (error) { console.warn("Speech start failed", error); }
       }
     };
 
@@ -324,7 +324,7 @@ export const AIAssistantHub = () => {
   const stopContinuousListening = useCallback(() => {
     setContinuousListening(false);
     if (recognitionRef.current) {
-      try { recognitionRef.current.stop(); } catch {}
+      try { recognitionRef.current.stop(); } catch (error) { console.warn("Speech stop failed", error); }
       recognitionRef.current = null;
     }
   }, []);
