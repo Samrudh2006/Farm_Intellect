@@ -162,7 +162,9 @@ serve(async (req) => {
             try {
               const parsed = JSON.parse(toolCall.function.arguments);
               prices = parsed.prices || [];
-            } catch {}
+            } catch (parseError) {
+              console.warn("Failed to parse streamed JSON chunk", parseError);
+            }
           }
         }
       }

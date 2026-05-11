@@ -30,6 +30,7 @@ import { logger } from './utils/logger.js';
 dotenv.config();
 
 const app = express();
+app.disable('x-powered-by');
 const server = createServer(app);
 const io = new Server(server, {
   cors: {
@@ -81,22 +82,55 @@ if (process.env.SENTRY_DSN) {
 
 app.use(
   helmet({
-    contentSecurityPolicy: process.env.NODE_ENV === 'production'
-      ? {
-          directives: {
-            defaultSrc: ["'self'"],
-            scriptSrc: ["'self'", "'unsafe-inline'", "'unsafe-eval'"],
-            styleSrc: ["'self'", "'unsafe-inline'"],
-            imgSrc: ["'self'", 'data:', 'https:'],
-            connectSrc: ["'self'", 'https:', 'wss:'],
-            fontSrc: ["'self'", 'https:', 'data:'],
-            objectSrc: ["'none'"],
-            frameAncestors: ["'none'"],
-          },
-        }
-      : false,
+    contentSecurityPolicy: {
+      directives: {
+        defaultSrc: ["'self'"],
+        scriptSrc: ["'self'"],
+        styleSrc: ["'self'", "'unsafe-inline'"],
+        imgSrc: ["'self'", 'data:', 'https:'],
+        connectSrc: ["'self'", 'https:', 'wss:'],
+        fontSrc: ["'self'", 'https:', 'data:'],
+        objectSrc: ["'none'"],
+        frameAncestors: ["'none'"],
+        baseUri: ["'self'"],
+        formAction: ["'self'"],
+      },
+    },
   }),
 );
+
+const MAINTENANCE_MODE = process.env.MAINTENANCE_MODE === 'true';
+const FORCE_HTTPS = process.env.NODE_ENV === 'production' && process.env.FORCE_HTTPS === 'true';
+
+app.use((req, res, next) => {
+  if (!MAINTENANCE_MODE) {
+    next();
+    return;
+  }
+
+  if (req.path === '/health') {
+    next();
+    return;
+  }
+
+  res.status(503).json({
+    error: 'Service temporarily unavailable for maintenance',
+    maintenance: true,
+  });
+});
+
+
+if (FORCE_HTTPS) {
+  app.enable('trust proxy');
+  app.use((req, res, next) => {
+    const forwardedProto = req.get('x-forwarded-proto');
+    if (forwardedProto && forwardedProto !== 'https') {
+      return res.redirect(301, `https://${req.get('host')}${req.originalUrl}`);
+    }
+    next();
+  });
+}
+
 app.use(cors({ origin: allowedOrigin, credentials: true }));
 app.use(limiter);
 app.use(express.json({ limit: '10mb' }));
@@ -123,7 +157,7 @@ app.use('/api/datasets', datasetRoutes);
 
 // Health check
 app.get('/health', (req, res) => {
-  res.json({ status: 'OK', timestamp: new Date().toISOString() });
+  res.json({ status: 'OK', maintenance: MAINTENANCE_MODE, timestamp: new Date().toISOString() });
 });
 
 app.get('/metrics', authenticate, authorize('ADMIN'), metricsHandler);

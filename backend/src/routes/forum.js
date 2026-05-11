@@ -6,6 +6,18 @@ import { logger } from '../utils/logger.js';
 
 const router = express.Router();
 
+
+function sanitizeText(input) {
+  return String(input || '')
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;')
+    .trim();
+}
+
+
 // Get forum posts
 router.get('/posts', authenticate, async (req, res) => {
   try {
@@ -65,16 +77,18 @@ router.get('/posts', authenticate, async (req, res) => {
 router.post('/posts', authenticate, logActivity, async (req, res) => {
   try {
     const { title, content, category, tags } = req.body;
+    const safeTitle = sanitizeText(title);
+    const safeContent = sanitizeText(content);
 
-    if (!title || !content || !category) {
+    if (!safeTitle || !safeContent || !category) {
       return res.status(400).json({ error: 'Title, content, and category are required' });
     }
 
     const post = await prisma.post.create({
       data: {
         authorId: req.user.id,
-        title,
-        content,
+        title: safeTitle,
+        content: safeContent,
         category,
         tags: tags ? JSON.stringify(tags) : null,
         isApproved: req.user.role === 'EXPERT' || req.user.role === 'ADMIN'
@@ -149,8 +163,9 @@ router.post('/posts/:id/comments', authenticate, logActivity, async (req, res) =
   try {
     const { id } = req.params;
     const { content } = req.body;
+    const safeContent = sanitizeText(content);
 
-    if (!content) {
+    if (!safeContent) {
       return res.status(400).json({ error: 'Content is required' });
     }
 
@@ -166,7 +181,7 @@ router.post('/posts/:id/comments', authenticate, logActivity, async (req, res) =
       data: {
         postId: id,
         authorId: req.user.id,
-        content
+        content: safeContent
       },
       include: {
         author: {
