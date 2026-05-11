@@ -25,7 +25,7 @@ const SENSITIVE_KEYS = [
 const MAX_LOG_VALUE_LENGTH = 1000;
 const MAX_LOG_DEPTH = 6;
 
-const escapeHtml = (value) => String(value).replace(/[&<>"']/g, (char) => HTML_ESCAPE_MAP[char] || char);
+const escapeHtml = (value) => String(value).replace(/[&<>"']/g, (char) => HTML_ESCAPE_MAP[char]);
 
 export const sanitizeUserText = (value) => {
   if (value === null || value === undefined) {
