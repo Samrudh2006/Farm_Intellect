@@ -114,7 +114,7 @@ router.post('/upload', authenticate, upload.single('document'), logActivity, asy
 router.get('/my-documents', authenticate, async (req, res) => {
   try {
     const documents = await prisma.document.findMany({
-      where: { userId: req.user.id },
+      where: { userId: req.user.id, deletedAt: null },
       select: {
         id: true,
         type: true,
@@ -142,7 +142,8 @@ router.get('/download/:id', authenticate, async (req, res) => {
     const document = await prisma.document.findFirst({
       where: {
         id,
-        userId: req.user.id
+        userId: req.user.id,
+        deletedAt: null
       }
     });
 
@@ -169,7 +170,8 @@ router.delete('/:id', authenticate, logActivity, async (req, res) => {
     const document = await prisma.document.findFirst({
       where: {
         id,
-        userId: req.user.id
+        userId: req.user.id,
+        deletedAt: null
       }
     });
 
@@ -177,17 +179,12 @@ router.delete('/:id', authenticate, logActivity, async (req, res) => {
       return res.status(404).json({ error: 'Document not found' });
     }
 
-    // Delete file from filesystem
-    if (fs.existsSync(document.filePath)) {
-      fs.unlinkSync(document.filePath);
-    }
-
-    // Delete from database
-    await prisma.document.delete({
-      where: { id }
+    await prisma.document.update({
+      where: { id },
+      data: { deletedAt: new Date() }
     });
 
-    res.json({ message: 'Document deleted successfully' });
+    res.json({ message: 'Document archived successfully' });
   } catch (error) {
     logger.error('Document delete error:', error);
     res.status(500).json({ error: 'Failed to delete document' });
@@ -198,7 +195,7 @@ router.delete('/:id', authenticate, logActivity, async (req, res) => {
 router.get('/pending-verification', authenticate, authorize('ADMIN', 'EXPERT'), async (req, res) => {
   try {
     const documents = await prisma.document.findMany({
-      where: { isVerified: false },
+      where: { isVerified: false, deletedAt: null },
       include: {
         user: {
           select: {
@@ -225,8 +222,8 @@ router.patch('/:id/verify', authenticate, authorize('ADMIN', 'EXPERT'), logActiv
     const { id } = req.params;
     const { isVerified, rejectionReason } = req.body;
 
-    const document = await prisma.document.findUnique({
-      where: { id },
+    const document = await prisma.document.findFirst({
+      where: { id, deletedAt: null },
       include: { user: true }
     });
 

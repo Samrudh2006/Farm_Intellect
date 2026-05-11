@@ -10,8 +10,10 @@
     "build": "echo 'No build step needed for Node.js'",
     "test": "cross-env NODE_ENV=test vitest run",
     "db:migrate": "npx prisma migrate dev",
+    "db:migrate:deploy": "npx prisma migrate deploy",
+    "db:migrate:status": "npx prisma migrate status",
     "db:seed": "node prisma/seed.js",
-    "db:push": "npx prisma db push",
+    "db:push": "node -e \"console.error('Blocked: use Prisma migrations instead (db:migrate or db:migrate:deploy).'); process.exit(1);\"",
     "db:studio": "npx prisma studio"
   },
   "prisma": {

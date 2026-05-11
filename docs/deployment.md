@@ -28,8 +28,11 @@ Recommended:
 
 - `PORT=3001`
 - `NODE_ENV=production`
+- `APP_ENV=production`
 - `FRONTEND_URL=https://your-frontend-domain`
-- `DATABASE_URL=postgresql://user:password@host:5432/farm_intellect?schema=public`
+- `DATABASE_URL_PRODUCTION=postgresql://user:password@host:5432/farm_intellect_prod?schema=public`
+- `DATABASE_URL_STAGING=postgresql://user:password@staging-host:5432/farm_intellect_staging?schema=public`
+- `DATABASE_URL_LOCAL=postgresql://user:password@localhost:5432/farm_intellect_local?schema=public`
 - `JWT_SECRET=<strong-random-secret>`
 - `JWT_EXPIRES_IN=7d`
 - `BCRYPT_ROUNDS=12`
@@ -54,6 +57,20 @@ npm run db:migrate
 npm run db:seed
 npm run start
 ```
+
+## Environment separation policy
+
+- keep independent credentials and databases for `local`, `staging`, and `production`
+- never point local/staging apps to production databases
+- never reuse production API keys for staging/local integrations
+- set `APP_ENV` explicitly in each environment so scoped secrets are selected correctly
+
+## Migration-only database change workflow
+
+- use `npm run db:migrate` for local schema changes
+- commit migration files under `backend/prisma/migrations`
+- deploy schema changes with `npm run db:migrate:deploy` in staging/production
+- `db:push` is intentionally blocked to prevent uncontrolled schema drift
 
 ## Vercel notes
 

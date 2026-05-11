@@ -294,10 +294,13 @@ return <p>{t('your.new.key')}</p>;
 | Rule | Why |
 |:-----|:----|
 | ✅ Use migration files for schema changes | Keeps history clean |
+| ✅ Use separate local/staging/production DB credentials | Prevents accidental production data loss |
+| ✅ Use soft deletes for critical records (`deletedAt`) | Allows safe recovery and audit trails |
 | ✅ Always add RLS (Row-Level Security) policies | Protects user data |
 | ✅ Reference `profiles` table for user data | Never use `auth.users` directly |
 | ✅ Keep roles in `user_roles` table | Prevents privilege escalation |
 | ❌ Never put roles on `profiles` table | Security risk! |
+| ❌ Never use `db push` in production workflows | Can cause untracked schema drift |
 
 </div>
 

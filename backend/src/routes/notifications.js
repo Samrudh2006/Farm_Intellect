@@ -17,6 +17,7 @@ router.get('/', authenticate, async (req, res) => {
 
     const where = {
       userId: req.user.id,
+      deletedAt: null,
       ...(unreadOnly === 'true' && { isRead: false })
     };
 
@@ -29,7 +30,7 @@ router.get('/', authenticate, async (req, res) => {
 
     const total = await prisma.notification.count({ where });
     const unreadCount = await prisma.notification.count({
-      where: { userId: req.user.id, isRead: false }
+      where: { userId: req.user.id, isRead: false, deletedAt: null }
     });
 
     res.json({
@@ -111,7 +112,7 @@ router.patch('/:id/read', authenticate, logActivity, async (req, res) => {
     const { id } = req.params;
 
     const notification = await prisma.notification.findFirst({
-      where: { id, userId: req.user.id }
+      where: { id, userId: req.user.id, deletedAt: null }
     });
 
     if (!notification) {
@@ -134,7 +135,7 @@ router.patch('/:id/read', authenticate, logActivity, async (req, res) => {
 router.patch('/mark-all-read', authenticate, logActivity, async (req, res) => {
   try {
     await prisma.notification.updateMany({
-      where: { userId: req.user.id, isRead: false },
+      where: { userId: req.user.id, isRead: false, deletedAt: null },
       data: { isRead: true }
     });
 
@@ -175,18 +176,19 @@ router.delete('/:id', authenticate, logActivity, async (req, res) => {
     const { id } = req.params;
 
     const notification = await prisma.notification.findFirst({
-      where: { id, userId: req.user.id }
+      where: { id, userId: req.user.id, deletedAt: null }
     });
 
     if (!notification) {
       return res.status(404).json({ error: 'Notification not found' });
     }
 
-    await prisma.notification.delete({
-      where: { id }
+    await prisma.notification.update({
+      where: { id },
+      data: { deletedAt: new Date() }
     });
 
-    res.json({ message: 'Notification deleted' });
+    res.json({ message: 'Notification archived' });
   } catch (error) {
     logger.error('Delete notification error:', error);
     res.status(500).json({ error: 'Failed to delete notification' });

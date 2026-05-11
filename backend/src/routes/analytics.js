@@ -82,16 +82,16 @@ const getFarmerAnalytics = async (userId, timeframe) => {
     forumPosts,
     aiInteractions
   ] = await Promise.all([
-    prisma.cropCalendar.count({ where: { userId } }),
+    prisma.cropCalendar.count({ where: { userId, deletedAt: null } }),
     prisma.notification.count({ 
-      where: { userId, createdAt: { gte: startDate } } 
+      where: { userId, deletedAt: null, createdAt: { gte: startDate } } 
     }),
-    prisma.document.count({ where: { userId } }),
+    prisma.document.count({ where: { userId, deletedAt: null } }),
     prisma.post.count({ 
       where: { authorId: userId, createdAt: { gte: startDate } } 
     }),
     prisma.chatMessage.count({ 
-      where: { userId, type: 'USER', createdAt: { gte: startDate } } 
+      where: { userId, type: 'USER', deletedAt: null, createdAt: { gte: startDate } } 
     })
   ]);
 
@@ -117,9 +117,9 @@ const getMerchantAnalytics = async (userId, timeframe) => {
     activities
   ] = await Promise.all([
     prisma.notification.count({ 
-      where: { userId, createdAt: { gte: startDate } } 
+      where: { userId, deletedAt: null, createdAt: { gte: startDate } } 
     }),
-    prisma.document.count({ where: { userId } }),
+    prisma.document.count({ where: { userId, deletedAt: null } }),
     prisma.post.count({ 
       where: { authorId: userId, createdAt: { gte: startDate } } 
     }),
@@ -159,6 +159,7 @@ const getExpertAnalytics = async (userId, timeframe) => {
     }),
     prisma.document.count({ 
       where: { 
+        deletedAt: null,
         verifiedAt: { gte: startDate }
         // Note: In real app, track who verified
       } 
@@ -192,10 +193,10 @@ const getAdminAnalytics = async (timeframe) => {
   ] = await Promise.all([
     prisma.user.count(),
     prisma.user.count({ where: { createdAt: { gte: startDate } } }),
-    prisma.document.count(),
-    prisma.document.count({ where: { isVerified: false } }),
+    prisma.document.count({ where: { deletedAt: null } }),
+    prisma.document.count({ where: { isVerified: false, deletedAt: null } }),
     prisma.post.count({ where: { createdAt: { gte: startDate } } }),
-    prisma.notification.count({ where: { createdAt: { gte: startDate } } }),
+    prisma.notification.count({ where: { deletedAt: null, createdAt: { gte: startDate } } }),
     prisma.user.groupBy({
       by: ['role'],
       _count: { role: true }

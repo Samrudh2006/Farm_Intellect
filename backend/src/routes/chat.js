@@ -77,7 +77,7 @@ const buildAssistantMessages = ({ user, mode = 'chat', messages, context, langua
 
 const getStoredConversationMessages = async (userId) => {
   const history = await prisma.chatMessage.findMany({
-    where: { userId },
+    where: { userId, deletedAt: null },
     take: CHAT_HISTORY_LIMIT,
     orderBy: { createdAt: 'desc' },
   });
@@ -95,7 +95,7 @@ router.get('/messages', authenticate, async (req, res) => {
     const skip = (page - 1) * limit;
 
     const messages = await prisma.chatMessage.findMany({
-      where: { userId: req.user.id },
+      where: { userId: req.user.id, deletedAt: null },
       skip: parseInt(skip),
       take: parseInt(limit),
       orderBy: { createdAt: 'asc' }
@@ -250,11 +250,12 @@ router.post('/voice/speak', authenticate, logActivity, async (req, res) => {
 // Clear chat history
 router.delete('/messages', authenticate, logActivity, async (req, res) => {
   try {
-    await prisma.chatMessage.deleteMany({
-      where: { userId: req.user.id }
+    await prisma.chatMessage.updateMany({
+      where: { userId: req.user.id, deletedAt: null },
+      data: { deletedAt: new Date() }
     });
 
-    res.json({ message: 'Chat history cleared' });
+    res.json({ message: 'Chat history archived' });
   } catch (error) {
     logger.error('Clear chat error:', error);
     res.status(500).json({ error: 'Failed to clear chat history' });

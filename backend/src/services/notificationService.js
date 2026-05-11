@@ -1,6 +1,7 @@
 import admin from 'firebase-admin';
 import twilio from 'twilio';
 import prisma from '../config/database.js';
+import { getScopedEnv } from '../config/environment.js';
 import { logger } from '../utils/logger.js';
 
 const getFirebaseApp = () => {
@@ -22,10 +23,13 @@ const getFirebaseApp = () => {
 };
 
 const getTwilioClient = () => {
-  if (!process.env.TWILIO_ACCOUNT_SID || !process.env.TWILIO_AUTH_TOKEN) {
+  const twilioSid = getScopedEnv('TWILIO_ACCOUNT_SID');
+  const twilioAuthToken = getScopedEnv('TWILIO_AUTH_TOKEN');
+
+  if (!twilioSid || !twilioAuthToken) {
     return null;
   }
-  return twilio(process.env.TWILIO_ACCOUNT_SID, process.env.TWILIO_AUTH_TOKEN);
+  return twilio(twilioSid, twilioAuthToken);
 };
 
 export const ensureNotificationPreference = async (userId) => {
@@ -77,8 +81,8 @@ const sendSmsNotification = async ({ phone, message }) => {
   try {
     await client.messages.create({
       to: phone,
-      from: process.env.TWILIO_MESSAGING_SERVICE_SID ? undefined : process.env.TWILIO_SMS_FROM,
-      messagingServiceSid: process.env.TWILIO_MESSAGING_SERVICE_SID,
+      from: getScopedEnv('TWILIO_MESSAGING_SERVICE_SID') ? undefined : getScopedEnv('TWILIO_SMS_FROM'),
+      messagingServiceSid: getScopedEnv('TWILIO_MESSAGING_SERVICE_SID'),
       body: message,
     });
   } catch (error) {
@@ -88,11 +92,12 @@ const sendSmsNotification = async ({ phone, message }) => {
 
 const sendWhatsAppNotification = async ({ phone, message }) => {
   const client = getTwilioClient();
-  if (!client || !phone || !process.env.TWILIO_WHATSAPP_FROM) return;
+  const whatsappFrom = getScopedEnv('TWILIO_WHATSAPP_FROM');
+  if (!client || !phone || !whatsappFrom) return;
   try {
     await client.messages.create({
       to: `whatsapp:${phone}`,
-      from: `whatsapp:${process.env.TWILIO_WHATSAPP_FROM}`,
+      from: `whatsapp:${whatsappFrom}`,
       body: message,
     });
   } catch (error) {

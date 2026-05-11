@@ -94,9 +94,11 @@ model Document {
   size         Int
   isVerified   Boolean      @default(false)
   verifiedAt   DateTime?
+  deletedAt    DateTime?
   createdAt    DateTime     @default(now())
   user         User         @relation(fields: [userId], references: [id], onDelete: Cascade)
 
+  @@index([userId, deletedAt])
   @@map("documents")
 }
 
@@ -122,9 +124,11 @@ model Notification {
   type      NotificationType
   isRead    Boolean          @default(false)
   data      String? // JSON data for additional context
+  deletedAt DateTime?
   createdAt DateTime         @default(now())
   user      User             @relation(fields: [userId], references: [id], onDelete: Cascade)
 
+  @@index([userId, isRead, deletedAt])
   @@map("notifications")
 }
 
@@ -166,9 +170,11 @@ model ChatMessage {
   message   String
   type      MessageType @default(USER)
   context   String? // JSON context for AI responses
+  deletedAt DateTime?
   createdAt DateTime    @default(now())
   user      User        @relation(fields: [userId], references: [id], onDelete: Cascade)
 
+  @@index([userId, createdAt, deletedAt])
   @@map("chat_messages")
 }
 
@@ -197,9 +203,11 @@ model CropCalendar {
   stage       String
   reminders   String? // JSON array of reminders
   notes       String?
+  deletedAt   DateTime?
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 
+  @@index([userId, deletedAt])
   @@map("crop_calendar")
 }
 
