@@ -119,3 +119,9 @@ Operational behavior:
 - delete endpoints archive records by setting `deletedAt`
 - read/list/count queries exclude rows where `deletedAt` is not null
 - restoration remains possible through controlled admin tooling/runbooks
+
+## Audit logging (backend Prisma)
+
+- all write actions are captured in the `Activity` table with redacted request metadata
+- admin document verification captures before/after values in activity metadata
+- per-table `created_by`/`updated_by` fields can be added later via Prisma migrations if required

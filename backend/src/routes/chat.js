@@ -4,6 +4,7 @@ import { authenticate } from '../middleware/auth.js';
 import { logActivity } from '../middleware/activity.js';
 import prisma from '../config/database.js';
 import { logger } from '../utils/logger.js';
+import { sanitizeUserText } from '../utils/sanitize.js';
 import {
   createSarvamChatCompletion,
   synthesizeSarvamSpeech,
@@ -57,7 +58,7 @@ const buildAssistantMessages = ({ user, mode = 'chat', messages, context, langua
     .filter((message) => message?.content)
     .map((message) => ({
       role: message.role === 'assistant' || message.role === 'system' ? message.role : 'user',
-      content: String(message.content).trim(),
+      content: sanitizeUserText(message.content),
     }))
     .filter((message) => message.content.length > 0);
 
@@ -144,12 +145,16 @@ router.post('/message', authenticate, logActivity, async (req, res) => {
     }
 
     const trimmedMessage = message.trim();
+    const sanitizedMessage = sanitizeUserText(trimmedMessage);
+    if (!sanitizedMessage) {
+      return res.status(400).json({ error: 'Message is required' });
+    }
 
     // Save user message
     const userMessage = await prisma.chatMessage.create({
       data: {
         userId: req.user.id,
-        message: trimmedMessage,
+        message: sanitizedMessage,
         type: 'USER',
         context: context ? JSON.stringify(context) : null
       }
@@ -157,7 +162,7 @@ router.post('/message', authenticate, logActivity, async (req, res) => {
 
     const conversationMessages = [
       ...(await getStoredConversationMessages(req.user.id)),
-      { role: 'user', content: trimmedMessage },
+      { role: 'user', content: sanitizedMessage },
     ];
 
     const completion = await createSarvamChatCompletion({
@@ -171,13 +176,14 @@ router.post('/message', authenticate, logActivity, async (req, res) => {
     });
 
     // Save AI response
+    const sanitizedAiMessage = sanitizeUserText(completion.content);
     const aiMessage = await prisma.chatMessage.create({
       data: {
         userId: req.user.id,
-        message: completion.content,
+        message: sanitizedAiMessage,
         type: 'AI_ASSISTANT',
         context: JSON.stringify({
-          originalMessage: trimmedMessage,
+          originalMessage: sanitizedMessage,
           mode,
           languageCode,
           ...context

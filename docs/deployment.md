@@ -39,6 +39,8 @@ Recommended:
 - `RATE_LIMIT_WINDOW_MS=900000`
 - `RATE_LIMIT_MAX_REQUESTS=100`
 - `MAX_FILE_SIZE=10485760`
+- `MAINTENANCE_MODE=false`
+- `FORCE_HTTPS=true`
 - database connection settings if moving beyond SQLite
 
 ## Frontend build
@@ -90,6 +92,7 @@ The repository already includes `vercel.json` for SPA routing support.
 - provision a managed PostgreSQL instance and run Prisma migrations
 - configure logs retention and alerting
 - enable HTTPS end to end
+- review `docs/production-hardening.md` for backup, restore testing, and operational runbooks
 
 ## Recommended deployment model
 

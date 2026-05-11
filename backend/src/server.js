@@ -39,6 +39,11 @@ const io = new Server(server, {
 });
 
 const PORT = process.env.PORT || 3001;
+const maintenanceMode = String(process.env.MAINTENANCE_MODE || '').toLowerCase() === 'true';
+const forceHttps = String(process.env.FORCE_HTTPS || '').toLowerCase() === 'true'
+  || process.env.NODE_ENV === 'production';
+
+app.set('trust proxy', 1);
 
 // Rate limiting
 const limiter = rateLimit({
@@ -97,6 +102,18 @@ app.use(
       : false,
   }),
 );
+app.use((req, res, next) => {
+  if (forceHttps && !req.secure && req.get('x-forwarded-proto') !== 'https') {
+    return res.status(400).json({ error: 'HTTPS is required.' });
+  }
+  return next();
+});
+app.use((req, res, next) => {
+  if (maintenanceMode && !['/health', '/metrics'].includes(req.path)) {
+    return res.status(503).json({ error: 'Service unavailable for scheduled maintenance.' });
+  }
+  return next();
+});
 app.use(cors({ origin: allowedOrigin, credentials: true }));
 app.use(limiter);
 app.use(express.json({ limit: '10mb' }));

@@ -3,6 +3,7 @@ import { authenticate } from '../middleware/auth.js';
 import { logActivity } from '../middleware/activity.js';
 import prisma from '../config/database.js';
 import { getDatasetMetadata, touchDatasetMetadata } from '../services/datasets.js';
+import { sanitizeUserText } from '../utils/sanitize.js';
 
 const formatPoll = (poll) => {
   const totalVotes = poll.options.reduce((sum, option) => sum + option.votes, 0);
@@ -27,27 +28,44 @@ router.get('/', authenticate, async (_req, res) => {
   res.json({ metadata, polls: polls.map(formatPoll) });
 });
 
-router.post('/', authenticate, logActivity, async (req, res) => {
-  const { title, description, category, options, endDate, region } = req.body || {};
-  if (!title || !description || !category || !Array.isArray(options) || options.length < 2) {
-    return res.status(400).json({ error: 'Title, description, category, and at least two options are required' });
-  }
+  router.post('/', authenticate, logActivity, async (req, res) => {
+    const { title, description, category, options, endDate, region } = req.body || {};
+    if (!title || !description || !category || !Array.isArray(options) || options.length < 2) {
+      return res.status(400).json({ error: 'Title, description, category, and at least two options are required' });
+    }
 
-  const poll = await prisma.$transaction(async (tx) => {
-    const created = await tx.poll.create({
-      data: {
-        title,
-        description,
-        category,
-        status: 'active',
-        creator: req.user?.name || 'Community Member',
-        region: region || req.user?.location || 'All India',
-        endDate: endDate ? new Date(endDate) : null,
-        options: {
-          create: options.filter(Boolean).map((text) => ({ text })),
+    const sanitizedTitle = sanitizeUserText(title);
+    const sanitizedDescription = sanitizeUserText(description);
+    const sanitizedCategory = sanitizeUserText(category);
+    const sanitizedRegion = sanitizeUserText(region || req.user?.location || 'All India');
+    const sanitizedOptions = options
+      .filter(Boolean)
+      .map((text) => sanitizeUserText(text))
+      .filter(Boolean);
+
+    if (!sanitizedTitle || !sanitizedDescription || !sanitizedCategory) {
+      return res.status(400).json({ error: 'Title, description, and category are required' });
+    }
+
+    if (sanitizedOptions.length < 2) {
+      return res.status(400).json({ error: 'At least two valid options are required' });
+    }
+
+    const poll = await prisma.$transaction(async (tx) => {
+      const created = await tx.poll.create({
+        data: {
+          title: sanitizedTitle,
+          description: sanitizedDescription,
+          category: sanitizedCategory,
+          status: 'active',
+          creator: sanitizeUserText(req.user?.name) || 'Community Member',
+          region: sanitizedRegion,
+          endDate: endDate ? new Date(endDate) : null,
+          options: {
+            create: sanitizedOptions.map((text) => ({ text })),
+          },
         },
-      },
-      include: { options: true },
+        include: { options: true },
     });
     return created;
   });

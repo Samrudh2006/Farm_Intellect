@@ -245,6 +245,14 @@ router.patch('/:id/verify', authenticate, authorize('ADMIN', 'EXPERT'), logActiv
       return res.status(404).json({ error: 'Document not found' });
     }
 
+    req.auditBefore = {
+      id: document.id,
+      userId: document.userId,
+      type: document.type,
+      isVerified: document.isVerified,
+      verifiedAt: document.verifiedAt,
+    };
+
     const updatedDocument = await prisma.document.update({
       where: { id },
       data: {
@@ -252,6 +260,15 @@ router.patch('/:id/verify', authenticate, authorize('ADMIN', 'EXPERT'), logActiv
         verifiedAt: isVerified === true ? new Date() : null
       }
     });
+
+    req.auditAfter = {
+      id: updatedDocument.id,
+      userId: updatedDocument.userId,
+      type: updatedDocument.type,
+      isVerified: updatedDocument.isVerified,
+      verifiedAt: updatedDocument.verifiedAt,
+      rejectionReason: isVerified ? null : rejectionReason || null,
+    };
 
     // Create notification for user
     await prisma.notification.create({

@@ -4,6 +4,10 @@
 
 This project has moved from prototype-grade security toward safer full-stack defaults, but it still requires several production hardening steps before real-world scale deployment.
 
+## Production hardening checklist
+
+See `docs/production-hardening.md` for the full requirement-by-requirement checklist, implementation status, and operational runbooks.
+
 ## Security improvements already applied
 
 ### Secret handling
@@ -31,7 +35,7 @@ This project has moved from prototype-grade security toward safer full-stack def
 ### High priority
 - remove any remaining prototype login shortcuts entirely
 - complete request validation coverage for all routes
-- add audit logging for admin actions
+- expand admin audit logging coverage beyond document verification
 - add file upload scanning beyond MIME filtering
 - implement CSP hardening with tested asset policy
 - add secret rotation runbook and schedule

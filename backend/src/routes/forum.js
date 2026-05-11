@@ -3,6 +3,7 @@ import { authenticate } from '../middleware/auth.js';
 import { logActivity } from '../middleware/activity.js';
 import prisma from '../config/database.js';
 import { logger } from '../utils/logger.js';
+import { sanitizeUserText } from '../utils/sanitize.js';
 
 const router = express.Router();
 
@@ -70,13 +71,24 @@ router.post('/posts', authenticate, logActivity, async (req, res) => {
       return res.status(400).json({ error: 'Title, content, and category are required' });
     }
 
+    const sanitizedTitle = sanitizeUserText(title);
+    const sanitizedContent = sanitizeUserText(content);
+    const sanitizedCategory = sanitizeUserText(category);
+    const sanitizedTags = Array.isArray(tags)
+      ? tags.map((tag) => sanitizeUserText(tag)).filter(Boolean)
+      : null;
+
+    if (!sanitizedTitle || !sanitizedContent || !sanitizedCategory) {
+      return res.status(400).json({ error: 'Title, content, and category are required' });
+    }
+
     const post = await prisma.post.create({
       data: {
         authorId: req.user.id,
-        title,
-        content,
-        category,
-        tags: tags ? JSON.stringify(tags) : null,
+        title: sanitizedTitle,
+        content: sanitizedContent,
+        category: sanitizedCategory,
+        tags: sanitizedTags?.length ? JSON.stringify(sanitizedTags) : null,
         isApproved: req.user.role === 'EXPERT' || req.user.role === 'ADMIN'
       },
       include: {
@@ -154,6 +166,11 @@ router.post('/posts/:id/comments', authenticate, logActivity, async (req, res) =
       return res.status(400).json({ error: 'Content is required' });
     }
 
+    const sanitizedContent = sanitizeUserText(content);
+    if (!sanitizedContent) {
+      return res.status(400).json({ error: 'Content is required' });
+    }
+
     const post = await prisma.post.findUnique({
       where: { id }
     });
@@ -166,7 +183,7 @@ router.post('/posts/:id/comments', authenticate, logActivity, async (req, res) =
       data: {
         postId: id,
         authorId: req.user.id,
-        content
+        content: sanitizedContent
       },
       include: {
         author: {

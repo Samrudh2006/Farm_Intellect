@@ -2,6 +2,7 @@ import express from 'express';
 import { authenticate, authorize } from '../middleware/auth.js';
 import prisma from '../config/database.js';
 import { logger } from '../utils/logger.js';
+import { sanitizeUserText } from '../utils/sanitize.js';
 
 const router = express.Router();
 
@@ -20,13 +21,15 @@ router.get('/profile', authenticate, async (req, res) => {
 router.patch('/profile', authenticate, async (req, res) => {
   try {
     const { name, phone, location } = req.body;
+    const sanitizedName = name ? sanitizeUserText(name) : undefined;
+    const sanitizedLocation = location ? sanitizeUserText(location) : undefined;
     
     const updatedUser = await prisma.user.update({
       where: { id: req.user.id },
       data: {
-        ...(name && { name }),
+        ...(sanitizedName && { name: sanitizedName }),
         ...(phone && { phone }),
-        ...(location && { location })
+        ...(sanitizedLocation && { location: sanitizedLocation })
       },
       include: {
         farmerProfile: true,

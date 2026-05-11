@@ -5,6 +5,7 @@ import { generateToken, hashPassword, comparePassword } from '../utils/auth.js';
 import { sendOTP, verifyOTP } from '../utils/otp.js';
 import { logActivity } from '../middleware/activity.js';
 import { logger } from '../utils/logger.js';
+import { sanitizeUserText } from '../utils/sanitize.js';
 
 const router = express.Router();
 
@@ -34,6 +35,8 @@ router.post('/signup', signupValidation, logActivity, async (req, res) => {
     }
 
     const { email, password, name, role, phone, location } = req.body;
+    const sanitizedName = sanitizeUserText(name);
+    const sanitizedLocation = location ? sanitizeUserText(location) : null;
 
     // Check if user exists
     const existingUser = await prisma.user.findUnique({
@@ -52,10 +55,10 @@ router.post('/signup', signupValidation, logActivity, async (req, res) => {
       data: {
         email,
         password: hashedPassword,
-        name,
+        name: sanitizedName,
         role,
         phone,
-        location
+        location: sanitizedLocation
       }
     });
 
