@@ -1,4 +1,5 @@
 import express from 'express';
+import rateLimit from 'express-rate-limit';
 import { body, validationResult } from 'express-validator';
 import prisma from '../config/database.js';
 import { generateToken, hashPassword, comparePassword } from '../utils/auth.js';
@@ -7,6 +8,20 @@ import { logActivity } from '../middleware/activity.js';
 import { logger } from '../utils/logger.js';
 
 const router = express.Router();
+
+
+const otpLimiter = rateLimit({
+  windowMs: 10 * 60 * 1000,
+  max: 8,
+  message: 'Too many OTP requests. Please try again later.'
+});
+
+const resetLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 6,
+  message: 'Too many password reset attempts. Please try again later.'
+});
+
 
 // Validation rules
 const signupValidation = [
@@ -158,7 +173,7 @@ router.post('/login', loginValidation, logActivity, async (req, res) => {
 });
 
 // Verify OTP endpoint
-router.post('/verify-otp', async (req, res) => {
+router.post('/verify-otp', otpLimiter, async (req, res) => {
   try {
     const { userId, code, purpose } = req.body;
 
@@ -191,7 +206,7 @@ router.post('/verify-otp', async (req, res) => {
 });
 
 // Resend OTP
-router.post('/resend-otp', async (req, res) => {
+router.post('/resend-otp', otpLimiter, async (req, res) => {
   try {
     const { userId, type, purpose } = req.body;
 
@@ -218,7 +233,7 @@ router.post('/resend-otp', async (req, res) => {
 });
 
 // Password reset request
-router.post('/forgot-password', async (req, res) => {
+router.post('/forgot-password', resetLimiter, async (req, res) => {
   try {
     const { email } = req.body;
 
@@ -241,7 +256,7 @@ router.post('/forgot-password', async (req, res) => {
 });
 
 // Reset password with OTP
-router.post('/reset-password', async (req, res) => {
+router.post('/reset-password', resetLimiter, async (req, res) => {
   try {
     const { email, otpCode, newPassword } = req.body;
 

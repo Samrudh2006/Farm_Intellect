@@ -13,6 +13,66 @@ import { runInference } from '../services/inferenceClient.js';
 
 const router = express.Router();
 
+const AI_UPLOADS_ROOT = path.resolve(process.cwd(), 'uploads', 'ai-images');
+const ALLOWED_IMAGE_EXTENSIONS = new Set(['.jpg', '.jpeg', '.png', '.webp']);
+const AI_DAILY_QUOTA = parseInt(process.env.AI_DAILY_QUOTA || '200', 10);
+const aiUsageWindow = new Map();
+
+function isPathInside(baseDir, targetPath) {
+  const resolvedBase = path.resolve(baseDir);
+  const resolvedTarget = path.resolve(targetPath);
+  return resolvedTarget === resolvedBase || resolvedTarget.startsWith(`${resolvedBase}${path.sep}`);
+}
+
+function safeUnlink(filePath) {
+  if (!filePath || !isPathInside(AI_UPLOADS_ROOT, filePath)) {
+    logger.warn('Refused to delete file outside AI uploads directory', { filePath });
+    return;
+  }
+
+  const safeFilePath = path.join(AI_UPLOADS_ROOT, path.basename(filePath));
+  try {
+    fs.unlinkSync(safeFilePath);
+  } catch (error) {
+    if (error?.code !== 'ENOENT') {
+      throw error;
+    }
+  }
+}
+
+
+function enforceDailyAiQuota(req, res, next) {
+  const userId = req.user?.id;
+  if (!userId) return res.status(401).json({ error: 'Authentication required' });
+
+  const dayKey = new Date().toISOString().slice(0, 10);
+  const entry = aiUsageWindow.get(userId);
+  if (!entry || entry.day !== dayKey) {
+    aiUsageWindow.set(userId, { day: dayKey, count: 1 });
+    return next();
+  }
+
+  if (entry.count >= AI_DAILY_QUOTA) {
+    return res.status(429).json({ error: 'Daily AI quota exceeded' });
+  }
+
+  entry.count += 1;
+  aiUsageWindow.set(userId, entry);
+  next();
+}
+
+function validateRequiredFields(requiredFields) {
+  return (req, res, next) => {
+    for (const field of requiredFields) {
+      const value = req.body?.[field];
+      if (value === undefined || value === null || value === '') {
+        return res.status(400).json({ error: `Missing required field: ${field}` });
+      }
+    }
+    next();
+  };
+}
+
 const MODEL_VERSIONS = {
   cropRecommendation: { name: 'crop-recommendation', version: '1.0.0' },
   yieldPrediction: { name: 'yield-prediction', version: '1.0.0' },
@@ -40,17 +100,18 @@ const storage = multer.diskStorage({
 const upload = multer({
   storage,
   fileFilter: (req, file, cb) => {
-    if (file.mimetype.startsWith('image/')) {
+    const ext = path.extname(file.originalname).toLowerCase();
+    if (file.mimetype.startsWith('image/') && ALLOWED_IMAGE_EXTENSIONS.has(ext)) {
       cb(null, true);
     } else {
-      cb(new Error('Only image files are allowed'), false);
+      cb(new Error('Only JPG, JPEG, PNG and WEBP image files are allowed'), false);
     }
   },
   limits: { fileSize: 5 * 1024 * 1024 } // 5MB
 });
 
 // Crop recommendation based on location and soil data
-router.post('/recommend-crops', authenticate, logActivity, async (req, res) => {
+router.post('/recommend-crops', authenticate, enforceDailyAiQuota, validateRequiredFields(['season']), logActivity, async (req, res) => {
   try {
     const { location, soilType, season, farmSize, experience, nitrogen, phosphorus, potassium, ph, temperature, humidity, rainfall } = req.body;
 
@@ -97,7 +158,7 @@ router.post('/recommend-crops', authenticate, logActivity, async (req, res) => {
 });
 
 // Crop disease detection from image
-router.post('/detect-disease', authenticate, upload.single('image'), logActivity, async (req, res) => {
+router.post('/detect-disease', authenticate, enforceDailyAiQuota, upload.single('image'), logActivity, async (req, res) => {
   try {
     if (!req.file) {
       return res.status(400).json({ error: 'Image is required' });
@@ -110,9 +171,7 @@ router.post('/detect-disease', authenticate, upload.single('image'), logActivity
 
     // Clean up uploaded file after processing
     setTimeout(() => {
-      if (fs.existsSync(req.file.path)) {
-        fs.unlinkSync(req.file.path);
-      }
+      safeUnlink(req.file.path);
     }, 60000); // Delete after 1 minute
 
     res.json({
@@ -125,8 +184,8 @@ router.post('/detect-disease', authenticate, upload.single('image'), logActivity
     });
   } catch (error) {
     logger.error('Disease detection error:', error);
-    if (req.file && fs.existsSync(req.file.path)) {
-      fs.unlinkSync(req.file.path);
+    if (req.file) {
+      safeUnlink(req.file.path);
     }
     res.status(500).json({ error: 'Failed to detect disease' });
   }
@@ -157,7 +216,7 @@ router.get('/suggestions', authenticate, async (req, res) => {
 });
 
 // Generate yield prediction
-router.post('/predict-yield', authenticate, logActivity, async (req, res) => {
+router.post('/predict-yield', authenticate, enforceDailyAiQuota, validateRequiredFields(['cropType', 'farmSize']), logActivity, async (req, res) => {
   try {
     const { cropType, farmSize, soilQuality, soilParams, irrigation, irrigationMethod, fertilizer, fertilizerTiming, weather, pestPressure } = req.body;
 
