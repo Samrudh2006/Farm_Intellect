@@ -30,7 +30,7 @@ function safeUnlink(filePath) {
     return;
   }
 
-const safeFilePath = path.join(AI_UPLOADS_ROOT, path.basename(filePath));
+  const safeFilePath = path.join(AI_UPLOADS_ROOT, path.basename(filePath));
   try {
     fs.unlinkSync(safeFilePath);
   } catch (error) {
@@ -39,7 +39,6 @@ const safeFilePath = path.join(AI_UPLOADS_ROOT, path.basename(filePath));
     }
   }
 }
-
 
 function enforceDailyAiQuota(req, res, next) {
   const userId = req.user?.id;
@@ -71,7 +70,6 @@ function validateRequiredFields(requiredFields) {
     }
     next();
   };
-}
 }
 
 const MODEL_VERSIONS = {
@@ -389,24 +387,6 @@ router.post('/crop-calendar', authenticate, logActivity, async (req, res) => {
   } catch (error) {
     logger.error('Crop calendar error:', error);
     res.status(500).json({ error: 'Failed to generate crop calendar' });
-  }
-});
-
-// Get preventive tips for experts dashboard
-router.get('/preventive-tips', authenticate, async (req, res) => {
-  try {
-    if (!['EXPERT', 'ADMIN'].includes(req.user.role)) {
-      return res.status(403).json({ error: 'Access denied' });
-    }
-
-    const { category, season } = req.query;
-
-    const tips = getPreventiveTips(category, season);
-
-    res.json({ tips });
-  } catch (error) {
-    logger.error('Get preventive tips error:', error);
-    res.status(500).json({ error: 'Failed to fetch preventive tips' });
   }
 });
 

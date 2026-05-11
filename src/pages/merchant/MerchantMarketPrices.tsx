@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { Header } from "@/components/layout/Header";
 import { Sidebar } from "@/components/layout/Sidebar";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -28,7 +28,7 @@ const MerchantMarketPrices = () => {
 
   const user = { name: "Merchant User", role: "merchant" };
 
-  const fetchPrices = async () => {
+  const fetchPrices = useCallback(async () => {
     setLoading(true);
     try {
       const { data, error } = await supabase.functions.invoke("market-prices", {
@@ -43,9 +43,9 @@ const MerchantMarketPrices = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, []);
 
-  useEffect(() => { fetchPrices(); }, []);
+  useEffect(() => { fetchPrices(); }, [fetchPrices]);
 
   const sourceBadge = source === "live"
     ? { label: "Live Agmarknet", variant: "default" as const }

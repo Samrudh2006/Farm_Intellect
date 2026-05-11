@@ -84,7 +84,7 @@ export const AIAssistantHub = () => {
       type: "assistant",
       timestamp: new Date(),
     }]);
-  }, [language]);
+  }, [language, t]);
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -331,7 +331,7 @@ export const AIAssistantHub = () => {
 
   useEffect(() => {
     if (activeTab !== "voice") stopContinuousListening();
-  }, [activeTab]);
+  }, [activeTab, stopContinuousListening]);
 
   useEffect(() => {
     return () => {
@@ -339,7 +339,7 @@ export const AIAssistantHub = () => {
       if (videoCallTimerRef.current) clearInterval(videoCallTimerRef.current);
       stopContinuousListening();
     };
-  }, []);
+  }, [stopContinuousListening]);
 
   const quickQuestions = [
     t('ai.quick_crop_season'),

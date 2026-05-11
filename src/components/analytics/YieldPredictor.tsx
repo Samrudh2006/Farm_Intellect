@@ -1,4 +1,4 @@
-import { useMemo, useState, useEffect } from "react";
+import { useMemo, useState, useEffect, useCallback } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -42,7 +42,7 @@ const YieldPredictor = () => {
   const [forecast, setForecast] = useState<Array<{ month: string; price: number }>>([]);
   const [loading, setLoading] = useState(false);
 
-  const fetchPrediction = async () => {
+  const fetchPrediction = useCallback(async () => {
     setLoading(true);
     try {
       const { prediction: result } = await apiFetch<{ prediction: any }>("/api/ai/predict-yield", {
@@ -70,11 +70,11 @@ const YieldPredictor = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [selectedCrop, farmSize]);
 
   useEffect(() => {
     fetchPrediction();
-  }, [selectedCrop, farmSize]);
+  }, [fetchPrediction]);
 
   const yieldPerHectare = prediction?.yieldPerHectare ? prediction.yieldPerHectare / 100 : 0;
   const yieldProgression = useMemo(() => {

@@ -76,7 +76,7 @@ export const EnhancedAIChatbot = () => {
       type: "assistant",
       timestamp: new Date(),
     }]);
-  }, [language]);
+  }, [language, t]);
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
