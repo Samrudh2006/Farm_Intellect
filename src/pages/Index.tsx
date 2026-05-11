@@ -292,7 +292,7 @@ const Index = () => {
       </section>
 
       {/* Features Section */}
-      <section className="py-20 bg-muted/40 relative">
+      <section className="py-20 bg-gradient-to-b from-amber-50 via-orange-50 to-amber-50 relative">
         <div className="container mx-auto px-4">
           <motion.div
             initial="hidden"
@@ -326,17 +326,17 @@ const Index = () => {
                     <motion.div
                       whileHover={{ rotate: [0, -10, 10, 0], scale: 1.15 }}
                       transition={{ duration: 0.4 }}
-                      className={`inline-flex p-0 rounded-full overflow-hidden group-hover:shadow-lg transition-shadow`}
+                      className="flex items-center justify-center w-32 h-32 mx-auto"
                     >
                       {feature.image ? (
                         <img 
                           src={feature.image} 
                           alt={feature.title}
-                          className="h-24 w-24 object-cover rounded-full"
+                          className="h-32 w-32 object-contain rounded-full shadow-lg hover:shadow-xl transition-shadow"
                         />
                       ) : (
-                        <div className={`inline-flex p-4 rounded-full ${feature.iconBg}`}>
-                          <feature.icon className={`h-12 w-12 ${feature.iconColor}`} />
+                        <div className={`flex items-center justify-center w-32 h-32 rounded-full ${feature.iconBg} group-hover:shadow-lg transition-shadow`}>
+                          <feature.icon className={`h-16 w-16 ${feature.iconColor}`} />
                         </div>
                       )}
                     </motion.div>
@@ -368,13 +368,13 @@ const Index = () => {
                   <img 
                     src={features[selectedFeature].image} 
                     alt={features[selectedFeature].title}
-                    className="h-20 w-20 object-cover rounded-full"
+                    className="h-28 w-28 object-contain rounded-full flex-shrink-0"
                   />
                 ) : (
-                  <div className={`p-4 rounded-full ${features[selectedFeature].iconBg}`}>
+                  <div className={`flex items-center justify-center w-28 h-28 rounded-full ${features[selectedFeature].iconBg} flex-shrink-0`}>
                     {(() => {
                       const Icon = features[selectedFeature].icon;
-                      return <Icon className={`h-8 w-8 ${features[selectedFeature].iconColor}`} />;
+                      return <Icon className={`h-12 w-12 ${features[selectedFeature].iconColor}`} />;
                     })()}
                   </div>
                 )}
