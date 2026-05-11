@@ -14,9 +14,7 @@ import { runInference } from '../services/inferenceClient.js';
 const router = express.Router();
 
 const AI_UPLOADS_ROOT = path.resolve(process.cwd(), 'uploads', 'ai-images');
-const ALLOWED_IMAGE_EXTENSIONS = new Set(['.jpg', '.jpeg', '.png', '.webp']);
-const AI_DAILY_QUOTA = parseInt(process.env.AI_DAILY_QUOTA || '200', 10);
-const aiUsageWindow = new Map();
+
 
 function isPathInside(baseDir, targetPath) {
   const resolvedBase = path.resolve(baseDir);
@@ -30,47 +28,7 @@ function safeUnlink(filePath) {
     return;
   }
 
-  const safeFilePath = path.join(AI_UPLOADS_ROOT, path.basename(filePath));
-  try {
-    fs.unlinkSync(safeFilePath);
-  } catch (error) {
-    if (error?.code !== 'ENOENT') {
-      throw error;
-    }
-  }
-}
 
-
-function enforceDailyAiQuota(req, res, next) {
-  const userId = req.user?.id;
-  if (!userId) return res.status(401).json({ error: 'Authentication required' });
-
-  const dayKey = new Date().toISOString().slice(0, 10);
-  const entry = aiUsageWindow.get(userId);
-  if (!entry || entry.day !== dayKey) {
-    aiUsageWindow.set(userId, { day: dayKey, count: 1 });
-    return next();
-  }
-
-  if (entry.count >= AI_DAILY_QUOTA) {
-    return res.status(429).json({ error: 'Daily AI quota exceeded' });
-  }
-
-  entry.count += 1;
-  aiUsageWindow.set(userId, entry);
-  next();
-}
-
-function validateRequiredFields(requiredFields) {
-  return (req, res, next) => {
-    for (const field of requiredFields) {
-      const value = req.body?.[field];
-      if (value === undefined || value === null || value === '') {
-        return res.status(400).json({ error: `Missing required field: ${field}` });
-      }
-    }
-    next();
-  };
 }
 
 const MODEL_VERSIONS = {

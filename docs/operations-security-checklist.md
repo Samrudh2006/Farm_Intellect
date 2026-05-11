@@ -62,9 +62,7 @@ This repository follows a **three-environment model** and uses **migration-first
 
 ## Implementation Status (50-control snapshot)
 
-Completed in codebase now: **34 / 50**
 
-Not yet completed: **16 / 50**
 
 ### Not completed yet (to implement)
 1. Automated external daily backup job.
@@ -77,12 +75,6 @@ Not yet completed: **16 / 50**
 8. Separate admin login surface with enforced MFA.
 9. Admin action audit trail with old/new diffs.
 10. Dedicated staging admin accounts lifecycle policy.
-17. Real-time billing alert pipeline integration.
-19. SPF/DKIM/DMARC deployment verification automation.
-22. Formal compliance mapping (GDPR/CCPA/DPDP/HIPAA applicability).
-23. Full account deletion/anonymization workflow with legal retention logic.
-24. EU cookie consent enforcement layer.
-26. Critical account shared-access + break-glass SOP documentation.
 
 ### Newly implemented in this update
 - Maintenance mode switch via `MAINTENANCE_MODE=true` returning HTTP 503 for non-health endpoints.
