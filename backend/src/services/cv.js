@@ -23,7 +23,7 @@ function resolveSafeImagePath(imagePath) {
   if (!imagePath || !isPathInside(AI_UPLOADS_ROOT, imagePath)) {
     throw new Error('Invalid image path');
   }
-  return path.resolve(imagePath);
+
 }
 
 // ─── Image Feature Extraction (pure JS, no native deps) ─────────────────────
@@ -143,7 +143,7 @@ function extractTextureFeatures(pixelBuffer, width, height) {
 function decodeImageToPixels(imagePath) {
   const safeImagePath = resolveSafeImagePath(imagePath);
   const buffer = fs.readFileSync(safeImagePath);
-  const ext = path.extname(imagePath).toLowerCase();
+
 
   // For BMP files, parse header and extract pixel data
   if (ext === '.bmp' && buffer[0] === 0x42 && buffer[1] === 0x4D) {
@@ -371,7 +371,7 @@ async function analyzeWithSarvamVision(imagePath, cropType) {
   const safeImagePath = resolveSafeImagePath(imagePath);
   const imageBuffer = fs.readFileSync(safeImagePath);
   const base64Image = imageBuffer.toString('base64');
-  const ext = path.extname(imagePath).toLowerCase().replace('.', '');
+  const ext = path.extname(safeImagePath).toLowerCase().replace('.', '');
   const mimeType = { jpg: 'image/jpeg', jpeg: 'image/jpeg', png: 'image/png', webp: 'image/webp' }[ext] || 'image/jpeg';
 
   const systemPrompt = `You are an expert agricultural plant pathologist trained on PlantVillage, ICAR, and CIBRC databases.

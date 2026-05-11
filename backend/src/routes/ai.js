@@ -26,8 +26,7 @@ function safeUnlink(filePath) {
     logger.warn('Refused to delete file outside AI uploads directory', { filePath });
     return;
   }
-  if (fs.existsSync(filePath)) {
-    fs.unlinkSync(filePath);
+
   }
 }
 
