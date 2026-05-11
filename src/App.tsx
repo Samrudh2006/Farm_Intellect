@@ -12,6 +12,7 @@ import { AppErrorBoundary } from "@/components/system/AppErrorBoundary";
 import { AmbientMusic } from "@/components/ui/ambient-music";
 import { InstallPrompt } from "@/components/pwa/InstallPrompt";
 import { PushNotificationProvider } from "@/components/system/PushNotificationProvider";
+import { CookieConsentBanner } from "@/components/system/CookieConsentBanner";
 
 type AppRole = "farmer" | "merchant" | "expert" | "admin";
 
@@ -229,6 +230,7 @@ const App = () => (
               <AnimatedRoutes />
               <AmbientMusic />
               <InstallPrompt />
+      <CookieConsentBanner />
             </BrowserRouter>
           </TooltipProvider>
         </AuthProvider>
