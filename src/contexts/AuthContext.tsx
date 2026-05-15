@@ -46,40 +46,50 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
   const fetchProfile = async (userId: string) => {
     try {
+      console.log("[v0] Fetching profile for user:", userId);
       const { data: profileData, error } = await supabase
         .from("profiles")
         .select("*")
-        .eq("id", userId)
+        .eq("user_id", userId)  // Changed from 'id' to 'user_id'
         .single();
 
       if (error) {
-        console.error("Error fetching profile:", error);
+        console.error("[v0] Error fetching profile:", error);
         setProfile(null);
         return null;
       }
 
       if (profileData) {
+        console.log("[v0] Profile loaded successfully:", { userId: profileData.user_id, displayName: profileData.display_name });
+        // Fetch the user's role from user_roles table
+        const { data: roleData } = await supabase
+          .from("user_roles")
+          .select("role")
+          .eq("user_id", userId)
+          .single();
+
         const nextProfile: UserProfile = {
-          id: profileData.id,
-          first_name: profileData.first_name || undefined,
-          last_name: profileData.last_name || undefined,
+          id: profileData.user_id,
+          first_name: profileData.display_name?.split(" ")[0] || undefined,
+          last_name: profileData.display_name?.split(" ").slice(1).join(" ") || undefined,
           email: profileData.email || undefined,
-          phone_number: profileData.phone_number || undefined,
-          state: profileData.state || undefined,
-          district: profileData.district || undefined,
-          village: profileData.village || undefined,
-          profile_picture_url: profileData.profile_picture_url || undefined,
-          bio: profileData.bio || undefined,
-          language_preference: profileData.language_preference || "en",
-          role: profileData.role || "farmer",
+          phone_number: profileData.phone || undefined,
+          state: profileData.location?.split(",")[0]?.trim() || undefined,
+          district: profileData.location?.split(",")[1]?.trim() || undefined,
+          village: profileData.location?.split(",")[2]?.trim() || undefined,
+          profile_picture_url: profileData.avatar_url || undefined,
+          bio: undefined,
+          language_preference: "en",
+          role: (roleData?.role || "farmer") as 'farmer' | 'merchant' | 'expert' | 'admin',
         };
         setProfile(nextProfile);
         return nextProfile;
       }
+      console.warn("[v0] No profile data found for user:", userId);
       setProfile(null);
       return null;
     } catch (err) {
-      console.error("Error fetching profile:", err);
+      console.error("[v0] Error fetching profile:", err);
       setProfile(null);
       return null;
     }
@@ -119,9 +129,11 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       async (_event, session) => {
+        console.log("[v0] Auth state changed:", { event: _event, hasSession: !!session, userId: session?.user?.id });
         setSession(session);
         setUser(session?.user ?? null);
         if (session?.user) {
+          console.log("[v0] Fetching profile for user:", session.user.id);
           await fetchProfile(session.user.id);
         } else {
           setProfile(null);
