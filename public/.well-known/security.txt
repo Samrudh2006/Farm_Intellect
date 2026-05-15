@@ -1,21 +1,30 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<contact>
-  <email>support@farm-intellect.com</email>
-  <phone>+91-XXXXXXXXXX</phone>
-  <url>https://farm-intellect-65.lovable.app</url>
-  <canonical>https://farm-intellect-65.lovable.app/security.txt</canonical>
-</contact>
+# Smart Crop Advisory Platform - Security Policy
+# RFC 9116 Compliant - Updated 2026-05-15
 
-<!-- Security Contacts and Support -->
-Contact: mailto:security@farm-intellect.com
-Contact: https://farm-intellect-65.lovable.app/security-report
+# Primary security contact
+Contact: mailto:security@farm-intellect.dev
 
-<!-- Preferred Languages -->
-Preferred-Languages: en, hi, pa
+# Preferred languages for security reports
+Preferred-Languages: en, hi
 
-<!-- Expires (recommended to update annually) -->
-Expires: 2025-12-31T23:59:59.000Z
+# Policy pages
+Policy: https://farm-intellect-65.lovable.app/security-policy
+Acknowledgments: https://farm-intellect-65.lovable.app/security-acknowledgments
 
-<!-- Policy Page -->
-Policy: https://farm-intellect-65.lovable.app/privacy-policy
-Acknowledgments: https://farm-intellect-65.lovable.app/security
+# Canonical URL for this file
+Canonical: https://farm-intellect-65.lovable.app/.well-known/security.txt
+
+# Expiration date - update annually
+Expires: 2027-05-15T23:59:59.000Z
+
+# Hardware security keys supported (future)
+# Hiring: https://farm-intellect-65.lovable.app/careers
+
+# Key security commitments:
+# - End-to-end TLS encryption (HSTS preload)
+# - Content Security Policy (CSP) enforcement
+# - Row-Level Security (RLS) on all database tables
+# - Automatic dependency scanning via Dependabot
+# - Regular security audits (quarterly)
+# - Responsible vulnerability disclosure program
+# - No unpatched critical CVEs in dependencies
