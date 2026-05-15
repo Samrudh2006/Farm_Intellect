@@ -1,14 +1,25 @@
+# Smart Crop Advisory Platform - robots.txt
+# Last updated: 2026-05-15
+
+# Search engines - allow public pages only
 User-agent: Googlebot
 Allow: /
 Disallow: /admin/
+Disallow: /merchant/
+Disallow: /expert/
 Disallow: /api/
 Disallow: /private/
+Disallow: /.well-known/
+Disallow: /debug/
 
 User-agent: Bingbot
 Allow: /
 Disallow: /admin/
+Disallow: /merchant/
+Disallow: /expert/
 Disallow: /api/
 Disallow: /private/
+Disallow: /.well-known/
 
 User-agent: Twitterbot
 Allow: /
@@ -16,14 +27,27 @@ Allow: /
 User-agent: facebookexternalhit
 Allow: /
 
+# Default for all other bots
 User-agent: *
 Allow: /
 Disallow: /admin/
+Disallow: /merchant/
+Disallow: /expert/
 Disallow: /api/
 Disallow: /private/
+Disallow: /.well-known/
+Disallow: /debug/
 
 # Crawl-delay for general bots
 Crawl-delay: 1
 
+# Bad bots
+User-agent: MJ12bot
+Disallow: /
+
+User-agent: AhrefsBot
+Crawl-delay: 10
+
 # Sitemap declaration
 Sitemap: https://farm-intellect-65.lovable.app/sitemap.xml
+Sitemap: https://farm-intellect-65.lovable.app/sitemap-index.xml

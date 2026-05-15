@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { ArrowLeft, Sun, Moon, Shield, Phone, MessageCircle, Eye, EyeOff, KeyRound, ChevronDown, Fingerprint, ScanFace } from "lucide-react";
+import { ArrowLeft, Sun, Moon, Shield, Phone, MessageCircle, Eye, EyeOff, KeyRound, ChevronDown, Fingerprint, ScanFace, AlertTriangle } from "lucide-react";
 import {
   isBiometricSupported,
   registerBiometric,
@@ -20,6 +20,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import { indianStates, getCitiesByState } from "@/data/indianLocations";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { logSecurityEvent } from "@/lib/securityMonitoring";
 import farmerImg from "@/assets/roles/farmer-role.jpg";
 import merchantImg from "@/assets/roles/merchant-role.jpg";
 import expertImg from "@/assets/roles/expert-role.jpg";
@@ -39,6 +40,8 @@ const Login = () => {
   const [loginMethod, setLoginMethod] = useState<"sms" | "whatsapp">("sms");
   const [otp, setOtp] = useState(["", "", "", "", "", ""]);
   const [resendTimer, setResendTimer] = useState(0);
+  const [loginAttempts, setLoginAttempts] = useState(0);
+  const [isBlocked, setIsBlocked] = useState(false);
   const otpRefs = useRef<(HTMLInputElement | null)[]>([]);
 
   // Forgot passkey state
@@ -108,13 +111,49 @@ const Login = () => {
   // ── Aadhaar + Passkey submit ──
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    
+    // Rate limiting check
+    if (isBlocked) {
+      toast({ 
+        title: "Too Many Attempts", 
+        description: "Please wait 15 minutes before trying again", 
+        variant: "destructive" 
+      });
+      logSecurityEvent("LOGIN_BLOCKED_RATE_LIMIT", "User exceeded login attempts");
+      return;
+    }
+
+    if (loginAttempts >= 5) {
+      setIsBlocked(true);
+      toast({ 
+        title: "Account Temporarily Locked", 
+        description: "Too many failed login attempts. Please try again later.", 
+        variant: "destructive" 
+      });
+      logSecurityEvent("LOGIN_ATTEMPTS_EXCEEDED", `User exceeded 5 login attempts`);
+      return;
+    }
+
+    // TODO: Turnstile verification (once configured)
+    // if (!turnstileToken) {
+    //   toast({ 
+    //     title: "Bot Verification Required", 
+    //     description: "Please complete the Cloudflare verification", 
+    //     variant: "destructive" 
+    //   });
+    //   return;
+    // }
+
     const cleanAadhaar = formData.aadhaar.replace(/\s/g, "");
 
-    if (cleanAadhaar.length !== 12) {
+    // Validate Aadhaar format
+    if (!/^\d{12}$/.test(cleanAadhaar)) {
+      logSecurityEvent("LOGIN_INVALID_AADHAAR", `Invalid Aadhaar format attempted`);
       toast({ title: t("auth.invalid_phone"), description: "Please enter a valid 12-digit Aadhaar number", variant: "destructive" });
       return;
     }
 
+    // Validate passkey strength
     if (!formData.passkey || formData.passkey.length < 4) {
       toast({ title: "Invalid Passkey", description: "Passkey must be at least 4 characters", variant: "destructive" });
       return;
@@ -171,10 +210,24 @@ const Login = () => {
     } else {
       setLoading(true);
       const { error } = await signInWithAadhaar(cleanAadhaar, formData.passkey);
+      
       if (error) {
-        toast({ title: "Login Failed", description: "Invalid Aadhaar or Passkey", variant: "destructive" });
+        // Track failed login attempt
+        const newAttempts = loginAttempts + 1;
+        setLoginAttempts(newAttempts);
+        
+        logSecurityEvent("LOGIN_FAILED", `Failed login attempt #${newAttempts} for Aadhaar: ${cleanAadhaar.slice(-4)}`);
+        
+        toast({ 
+          title: "Login Failed", 
+          description: `Invalid credentials. ${5 - newAttempts} attempts remaining.`, 
+          variant: "destructive" 
+        });
       } else {
+        // Reset attempts on successful login
+        setLoginAttempts(0);
         toast({ title: t("auth.login_success"), description: t("auth.welcome_back") });
+        logSecurityEvent("LOGIN_SUCCESS", `Successful login`);
       }
       setLoading(false);
     }
@@ -961,13 +1014,31 @@ const Login = () => {
                   </div>
                 )}
 
-                <Button type="submit" className="w-full bg-primary text-primary-foreground hover:bg-primary/90" disabled={loading}>
+                {/* Bot Protection - Cloudflare Turnstile (placeholder while configuring) */}
+                {isBlocked && (
+                  <div className="flex items-start gap-3 rounded-md bg-destructive/10 border border-destructive/30 p-3">
+                    <AlertTriangle className="h-5 w-5 text-destructive flex-shrink-0 mt-0.5" />
+                    <div className="text-sm text-destructive">
+                      <p className="font-medium">Account Temporarily Locked</p>
+                      <p className="text-xs mt-1">Too many failed login attempts. Please try again in 15 minutes.</p>
+                    </div>
+                  </div>
+                )}
+
+                {/* TODO: Enable Turnstile once VITE_CLOUDFLARE_TURNSTILE_SITE_KEY is configured */}
+                {!isBlocked && (
+                  <div className="text-sm text-amber-600 bg-amber-50 border border-amber-200 rounded px-3 py-2">
+                    To enable bot protection, add VITE_CLOUDFLARE_TURNSTILE_SITE_KEY to your .env file
+                  </div>
+                )}
+
+                <Button type="submit" className="w-full bg-primary text-primary-foreground hover:bg-primary/90" disabled={loading || isBlocked}>
                   {loading ? (
                     <span className="flex items-center gap-2">
                       <span className="h-4 w-4 border-2 border-primary-foreground/30 border-t-primary-foreground rounded-full animate-spin" />
                       {t("common.loading")}
                     </span>
-                  ) : isLogin ? t("auth.signin") : t("auth.signup")}
+                  ) : isBlocked ? "Account Locked" : isLogin ? t("auth.signin") : t("auth.signup")}
                 </Button>
               </form>
 
