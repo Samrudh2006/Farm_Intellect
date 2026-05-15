@@ -46,7 +46,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
   const fetchProfile = async (userId: string) => {
     try {
-      console.log("[v0] Fetching profile for user:", userId);
+      console.debug("[v0] Fetching profile");
       // Parallel fetch: get profile and role simultaneously
       const [profileResult, roleResult] = await Promise.all([
         supabase.from("profiles").select("*").eq("user_id", userId).single(),
@@ -54,7 +54,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       ]);
 
       const { data: profileData, error: profileError } = profileResult;
-      const { data: roleData } = roleResult;
+      const { data: roleData, error: roleError } = roleResult;
 
       if (profileError) {
         console.error("[v0] Error fetching profile:", profileError);
@@ -62,17 +62,28 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         return null;
       }
 
+      // Handle missing role data - log error instead of silently defaulting
+      if (roleError) {
+        console.warn("[v0] Warning: Role lookup failed, defaulting to farmer");
+      }
+
       if (profileData) {
-        console.log("[v0] Profile loaded successfully:", { userId: profileData.user_id, displayName: profileData.display_name });
+        console.debug("[v0] Profile loaded successfully");
+        
+        // Parse location: format is "city, state"
+        const locationParts = profileData.location?.split(",").map(s => s.trim()) || [];
+        const city = locationParts[0];
+        const state = locationParts[1];
+
         const nextProfile: UserProfile = {
           id: profileData.user_id,
           first_name: profileData.display_name?.split(" ")[0] || undefined,
           last_name: profileData.display_name?.split(" ").slice(1).join(" ") || undefined,
           email: profileData.email || undefined,
           phone_number: profileData.phone || undefined,
-          state: profileData.location?.split(",")[0]?.trim() || undefined,
-          district: profileData.location?.split(",")[1]?.trim() || undefined,
-          village: profileData.location?.split(",")[2]?.trim() || undefined,
+          state: state || undefined,
+          district: city || undefined,
+          village: undefined,
           profile_picture_url: profileData.avatar_url || undefined,
           bio: undefined,
           language_preference: "en",
@@ -81,7 +92,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         setProfile(nextProfile);
         return nextProfile;
       }
-      console.warn("[v0] No profile data found for user:", userId);
+      console.warn("[v0] No profile data found");
       setProfile(null);
       return null;
     } catch (err) {
@@ -125,11 +136,11 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       async (_event, session) => {
-        console.log("[v0] Auth state changed:", { event: _event, hasSession: !!session, userId: session?.user?.id });
+        console.debug("[v0] Auth state changed:", { event: _event, hasSession: !!session });
         setSession(session);
         setUser(session?.user ?? null);
         if (session?.user) {
-          console.log("[v0] Fetching profile for user:", session.user.id);
+          console.debug("[v0] Fetching profile");
           await fetchProfile(session.user.id);
         } else {
           setProfile(null);
