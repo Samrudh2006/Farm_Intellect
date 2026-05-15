@@ -20,8 +20,6 @@ import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import { indianStates, getCitiesByState } from "@/data/indianLocations";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { SecureInput, VALIDATION_PATTERNS } from "@/components/security/SecureInput";
-import { TurnstileWidget } from "@/components/security/TurnstileWidget";
 import { logSecurityEvent } from "@/lib/securityMonitoring";
 import farmerImg from "@/assets/roles/farmer-role.jpg";
 import merchantImg from "@/assets/roles/merchant-role.jpg";
@@ -42,7 +40,6 @@ const Login = () => {
   const [loginMethod, setLoginMethod] = useState<"sms" | "whatsapp">("sms");
   const [otp, setOtp] = useState(["", "", "", "", "", ""]);
   const [resendTimer, setResendTimer] = useState(0);
-  const [turnstileToken, setTurnstileToken] = useState<string | null>(null);
   const [loginAttempts, setLoginAttempts] = useState(0);
   const [isBlocked, setIsBlocked] = useState(false);
   const otpRefs = useRef<(HTMLInputElement | null)[]>([]);
@@ -137,15 +134,15 @@ const Login = () => {
       return;
     }
 
-    // Turnstile verification
-    if (!turnstileToken) {
-      toast({ 
-        title: "Bot Verification Required", 
-        description: "Please complete the Cloudflare verification", 
-        variant: "destructive" 
-      });
-      return;
-    }
+    // TODO: Turnstile verification (once configured)
+    // if (!turnstileToken) {
+    //   toast({ 
+    //     title: "Bot Verification Required", 
+    //     description: "Please complete the Cloudflare verification", 
+    //     variant: "destructive" 
+    //   });
+    //   return;
+    // }
 
     const cleanAadhaar = formData.aadhaar.replace(/\s/g, "");
 
@@ -226,9 +223,6 @@ const Login = () => {
           description: `Invalid credentials. ${5 - newAttempts} attempts remaining.`, 
           variant: "destructive" 
         });
-        
-        // Reset Turnstile after failed attempt
-        setTurnstileToken(null);
       } else {
         // Reset attempts on successful login
         setLoginAttempts(0);
@@ -1020,7 +1014,7 @@ const Login = () => {
                   </div>
                 )}
 
-                {/* Bot Protection - Cloudflare Turnstile */}
+                {/* Bot Protection - Cloudflare Turnstile (placeholder while configuring) */}
                 {isBlocked && (
                   <div className="flex items-start gap-3 rounded-md bg-destructive/10 border border-destructive/30 p-3">
                     <AlertTriangle className="h-5 w-5 text-destructive flex-shrink-0 mt-0.5" />
@@ -1031,23 +1025,14 @@ const Login = () => {
                   </div>
                 )}
 
+                {/* TODO: Enable Turnstile once VITE_CLOUDFLARE_TURNSTILE_SITE_KEY is configured */}
                 {!isBlocked && (
-                  <TurnstileWidget 
-                    onVerify={setTurnstileToken}
-                    onError={() => {
-                      setTurnstileToken(null);
-                      toast({ title: "Verification Failed", description: "Please try the bot verification again", variant: "destructive" });
-                    }}
-                    onExpire={() => {
-                      setTurnstileToken(null);
-                      toast({ title: "Verification Expired", description: "Please complete the verification again", variant: "destructive" });
-                    }}
-                    theme="light"
-                    size="normal"
-                  />
+                  <div className="text-sm text-amber-600 bg-amber-50 border border-amber-200 rounded px-3 py-2">
+                    To enable bot protection, add VITE_CLOUDFLARE_TURNSTILE_SITE_KEY to your .env file
+                  </div>
                 )}
 
-                <Button type="submit" className="w-full bg-primary text-primary-foreground hover:bg-primary/90" disabled={loading || isBlocked || !turnstileToken}>
+                <Button type="submit" className="w-full bg-primary text-primary-foreground hover:bg-primary/90" disabled={loading || isBlocked}>
                   {loading ? (
                     <span className="flex items-center gap-2">
                       <span className="h-4 w-4 border-2 border-primary-foreground/30 border-t-primary-foreground rounded-full animate-spin" />
