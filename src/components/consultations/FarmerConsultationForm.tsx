@@ -1,4 +1,5 @@
 import { useState } from "react";
+import Turnstile from "react-turnstile";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -21,10 +22,15 @@ export const FarmerConsultationForm = ({ onSubmitted }: { onSubmitted?: () => vo
   const [category, setCategory] = useState("General");
   const [priority, setPriority] = useState("medium");
   const [submitting, setSubmitting] = useState(false);
+  const [captchaToken, setCaptchaToken] = useState<string | null>(null);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!user?.id || !title.trim() || !description.trim()) return;
+    if (!captchaToken) {
+      toast({ title: "Verification required", description: "Please complete the CAPTCHA", variant: "destructive" });
+      return;
+    }
 
     setSubmitting(true);
     const { error } = await supabase.from("consultations").insert({
@@ -33,6 +39,7 @@ export const FarmerConsultationForm = ({ onSubmitted }: { onSubmitted?: () => vo
       description: description.trim(),
       category,
       priority,
+      captcha_verified: true,
     });
 
     if (error) {
@@ -43,6 +50,7 @@ export const FarmerConsultationForm = ({ onSubmitted }: { onSubmitted?: () => vo
       setDescription("");
       setCategory("General");
       setPriority("medium");
+      setCaptchaToken(null);
       onSubmitted?.();
     }
     setSubmitting(false);
@@ -89,7 +97,20 @@ export const FarmerConsultationForm = ({ onSubmitted }: { onSubmitted?: () => vo
             <Textarea id="consult-desc" value={description} onChange={e => setDescription(e.target.value)} placeholder="Provide details about your crop issue, soil condition, or any agricultural question…" rows={4} maxLength={2000} required />
           </div>
 
-          <Button type="submit" disabled={submitting} className="w-full">
+          {/* Turnstile CAPTCHA for bot prevention */}
+          <div className="flex justify-center py-2">
+            <Turnstile
+              sitekey={import.meta.env.VITE_TURNSTILE_SITE_KEY || ""}
+              onSuccess={(token) => setCaptchaToken(token)}
+              onError={() => {
+                setCaptchaToken(null);
+                toast({ title: "CAPTCHA failed", description: "Please try again", variant: "destructive" });
+              }}
+              theme="light"
+            />
+          </div>
+
+          <Button type="submit" disabled={submitting || !captchaToken} className="w-full">
             <Send className="h-4 w-4 mr-2" />
             {submitting ? "Submitting…" : "Submit to Expert Queue"}
           </Button>
