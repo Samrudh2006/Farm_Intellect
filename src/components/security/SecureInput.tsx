@@ -1,6 +1,7 @@
 import React, { InputHTMLAttributes } from "react";
 import { Input } from "@/components/ui/input";
 import DOMPurify from "dompurify";
+import { VALIDATION_PATTERNS } from "@/lib/validationPatterns";
 
 interface SecureInputProps extends InputHTMLAttributes<HTMLInputElement> {
   onValueChange?: (sanitized: string) => void;
@@ -81,15 +82,3 @@ export const SecureInput = React.forwardRef<HTMLInputElement, SecureInputProps>(
 );
 
 SecureInput.displayName = "SecureInput";
-
-// Common validation patterns
-export const VALIDATION_PATTERNS = {
-  EMAIL: /^[^\s@]+@[^\s@]+\.[^\s@]+$/,
-  PHONE_INDIA: /^[6-9]\d{9}$/,
-  AADHAAR: /^\d{12}$/,
-  ALPHABETIC: /^[a-zA-Z\s]+$/,
-  ALPHANUMERIC: /^[a-zA-Z0-9\s]+$/,
-  NUMERIC: /^[0-9]+$/,
-  URL: /^(https?:\/\/)?([\da-z\.-]+)\.([a-z\.]{2,6})([\/\w \.-]*)*\/?$/,
-  PASSWORD: /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/, // 8+ chars, mixed case, number, special
-};

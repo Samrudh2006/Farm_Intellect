@@ -46,7 +46,7 @@ export const validatePassword = (password: string): { valid: boolean; errors: st
 export const sanitizeInput = (input: string): string => {
   return input
     .trim()
-    .replace(/[<>\"']/g, '')
+    .replace(/[<>"']/g, '')
     .slice(0, 255);
 };
 

@@ -99,11 +99,32 @@ const RouteLoader = () => (
 
 const ProtectedRoute = ({ children, allowedRoles }: { children: ReactNode; allowedRoles?: AppRole[] }) => {
   const { user, profile, loading } = useAuth();
-  if (loading) return <div className="min-h-screen flex items-center justify-center"><span className="h-8 w-8 border-4 border-primary/30 border-t-primary rounded-full animate-spin" /></div>;
-  if (!user) return <Navigate to="/login" replace />;
+  
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-background">
+        <div className="flex flex-col items-center gap-4">
+          <span className="h-8 w-8 border-4 border-primary/30 border-t-primary rounded-full animate-spin" />
+          <p className="text-sm text-muted-foreground">Loading...</p>
+        </div>
+      </div>
+    );
+  }
+  
+  if (!user) {
+    return <Navigate to="/login" replace />;
+  }
+  
   if (allowedRoles) {
     if (!profile) {
-      return <div className="min-h-screen flex items-center justify-center"><span className="h-8 w-8 border-4 border-primary/30 border-t-primary rounded-full animate-spin" /></div>;
+      return (
+        <div className="min-h-screen flex items-center justify-center bg-background">
+          <div className="text-center">
+            <h2 className="text-lg font-semibold text-foreground mb-2">Profile Loading Failed</h2>
+            <p className="text-muted-foreground">Unable to load your profile. Please try refreshing the page.</p>
+          </div>
+        </div>
+      );
     }
 
     const role = profile.role as AppRole;
@@ -111,6 +132,7 @@ const ProtectedRoute = ({ children, allowedRoles }: { children: ReactNode; allow
       return <Navigate to={roleHomeRoutes[role] || "/farmer/dashboard"} replace />;
     }
   }
+  
   return <>{children}</>;
 };
 
@@ -218,27 +240,31 @@ const AnimatedRoutes = () => {
   );
 };
 
-const App = () => (
-  <QueryClientProvider client={queryClient}>
-    <AppErrorBoundary>
-      <LanguageProvider>
-        <AuthProvider>
-          <TooltipProvider>
-            <Toaster />
-            <Sonner />
-            <BrowserRouter>
-              <SeoHead schema="website" />
-              <PushNotificationProvider />
-              <AnimatedRoutes />
-              <AmbientMusic />
-              <InstallPrompt />
-              <CookieConsentBanner />
-            </BrowserRouter>
-          </TooltipProvider>
-        </AuthProvider>
-      </LanguageProvider>
-    </AppErrorBoundary>
-  </QueryClientProvider>
-);
+const App = () => {
+  console.log("[v0] App component rendering");
+  
+  return (
+    <QueryClientProvider client={queryClient}>
+      <AppErrorBoundary>
+        <LanguageProvider>
+          <AuthProvider>
+            <TooltipProvider>
+              <Toaster />
+              <Sonner />
+              <BrowserRouter>
+                <SeoHead schema="website" />
+                <PushNotificationProvider />
+                <AnimatedRoutes />
+                <AmbientMusic />
+                <InstallPrompt />
+                <CookieConsentBanner />
+              </BrowserRouter>
+            </TooltipProvider>
+          </AuthProvider>
+        </LanguageProvider>
+      </AppErrorBoundary>
+    </QueryClientProvider>
+  );
+};
 
 export default App;
