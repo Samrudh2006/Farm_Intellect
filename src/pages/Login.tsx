@@ -874,7 +874,7 @@ const Login = () => {
               <h3 className="absolute bottom-3 left-4 text-white font-bold text-xl drop-shadow-lg">{currentRole?.title}</h3>
             </div>
             <CardHeader className="text-center pb-4 pt-4">
-              <CardTitle className="text-xl">{isLogin ? t("auth.signin") : t("auth.signup")}</CardTitle>
+              <CardTitle className="text-xl">Welcome</CardTitle>
               <CardDescription>{isLogin ? t("auth.signin_desc") : t("auth.signup_desc")}</CardDescription>
             </CardHeader>
             <CardContent>

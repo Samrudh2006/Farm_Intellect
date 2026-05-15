@@ -47,27 +47,23 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const fetchProfile = async (userId: string) => {
     try {
       console.log("[v0] Fetching profile for user:", userId);
-      const { data: profileData, error } = await supabase
-        .from("profiles")
-        .select("*")
-        .eq("user_id", userId)  // Changed from 'id' to 'user_id'
-        .single();
+      // Parallel fetch: get profile and role simultaneously
+      const [profileResult, roleResult] = await Promise.all([
+        supabase.from("profiles").select("*").eq("user_id", userId).single(),
+        supabase.from("user_roles").select("role").eq("user_id", userId).single(),
+      ]);
 
-      if (error) {
-        console.error("[v0] Error fetching profile:", error);
+      const { data: profileData, error: profileError } = profileResult;
+      const { data: roleData } = roleResult;
+
+      if (profileError) {
+        console.error("[v0] Error fetching profile:", profileError);
         setProfile(null);
         return null;
       }
 
       if (profileData) {
         console.log("[v0] Profile loaded successfully:", { userId: profileData.user_id, displayName: profileData.display_name });
-        // Fetch the user's role from user_roles table
-        const { data: roleData } = await supabase
-          .from("user_roles")
-          .select("role")
-          .eq("user_id", userId)
-          .single();
-
         const nextProfile: UserProfile = {
           id: profileData.user_id,
           first_name: profileData.display_name?.split(" ")[0] || undefined,
