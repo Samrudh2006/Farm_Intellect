@@ -119,7 +119,11 @@ const Login = () => {
         description: "Please wait 15 minutes before trying again", 
         variant: "destructive" 
       });
-      logSecurityEvent("LOGIN_BLOCKED_RATE_LIMIT", "User exceeded login attempts");
+      logSecurityEvent({
+        eventType: "LOGIN_BLOCKED_RATE_LIMIT",
+        severity: "high",
+        description: "User exceeded login attempts"
+      });
       return;
     }
 
@@ -130,7 +134,11 @@ const Login = () => {
         description: "Too many failed login attempts. Please try again later.", 
         variant: "destructive" 
       });
-      logSecurityEvent("LOGIN_ATTEMPTS_EXCEEDED", `User exceeded 5 login attempts`);
+      logSecurityEvent({
+        eventType: "LOGIN_ATTEMPTS_EXCEEDED",
+        severity: "high",
+        description: "User exceeded 5 login attempts"
+      });
       return;
     }
 
@@ -148,7 +156,11 @@ const Login = () => {
 
     // Validate Aadhaar format
     if (!/^\d{12}$/.test(cleanAadhaar)) {
-      logSecurityEvent("LOGIN_INVALID_AADHAAR", `Invalid Aadhaar format attempted`);
+      logSecurityEvent({
+        eventType: "LOGIN_INVALID_AADHAAR",
+        severity: "low",
+        description: "Invalid Aadhaar format attempted"
+      });
       toast({ title: t("auth.invalid_phone"), description: "Please enter a valid 12-digit Aadhaar number", variant: "destructive" });
       return;
     }
@@ -171,10 +183,10 @@ const Login = () => {
 
       setLoading(true);
       const { error } = await signUpWithAadhaar(cleanAadhaar, formData.passkey, {
-        display_name: formData.name,
-        role: selectedRole || "farmer",
-        phone: formData.phone ? `+91${formData.phone}` : undefined,
-        location: formData.location || undefined,
+        first_name: formData.name,
+        role: (selectedRole || "farmer") as 'farmer' | 'merchant' | 'expert' | 'admin',
+        phone_number: formData.phone ? `+91${formData.phone}` : undefined,
+        state: formData.location || undefined,
       });
 
       if (error) {
@@ -216,7 +228,12 @@ const Login = () => {
         const newAttempts = loginAttempts + 1;
         setLoginAttempts(newAttempts);
         
-        logSecurityEvent("LOGIN_FAILED", `Failed login attempt #${newAttempts} for Aadhaar: ${cleanAadhaar.slice(-4)}`);
+        logSecurityEvent({
+          eventType: "LOGIN_FAILED",
+          severity: "medium",
+          description: `Failed login attempt #${newAttempts}`,
+          details: { attemptNumber: newAttempts }
+        });
         
         toast({ 
           title: "Login Failed", 
@@ -227,7 +244,11 @@ const Login = () => {
         // Reset attempts on successful login
         setLoginAttempts(0);
         toast({ title: t("auth.login_success"), description: t("auth.welcome_back") });
-        logSecurityEvent("LOGIN_SUCCESS", `Successful login`);
+        logSecurityEvent({
+          eventType: "LOGIN_SUCCESS",
+          severity: "low",
+          description: "Successful login"
+        });
       }
       setLoading(false);
     }
