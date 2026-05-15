@@ -80,6 +80,7 @@ const Login = () => {
 
   // Redirect if already logged in
   useEffect(() => {
+    console.log("[v0] Login page auth check:", { user: !!user, profile: !!profile, userRole: profile?.role });
     if (user && profile) {
       const routes: Record<string, string> = {
         farmer: "/farmer/dashboard",
@@ -87,7 +88,9 @@ const Login = () => {
         expert: "/expert/dashboard",
         admin: "/admin/dashboard",
       };
-      navigate(routes[profile.role] || "/farmer/dashboard");
+      const targetRoute = routes[profile.role] || "/farmer/dashboard";
+      console.log("[v0] Redirecting to:", targetRoute);
+      navigate(targetRoute);
     }
   }, [user, profile, navigate]);
 
@@ -871,7 +874,7 @@ const Login = () => {
               <h3 className="absolute bottom-3 left-4 text-white font-bold text-xl drop-shadow-lg">{currentRole?.title}</h3>
             </div>
             <CardHeader className="text-center pb-4 pt-4">
-              <CardTitle className="text-xl">{isLogin ? t("auth.signin") : t("auth.signup")}</CardTitle>
+              <CardTitle className="text-xl">Welcome</CardTitle>
               <CardDescription>{isLogin ? t("auth.signin_desc") : t("auth.signup_desc")}</CardDescription>
             </CardHeader>
             <CardContent>
