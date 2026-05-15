@@ -5,6 +5,7 @@ import { reportError } from '@/lib/error-handling';
 
 interface State {
   hasError: boolean;
+  error?: Error;
 }
 
 export class AppErrorBoundary extends React.Component<React.PropsWithChildren, State> {
@@ -13,11 +14,13 @@ export class AppErrorBoundary extends React.Component<React.PropsWithChildren, S
     this.state = { hasError: false };
   }
 
-  static getDerivedStateFromError(): State {
-    return { hasError: true };
+  static getDerivedStateFromError(error: Error): State {
+    console.error("[v0] Error boundary caught error:", error);
+    return { hasError: true, error };
   }
 
   componentDidCatch(error: Error): void {
+    console.error("[v0] Error boundary logging error:", error.message, error.stack);
     reportError('AppErrorBoundary', error);
   }
 
@@ -33,6 +36,11 @@ export class AppErrorBoundary extends React.Component<React.PropsWithChildren, S
               <p className="text-sm text-muted-foreground">
                 The application hit an unexpected error. You can refresh the page and continue working.
               </p>
+              {this.state.error && (
+                <div className="text-xs bg-muted p-2 rounded overflow-auto max-h-32">
+                  <code className="text-muted-foreground">{this.state.error.message}</code>
+                </div>
+              )}
               <Button onClick={() => window.location.reload()}>Reload application</Button>
             </CardContent>
           </Card>
