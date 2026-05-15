@@ -22,12 +22,9 @@ export const TurnstileWidget = ({
   const siteKey = import.meta.env.VITE_CLOUDFLARE_TURNSTILE_SITE_KEY;
 
   if (!siteKey) {
-    console.warn("[v0] Cloudflare Turnstile site key not configured. Set VITE_CLOUDFLARE_TURNSTILE_SITE_KEY in .env");
-    return (
-      <div className="text-sm text-amber-600 bg-amber-50 border border-amber-200 rounded px-3 py-2">
-        Bot protection disabled - configure Cloudflare Turnstile
-      </div>
-    );
+    console.debug("[v0] Cloudflare Turnstile not configured - bot protection disabled");
+    // Silently return null when not configured
+    return null;
   }
 
   return (

@@ -190,8 +190,10 @@ const Login = () => {
       });
 
       if (error) {
+        console.error("[v0] Signup failed:", error.message);
         toast({ title: "Signup Failed", description: error.message, variant: "destructive" });
       } else {
+        console.log("[v0] Signup successful, waiting for profile load...");
         toast({ title: "🎉 Account Created!", description: "You are now logged in" });
         // Optionally register biometric right after signup
         if (bioRegisterOnSignup.length > 0 && bioSupported) {
@@ -228,6 +230,7 @@ const Login = () => {
         const newAttempts = loginAttempts + 1;
         setLoginAttempts(newAttempts);
         
+        console.error("[v0] Login failed:", error.message);
         logSecurityEvent({
           eventType: "LOGIN_FAILED",
           severity: "medium",
@@ -243,12 +246,14 @@ const Login = () => {
       } else {
         // Reset attempts on successful login
         setLoginAttempts(0);
+        console.log("[v0] Login successful, waiting for profile load...");
         toast({ title: t("auth.login_success"), description: t("auth.welcome_back") });
         logSecurityEvent({
           eventType: "LOGIN_SUCCESS",
           severity: "low",
           description: "Successful login"
         });
+        // Navigation will be handled by the useEffect that watches user/profile
       }
       setLoading(false);
     }
@@ -1043,13 +1048,6 @@ const Login = () => {
                       <p className="font-medium">Account Temporarily Locked</p>
                       <p className="text-xs mt-1">Too many failed login attempts. Please try again in 15 minutes.</p>
                     </div>
-                  </div>
-                )}
-
-                {/* TODO: Enable Turnstile once VITE_CLOUDFLARE_TURNSTILE_SITE_KEY is configured */}
-                {!isBlocked && (
-                  <div className="text-sm text-amber-600 bg-amber-50 border border-amber-200 rounded px-3 py-2">
-                    To enable bot protection, add VITE_CLOUDFLARE_TURNSTILE_SITE_KEY to your .env file
                   </div>
                 )}
 
