@@ -1436,13 +1436,13 @@ const Schemes = () => {
 
                   <div className="flex gap-2 pt-2">
                     <Button asChild className="flex-1" size="sm">
-                      <a href={scheme.applyUrl} target="_blank" rel="noreferrer">
+                      <a href={scheme.applyUrl} target="_blank" rel="noopener noreferrer">
                         <LinkIcon className="mr-2 h-4 w-4" />
                         Apply Now
                       </a>
                     </Button>
                     <Button asChild variant="outline" size="sm">
-                      <a href={scheme.learnMoreUrl} target="_blank" rel="noreferrer">Learn More</a>
+                      <a href={scheme.learnMoreUrl} target="_blank" rel="noopener noreferrer">Learn More</a>
                     </Button>
                   </div>
                 </CardContent>

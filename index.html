@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <!-- Security Headers -->
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
-    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; img-src 'self' data: blob: https:; font-src 'self' https://fonts.gstatic.com; connect-src 'self' https://*.supabase.co https://*.vercel.com https://*.lovable.app ws: wss: http://localhost:* http://127.0.0.1:*; frame-ancestors 'self'; base-uri 'self'; form-action 'self'; object-src 'none'; media-src 'self' blob:;" />
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; img-src 'self' data: blob: https:; font-src 'self' https://fonts.gstatic.com https://fonts.googleapis.com; connect-src 'self' https://*.supabase.co https://*.vercel.com https://*.lovable.app ws: wss: http://localhost:* http://127.0.0.1:*; frame-ancestors 'self'; base-uri 'self'; form-action 'self'; object-src 'none'; media-src 'self' blob:;" />
     <meta http-equiv="X-Content-Type-Options" content="nosniff" />
     <meta http-equiv="X-Frame-Options" content="SAMEORIGIN" />
     <meta name="referrer" content="strict-origin-when-cross-origin" />
@@ -15,8 +15,15 @@
     <meta name="description" content="India's smart agriculture platform: AI crop recommendations, weather forecasts, pest detection, market prices & government schemes for farmers." />
     <meta name="author" content="Smart Crop Advisory" />
     <meta name="keywords" content="smart farming, crop advisory, Indian agriculture, AI farming, kisan, PM-KISAN, mandi prices" />
-    <!-- Non-production pages - prevent indexing -->
+    <!-- Robots: only index on production domain -->
     <meta name="robots" content="index, follow" />
+    <script>
+      // Prevent indexing of preview/staging deployments
+      if (window.location.hostname !== 'farm-intellect-65.lovable.app' && !window.location.hostname.includes('localhost')) {
+        const robotsMeta = document.querySelector('meta[name="robots"]');
+        if (robotsMeta) robotsMeta.setAttribute('content', 'noindex, nofollow');
+      }
+    </script>
     <link rel="manifest" href="/manifest.json" />
     <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
     <link rel="icon" href="/favicon.png" type="image/png" />

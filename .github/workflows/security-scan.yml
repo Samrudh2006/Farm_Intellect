@@ -1,0 +1,143 @@
+name: Security Scan
+
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+    branches: [main, develop]
+  schedule:
+    # Run daily at 2 AM UTC
+    - cron: '0 2 * * *'
+
+jobs:
+  secret-scanning:
+    name: Secret Scanning
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Run TruffleHog Secret Scanner
+        uses: trufflesecurity/trufflehog@main
+        with:
+          path: ./
+          base: ${{ github.event.repository.default_branch }}
+          head: HEAD
+          extra_args: --debug --only-verified
+
+  dependency-check:
+    name: Dependency Security Check
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run npm audit
+        run: npm audit --audit-level=moderate
+        continue-on-error: true
+
+      - name: Check for vulnerable packages
+        run: npm audit --json | jq 'if .metadata.vulnerabilities.total > 0 then error("Found vulnerabilities") else empty end'
+        continue-on-error: true
+
+  sast-scan:
+    name: SAST - Code Quality
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run ESLint
+        run: npm run lint
+        continue-on-error: true
+
+      - name: Check for hardcoded secrets in source
+        run: |
+          # Check for common secret patterns
+          if grep -r "PRIVATE_KEY\|SECRET_KEY\|API_KEY\|PASSWORD\|TOKEN" src/ \
+            --include="*.ts" --include="*.tsx" --include="*.js" \
+            | grep -v "// ignore\|node_modules" ; then
+            echo "❌ Potential hardcoded secrets found!"
+            exit 1
+          else
+            echo "✓ No obvious hardcoded secrets detected"
+          fi
+        continue-on-error: true
+
+  csp-validation:
+    name: CSP Headers Validation
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Validate CSP Headers
+        run: |
+          echo "Checking CSP headers..."
+          
+          # Check vercel.json CSP
+          if grep -q "unsafe-eval" vercel.json; then
+            echo "❌ WARNING: 'unsafe-eval' found in vercel.json CSP"
+            exit 1
+          fi
+          
+          # Check index.html CSP
+          if grep -q "unsafe-eval" index.html; then
+            echo "❌ WARNING: 'unsafe-eval' found in index.html CSP"
+            exit 1
+          fi
+          
+          # Verify noopener on external links
+          if grep -r "target=\"_blank\"" src/ --include="*.tsx" | grep -v "rel=.*noopener"; then
+            echo "❌ WARNING: External links missing 'noopener' in rel attribute"
+            exit 1
+          fi
+          
+          echo "✓ CSP and link security checks passed"
+
+  build-check:
+    name: Build Verification
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build application
+        run: npm run build
+
+      - name: Check build output
+        run: |
+          if [ ! -d "dist" ]; then
+            echo "❌ Build failed - dist directory not found"
+            exit 1
+          fi
+          echo "✓ Build successful"
