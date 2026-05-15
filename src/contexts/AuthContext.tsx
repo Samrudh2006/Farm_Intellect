@@ -4,12 +4,17 @@ import type { User as SupabaseUser, Session as SupabaseSession } from "@supabase
 
 interface UserProfile {
   id: string;
-  display_name: string;
-  email: string;
-  phone?: string;
-  location?: string;
-  avatar_url?: string;
-  role: string;
+  first_name?: string;
+  last_name?: string;
+  email?: string;
+  phone_number?: string;
+  state?: string;
+  district?: string;
+  village?: string;
+  profile_picture_url?: string;
+  bio?: string;
+  language_preference?: string;
+  role: 'farmer' | 'merchant' | 'expert' | 'admin';
 }
 
 interface AuthContextType {
@@ -41,27 +46,32 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
   const fetchProfile = async (userId: string) => {
     try {
-      const { data: profileData } = await supabase
+      const { data: profileData, error } = await supabase
         .from("profiles")
         .select("*")
-        .eq("user_id", userId)
+        .eq("id", userId)
         .single();
 
-      const { data: roleData } = await supabase
-        .from("user_roles")
-        .select("role")
-        .eq("user_id", userId)
-        .single();
+      if (error) {
+        console.error("Error fetching profile:", error);
+        setProfile(null);
+        return null;
+      }
 
       if (profileData) {
         const nextProfile: UserProfile = {
           id: profileData.id,
-          display_name: profileData.display_name || "",
-          email: profileData.email || "",
-          phone: profileData.phone || "",
-          location: profileData.location || "",
-          avatar_url: profileData.avatar_url || "",
-          role: roleData?.role || "farmer",
+          first_name: profileData.first_name || undefined,
+          last_name: profileData.last_name || undefined,
+          email: profileData.email || undefined,
+          phone_number: profileData.phone_number || undefined,
+          state: profileData.state || undefined,
+          district: profileData.district || undefined,
+          village: profileData.village || undefined,
+          profile_picture_url: profileData.profile_picture_url || undefined,
+          bio: profileData.bio || undefined,
+          language_preference: profileData.language_preference || "en",
+          role: profileData.role || "farmer",
         };
         setProfile(nextProfile);
         return nextProfile;
@@ -121,7 +131,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const signUpWithAadhaar = async (
     aadhaar: string,
     passkey: string,
-    metadata: { display_name: string; role: string; phone?: string; location?: string }
+    metadata: { first_name: string; role: 'farmer' | 'merchant' | 'expert' | 'admin'; phone_number?: string; state?: string; district?: string; village?: string }
   ) => {
     if (!hasSupabaseEnv) {
       return { error: new Error("Backend not configured") };
@@ -129,17 +139,18 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
     const email = aadhaarToEmail(aadhaar);
 
-    const { error } = await supabase.auth.signUp({
+    const { error, data } = await supabase.auth.signUp({
       email,
       password: passkey,
       options: {
-        data: { ...metadata, aadhaar: aadhaar.replace(/\s/g, "") },
+        data: { ...metadata, role: metadata.role },
         emailRedirectTo: window.location.origin,
       },
     });
 
     if (error) return { error: error as Error };
 
+    // Profile is auto-created via database trigger
     return { error: null };
   };
 
@@ -153,7 +164,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     return { error: error ? (error as Error) : null };
   };
 
-  const signInWithPhoneOTP = async (phone: string, role: string, name?: string) => {
+  const signInWithPhoneOTP = async (phone: string, role: 'farmer' | 'merchant' | 'expert' | 'admin', name?: string) => {
     if (!hasSupabaseEnv) {
       return { otp: "", error: new Error("Backend not configured") };
     }
@@ -170,7 +181,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       email,
       password: tempPassword,
       options: {
-        data: { display_name: name || cleanPhone, role, phone: `+91${cleanPhone}` },
+        data: { first_name: name || cleanPhone, role, phone_number: `+91${cleanPhone}` },
         emailRedirectTo: window.location.origin,
       },
     });
