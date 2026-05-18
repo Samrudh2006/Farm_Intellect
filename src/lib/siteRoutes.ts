@@ -118,6 +118,13 @@ export const siteRoutes: RouteConfig[] = [
         changefreq: "monthly",
       },
       {
+        path: "/farmer/features",
+        title: "Smart Farm Features",
+        description: "Access advanced farmer capabilities, voice assistance, alerts, and personalized tools.",
+        priority: 0.7,
+        changefreq: "weekly",
+      },
+      {
         path: "/farmer/ai-advisory",
         title: "AI Advisory",
         description: "Get AI-powered agricultural advisory and recommendations.",
@@ -132,7 +139,7 @@ export const siteRoutes: RouteConfig[] = [
         changefreq: "daily",
       },
       {
-        path: "/farmer/knowledge-hub",
+        path: "/farmer/knowledge",
         title: "Knowledge Hub",
         description: "Access educational resources and best practices.",
         priority: 0.7,
@@ -165,6 +172,20 @@ export const siteRoutes: RouteConfig[] = [
         description: "Connect with experts and support team.",
         priority: 0.6,
         changefreq: "daily",
+      },
+      {
+        path: "/farmer/call",
+        title: "Farmer Call",
+        description: "Join voice and video consultations for real-time support.",
+        priority: 0.5,
+        changefreq: "daily",
+      },
+      {
+        path: "/farmer/profile",
+        title: "Farmer Profile",
+        description: "Manage farmer account details, preferences, and profile settings.",
+        priority: 0.6,
+        changefreq: "weekly",
       },
       {
         path: "/farmer/notifications",
@@ -233,6 +254,13 @@ export const siteRoutes: RouteConfig[] = [
         priority: 0.5,
         changefreq: "hourly",
       },
+      {
+        path: "/merchant/profile",
+        title: "Merchant Profile",
+        description: "Manage merchant profile details and account preferences.",
+        priority: 0.6,
+        changefreq: "weekly",
+      },
     ],
   },
 
@@ -273,7 +301,7 @@ export const siteRoutes: RouteConfig[] = [
         changefreq: "daily",
       },
       {
-        path: "/expert/knowledge-hub",
+        path: "/expert/knowledge",
         title: "Knowledge Hub",
         description: "Share and manage agricultural knowledge resources.",
         priority: 0.7,

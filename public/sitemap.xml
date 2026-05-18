@@ -84,6 +84,12 @@
     <priority>0.7</priority>
   </url>
   <url>
+    <loc>https://farm-intellect-65.lovable.app/farmer/features</loc>
+    <lastmod>2026-05-18</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
     <loc>https://farm-intellect-65.lovable.app/farmer/ai-advisory</loc>
     <lastmod>2026-05-11</lastmod>
     <changefreq>daily</changefreq>
@@ -96,8 +102,8 @@
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://farm-intellect-65.lovable.app/farmer/knowledge-hub</loc>
-    <lastmod>2026-05-11</lastmod>
+    <loc>https://farm-intellect-65.lovable.app/farmer/knowledge</loc>
+    <lastmod>2026-05-18</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
   </url>
@@ -123,6 +129,18 @@
     <loc>https://farm-intellect-65.lovable.app/farmer/chat</loc>
     <lastmod>2026-05-11</lastmod>
     <changefreq>daily</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://farm-intellect-65.lovable.app/farmer/call</loc>
+    <lastmod>2026-05-18</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.5</priority>
+  </url>
+  <url>
+    <loc>https://farm-intellect-65.lovable.app/farmer/profile</loc>
+    <lastmod>2026-05-18</lastmod>
+    <changefreq>weekly</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
@@ -175,6 +193,12 @@
     <changefreq>hourly</changefreq>
     <priority>0.5</priority>
   </url>
+  <url>
+    <loc>https://farm-intellect-65.lovable.app/merchant/profile</loc>
+    <lastmod>2026-05-18</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.6</priority>
+  </url>
 
   <!-- Expert Routes -->
   <url>
@@ -202,8 +226,8 @@
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://farm-intellect-65.lovable.app/expert/knowledge-hub</loc>
-    <lastmod>2026-05-11</lastmod>
+    <loc>https://farm-intellect-65.lovable.app/expert/knowledge</loc>
+    <lastmod>2026-05-18</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
   </url>
