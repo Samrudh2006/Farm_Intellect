@@ -1,6 +1,6 @@
 const STATIC_CACHE = "farm-intellect-static-v3";
 const RUNTIME_CACHE = "farm-intellect-runtime-v3";
-const APP_SHELL = ["/", "/manifest.json", "/robots.txt"];
+const APP_SHELL = ["/", "/app", "/manifest.json", "/robots.txt"];
 
 self.addEventListener("install", (event) => {
   event.waitUntil(

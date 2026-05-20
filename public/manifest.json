@@ -2,7 +2,7 @@
   "name": "Farm Intellect",
   "short_name": "FarmIntellect",
   "description": "AI-powered farming assistant for smart agriculture",
-  "start_url": "/",
+  "start_url": "/app",
   "display": "standalone",
   "background_color": "#ffffff",
   "theme_color": "#16a34a",
