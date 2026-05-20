@@ -54,6 +54,7 @@ const Chat = lazy(() => import("./pages/Chat"));
 const FarmFeatures = lazy(() => import("./pages/FarmFeatures"));
 const Profile = lazy(() => import("./pages/Profile"));
 const ResetPassword = lazy(() => import("./pages/ResetPassword"));
+const AppLauncher = lazy(() => import("./pages/AppLauncher"));
 
 const MerchantFarmers = lazy(() => import("./pages/merchant/MerchantFarmers"));
 const MerchantMarketPrices = lazy(() => import("./pages/merchant/MerchantMarketPrices"));
@@ -156,6 +157,8 @@ const AnimatedRoutes = () => {
       <Routes location={location} key={location.pathname}>
         <Route path="/" element={renderPage(Index)} />
         <Route path="/login" element={renderPage(Login)} />
+        <Route path="/app" element={renderPage(AppLauncher)} />
+        <Route path="/launch" element={renderPage(AppLauncher)} />
         <Route path="/reset-password" element={renderPage(ResetPassword)} />
         <Route path="/sms-register" element={renderPage(SmsRegister)} />
         

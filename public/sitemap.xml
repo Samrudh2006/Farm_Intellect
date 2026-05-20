@@ -16,6 +16,18 @@
     <priority>0.8</priority>
   </url>
   <url>
+    <loc>https://farm-intellect-65.lovable.app/app</loc>
+    <lastmod>2026-05-20</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.4</priority>
+  </url>
+  <url>
+    <loc>https://farm-intellect-65.lovable.app/launch</loc>
+    <lastmod>2026-05-20</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.4</priority>
+  </url>
+  <url>
     <loc>https://farm-intellect-65.lovable.app/reset-password</loc>
     <lastmod>2026-05-11</lastmod>
     <changefreq>yearly</changefreq>

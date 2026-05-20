@@ -32,6 +32,20 @@ export const siteRoutes: RouteConfig[] = [
     changefreq: "monthly",
   },
   {
+    path: "/app",
+    title: "Open App",
+    description: "Install Farm Intellect and open it like a native mobile application.",
+    priority: 0.4,
+    changefreq: "monthly",
+  },
+  {
+    path: "/launch",
+    title: "Open App",
+    description: "Install Farm Intellect and open it like a native mobile application.",
+    priority: 0.4,
+    changefreq: "monthly",
+  },
+  {
     path: "/reset-password",
     title: "Reset Password",
     description: "Reset your Farm-Intellect account password.",
