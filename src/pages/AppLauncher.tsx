@@ -85,7 +85,7 @@ const AppLauncher = () => {
 
           <Separator />
 
-          <div className="flex items-center justify-center gap-2 text-xs text-muted-foreground">
+          <div className="flex items-center justify-center gap-2 text-xs text-muted-foreground" aria-live="polite" aria-atomic="true">
             <ShieldCheck className="h-4 w-4 text-primary" />
             <span>{isOnline ? "Online and ready" : "Offline mode available after install"}</span>
             <Wifi className={`h-4 w-4 ${isOnline ? "text-primary" : "text-muted-foreground"}`} />
