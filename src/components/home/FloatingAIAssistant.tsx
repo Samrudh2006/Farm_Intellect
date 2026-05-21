@@ -17,6 +17,7 @@ interface Message {
 
 const VOICE_PROCESS_DELAY_MS = 250;
 const VOICE_SPEECH_RATE = 0.92;
+const VOICE_MAX_SPOKEN_CHARS = 500;
 const VOICE_QUALITY_REGEX = /(neural|natural|wavenet|enhanced|google|microsoft|premium)/i;
 
 const NAV_TARGETS = [
@@ -73,8 +74,7 @@ export const FloatingAIAssistant = () => {
 
   const getBestVoice = useCallback(() => {
     const target = langMap[language] || "en-IN";
-    const normalizedTarget = target || "en-IN";
-    const locale = normalizedTarget.split("-")[0] || "en";
+    const locale = target.split("-")[0] || "en";
     const exact = voices.filter((v) => v.lang.toLowerCase() === target.toLowerCase());
     const base = voices.filter((v) => v.lang.toLowerCase().startsWith(locale.toLowerCase()));
     const ranked = [...exact, ...base, ...voices];
@@ -85,7 +85,7 @@ export const FloatingAIAssistant = () => {
   const speakText = useCallback((text: string) => {
     if (!("speechSynthesis" in window)) return;
     window.speechSynthesis.cancel();
-    const clean = text.replace(/[*#_~`>[\]()!]/g, "").replace(/\n+/g, ". ").slice(0, 500);
+    const clean = text.replace(/[*#_~`>[\]()!]/g, "").replace(/\n+/g, ". ").slice(0, VOICE_MAX_SPOKEN_CHARS);
     const utterance = new SpeechSynthesisUtterance(clean);
     const voice = getBestVoice();
     utterance.lang = voice?.lang || langMap[language] || "en-IN";
@@ -155,8 +155,8 @@ export const FloatingAIAssistant = () => {
   }, [handleNavigationIntent, isListening, language]);
 
   // ── Send message with real AI streaming ──
-  const handleSendMessage = useCallback(async (transcript: string) => {
-    const text = transcript.trim();
+  const handleSendMessage = useCallback(async (messageText: string) => {
+    const text = messageText.trim();
     if (!text || isStreaming) return;
 
     const userMsg: Message = { role: "user", content: text };
