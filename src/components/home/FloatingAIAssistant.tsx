@@ -1,10 +1,10 @@
 import { useState, useRef, useEffect, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { X, Send, Sparkles, Mic, MicOff, Volume2, StopCircle, Loader2 } from "lucide-react";
+import { useNavigate } from "react-router-dom";
+import { X, Sparkles, Mic, MicOff, Volume2, StopCircle, Loader2, Navigation } from "lucide-react";
 import ReactMarkdown from "react-markdown";
 import krishiAvatar from "@/assets/krishi-ai-avatar.png";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { AshokaChakra } from "@/components/ui/ashoka-chakra";
 import { streamChat, type AiMessage } from "@/lib/aiStream";
@@ -15,19 +15,43 @@ interface Message {
   content: string;
 }
 
+const VOICE_PROCESS_DELAY_MS = 250;
+const VOICE_SPEECH_RATE = 0.92;
+const VOICE_MAX_SPOKEN_CHARS = 500;
+const VOICE_QUALITY_REGEX = /(neural|natural|wavenet|enhanced|google|microsoft|premium)/i;
+
+const NAV_TARGETS = [
+  { path: "/login", patterns: [/\b(log ?in|login|sign ?in)\b/i, /लॉगिन/i, /साइन इन/i] },
+  { path: "/sms-register", patterns: [/\b(sms|register|registration)\b/i, /रजिस्टर/i, /संदेश/i] },
+  { path: "/", patterns: [/\b(home|homepage|landing)\b/i, /होम/i, /मुख्य पेज/i] },
+] as const;
+
 const langMap: Record<string, string> = {
   en: "en-IN", hi: "hi-IN", bn: "bn-IN", te: "te-IN",
   ta: "ta-IN", pa: "pa-IN", mr: "mr-IN", gu: "gu-IN",
   kn: "kn-IN", ml: "ml-IN", or: "or-IN", ur: "ur-IN",
+  as: "as-IN", // Assamese
+  sa: "sa-IN", // Sanskrit
+  ne: "ne-NP", // Nepali
+  sd: "sd-IN", // Sindhi
+  ks: "ks-IN", // Kashmiri
+  kok: "kok-IN", // Konkani
+  doi: "doi-IN", // Dogri
+  mai: "mai-IN", // Maithili
+  mni: "mni-IN", // Manipuri
+  sat: "sat-IN", // Santali
+  brx: "brx-IN", // Bodo
 };
 
 export const FloatingAIAssistant = () => {
+  const navigate = useNavigate();
   const [isOpen, setIsOpen] = useState(false);
   const [messages, setMessages] = useState<Message[]>([]);
-  const [input, setInput] = useState("");
+  const [lastTranscript, setLastTranscript] = useState("");
   const [isStreaming, setIsStreaming] = useState(false);
   const [isListening, setIsListening] = useState(false);
   const [isSpeaking, setIsSpeaking] = useState(false);
+  const [voices, setVoices] = useState<SpeechSynthesisVoice[]>([]);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const recognitionRef = useRef<any>(null);
   const { t, language } = useLanguage();
@@ -36,24 +60,61 @@ export const FloatingAIAssistant = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
 
+  useEffect(() => {
+    if (!("speechSynthesis" in window)) return;
+
+    const loadVoices = () => {
+      setVoices(window.speechSynthesis.getVoices());
+    };
+
+    loadVoices();
+    window.speechSynthesis.addEventListener("voiceschanged", loadVoices);
+    return () => window.speechSynthesis.removeEventListener("voiceschanged", loadVoices);
+  }, []);
+
+  const getBestVoice = useCallback(() => {
+    const target = langMap[language] || "en-IN";
+    const locale = target.split("-")[0] || "en";
+    const exact = voices.filter((v) => v.lang.toLowerCase() === target.toLowerCase());
+    const base = voices.filter((v) => v.lang.toLowerCase().startsWith(locale.toLowerCase()));
+    const ranked = [...exact, ...base, ...voices];
+    return ranked.find((v) => VOICE_QUALITY_REGEX.test(v.name)) || ranked[0] || null;
+  }, [language, voices]);
+
   // ── TTS ──
   const speakText = useCallback((text: string) => {
     if (!("speechSynthesis" in window)) return;
     window.speechSynthesis.cancel();
-    const clean = text.replace(/[*#_~`>[\]()!]/g, "").replace(/\n+/g, ". ").slice(0, 500);
+    const clean = text.replace(/[*#_~`>[\]()!]/g, "").replace(/\n+/g, ". ").slice(0, VOICE_MAX_SPOKEN_CHARS);
     const utterance = new SpeechSynthesisUtterance(clean);
-    utterance.lang = langMap[language] || "en-IN";
-    utterance.rate = 0.95;
+    const voice = getBestVoice();
+    utterance.lang = voice?.lang || langMap[language] || "en-IN";
+    if (voice) utterance.voice = voice;
+    utterance.rate = VOICE_SPEECH_RATE;
+    utterance.pitch = 1;
+    utterance.volume = 1;
     utterance.onstart = () => setIsSpeaking(true);
     utterance.onend = () => setIsSpeaking(false);
     utterance.onerror = () => setIsSpeaking(false);
     window.speechSynthesis.speak(utterance);
-  }, [language]);
+  }, [getBestVoice, language]);
 
   const stopSpeaking = useCallback(() => {
     window.speechSynthesis?.cancel();
     setIsSpeaking(false);
   }, []);
+
+  const handleNavigationIntent = useCallback((text: string) => {
+    const matched = NAV_TARGETS.find((target) => target.patterns.some((pattern) => pattern.test(text)));
+    if (!matched) return false;
+
+    navigate(matched.path);
+    toast({
+      title: t("ai.voice_navigate"),
+      description: `${t("common.loading")} ${matched.path}`,
+    });
+    return true;
+  }, [navigate, t]);
 
   // ── Voice Recognition ──
   const toggleListening = useCallback(() => {
@@ -76,9 +137,10 @@ export const FloatingAIAssistant = () => {
     recognition.onresult = (event: any) => {
       const transcript = event.results[0]?.[0]?.transcript;
       if (transcript) {
-        setInput(transcript);
-        // Auto-send after a short delay
-        setTimeout(() => handleSendMessage(transcript), 300);
+        setLastTranscript(transcript);
+        if (!handleNavigationIntent(transcript)) {
+          setTimeout(() => handleSendMessage(transcript), VOICE_PROCESS_DELAY_MS);
+        }
       }
     };
     recognition.onend = () => setIsListening(false);
@@ -90,17 +152,16 @@ export const FloatingAIAssistant = () => {
     };
     setIsListening(true);
     recognition.start();
-  }, [isListening, language]);
+  }, [handleNavigationIntent, isListening, language]);
 
   // ── Send message with real AI streaming ──
-  const handleSendMessage = useCallback(async (overrideText?: string) => {
-    const text = overrideText || input.trim();
+  const handleSendMessage = useCallback(async (messageText: string) => {
+    const text = messageText.trim();
     if (!text || isStreaming) return;
 
     const userMsg: Message = { role: "user", content: text };
     const newMessages = [...messages, userMsg];
     setMessages(newMessages);
-    setInput("");
     setIsStreaming(true);
 
     // Build AI message history
@@ -142,8 +203,7 @@ export const FloatingAIAssistant = () => {
       },
       onDone: () => {
         setIsStreaming(false);
-        // Auto-speak response if it came from voice input
-        if (overrideText && assistantContent) {
+        if (assistantContent) {
           speakText(assistantContent);
         }
       },
@@ -156,9 +216,7 @@ export const FloatingAIAssistant = () => {
         ]);
       },
     });
-  }, [input, isStreaming, messages, language, speakText]);
-
-  const handleSend = () => handleSendMessage();
+  }, [isStreaming, messages, language, speakText]);
 
   const quickQuestions = language === "hi"
     ? ["गेहूं कैसे उगाएं?", "सरकारी योजनाएं", "कीट प्रबंधन"]
@@ -210,9 +268,9 @@ export const FloatingAIAssistant = () => {
                 <img src={krishiAvatar} alt="Krishi AI" className="h-full w-full object-cover scale-110" />
               </div>
               <div className="flex-1">
-                <h3 className="font-bold text-sm font-heading">{t("ai.title")}</h3>
+                <h3 className="font-bold text-sm font-heading">{t("ai.voice_agent_title")}</h3>
                 <p className="text-xs opacity-80 flex items-center gap-1">
-                  <Sparkles className="h-3 w-3" /> AI-Powered • Real-time
+                  <Sparkles className="h-3 w-3" /> {t("ai.voice_agent_subtitle")}
                 </p>
               </div>
               {isSpeaking && (
@@ -286,39 +344,39 @@ export const FloatingAIAssistant = () => {
               <div ref={messagesEndRef} />
             </div>
 
-            {/* Input */}
+            {/* Voice actions */}
             <div className="p-3 border-t border-border">
-              <form
-                onSubmit={(e) => { e.preventDefault(); handleSend(); }}
-                className="flex gap-2"
+              <div className="space-y-3"
               >
                 <Button
                   type="button"
-                  size="icon"
-                  variant={isListening ? "destructive" : "outline"}
                   onClick={toggleListening}
                   disabled={isStreaming}
-                  className={`flex-shrink-0 rounded-full h-9 w-9 ${isListening ? "animate-pulse" : ""}`}
-                  title={isListening ? "Stop listening" : "Speak to Krishi AI"}
+                  className={`w-full h-11 rounded-xl ${isListening ? "animate-pulse bg-destructive hover:bg-destructive/90" : "bg-accent text-accent-foreground hover:bg-accent/90"}`}
+                  title={isListening ? t("ai.voice_stop_listening") : t("ai.voice_listen")}
                 >
-                  {isListening ? <MicOff className="h-4 w-4" /> : <Mic className="h-4 w-4" />}
+                  {isStreaming ? (
+                    <>
+                      <Loader2 className="h-4 w-4 animate-spin mr-2" />
+                      {t("common.loading")}
+                    </>
+                  ) : isListening ? (
+                    <>
+                      <MicOff className="h-4 w-4 mr-2" />
+                      {t("ai.voice_stop_listening")}
+                    </>
+                  ) : (
+                    <>
+                      <Mic className="h-4 w-4 mr-2" />
+                      {t("ai.voice_listen")}
+                    </>
+                  )}
                 </Button>
-                <Input
-                  value={input}
-                  onChange={(e) => setInput(e.target.value)}
-                  placeholder={isListening ? "🎙️ Listening..." : t("ai.placeholder")}
-                  className="flex-1 text-sm"
-                  disabled={isStreaming}
-                />
-                <Button
-                  type="submit"
-                  size="icon"
-                  disabled={!input.trim() || isStreaming}
-                  className="bg-accent text-accent-foreground hover:bg-accent/90 h-9 w-9 flex-shrink-0"
-                >
-                  {isStreaming ? <Loader2 className="h-4 w-4 animate-spin" /> : <Send className="h-4 w-4" />}
-                </Button>
-              </form>
+                <div className="text-[11px] text-muted-foreground flex items-center gap-2">
+                  <Navigation className="h-3.5 w-3.5" />
+                  {t("ai.voice_nav_hint")}
+                </div>
+              </div>
               {isListening && (
                 <motion.div
                   initial={{ opacity: 0, height: 0 }}
@@ -328,6 +386,11 @@ export const FloatingAIAssistant = () => {
                   <span className="w-2 h-2 rounded-full bg-destructive animate-pulse" />
                   Listening in {langMap[language]?.split("-")[0] || "English"}...
                 </motion.div>
+              )}
+              {lastTranscript && !isListening && (
+                <p className="mt-2 text-xs text-muted-foreground">
+                  {t("ai.voice_heard_label")} <span className="text-foreground">{lastTranscript}</span>
+                </p>
               )}
             </div>
           </motion.div>
