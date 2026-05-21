@@ -15,6 +15,14 @@ interface Message {
   content: string;
 }
 
+const VOICE_PROCESS_DELAY_MS = 250;
+
+const NAV_TARGETS = [
+  { path: "/login", patterns: ["login", "log in", "sign in", "लॉगिन", "साइन इन"] },
+  { path: "/sms-register", patterns: ["sms", "message", "register", "रजिस्टर", "संदेश"] },
+  { path: "/", patterns: ["home", "homepage", "landing", "होम", "मुख्य पेज"] },
+] as const;
+
 const langMap: Record<string, string> = {
   en: "en-IN", hi: "hi-IN", bn: "bn-IN", te: "te-IN",
   ta: "ta-IN", pa: "pa-IN", mr: "mr-IN", gu: "gu-IN",
@@ -88,13 +96,7 @@ export const FloatingAIAssistant = () => {
 
   const handleNavigationIntent = useCallback((text: string) => {
     const lower = text.toLowerCase();
-    const navTargets = [
-      { path: "/login", patterns: ["login", "log in", "sign in", "लॉगिन", "साइन इन"] },
-      { path: "/sms-register", patterns: ["sms", "message", "register", "रजिस्टर", "संदेश"] },
-      { path: "/", patterns: ["home", "homepage", "landing", "होम", "मुख्य पेज"] },
-    ];
-
-    const matched = navTargets.find((target) => target.patterns.some((pattern) => lower.includes(pattern)));
+    const matched = NAV_TARGETS.find((target) => target.patterns.some((pattern) => lower.includes(pattern)));
     if (!matched) return false;
 
     navigate(matched.path);
@@ -128,7 +130,7 @@ export const FloatingAIAssistant = () => {
       if (transcript) {
         setLastTranscript(transcript);
         if (!handleNavigationIntent(transcript)) {
-          setTimeout(() => handleSendMessage(transcript), 250);
+          setTimeout(() => handleSendMessage(transcript), VOICE_PROCESS_DELAY_MS);
         }
       }
     };
@@ -144,8 +146,8 @@ export const FloatingAIAssistant = () => {
   }, [handleNavigationIntent, isListening, language]);
 
   // ── Send message with real AI streaming ──
-  const handleSendMessage = useCallback(async (overrideText?: string) => {
-    const text = overrideText?.trim();
+  const handleSendMessage = useCallback(async (transcript: string) => {
+    const text = transcript.trim();
     if (!text || isStreaming) return;
 
     const userMsg: Message = { role: "user", content: text };
@@ -259,7 +261,7 @@ export const FloatingAIAssistant = () => {
               <div className="flex-1">
                 <h3 className="font-bold text-sm font-heading">{t("ai.voice_agent_title")}</h3>
                 <p className="text-xs opacity-80 flex items-center gap-1">
-                  <Sparkles className="h-3 w-3" /> Voice AI • Real-time • Navigation Ready
+                  <Sparkles className="h-3 w-3" /> {t("ai.voice_agent_subtitle")}
                 </p>
               </div>
               {isSpeaking && (

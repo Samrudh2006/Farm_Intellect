@@ -91,6 +91,7 @@ const en: Record<string, string> = {
   'ai.placeholder': 'Ask me about crops, weather, farming tips...',
   'ai.title': 'AI Farm Assistant',
   'ai.voice_agent_title': 'AI Voice Agent',
+  'ai.voice_agent_subtitle': 'Voice AI • Real-time • Navigation Ready',
   'ai.greeting': "Namaste! \u{1F64F} I'm your AI farming assistant. Ask me anything about crops, weather, soil, or farming techniques!",
   'ai.description': 'Get instant help and expert advice from our AI-powered farming assistant',
   'ai.quick_questions': 'Quick Questions',
