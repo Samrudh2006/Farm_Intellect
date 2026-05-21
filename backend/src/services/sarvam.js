@@ -143,3 +143,176 @@ export const synthesizeSarvamSpeech = async ({
     raw: payload,
   };
 };
+
+/**
+ * Streaming Speech-to-Text with support for long-form audio
+ */
+export const transcribeSarvamAudioStream = async ({
+  buffer,
+  fileName = 'voice-stream.webm',
+  mimeType = 'audio/webm',
+  languageCode,
+  mode = 'transcribe',
+  onChunk,
+}) => {
+  const formData = new FormData();
+  formData.append('file', new Blob([buffer], { type: mimeType }), fileName);
+  formData.append('model', DEFAULT_STT_MODEL);
+  formData.append('mode', mode);
+
+  if (languageCode) {
+    formData.append('language_code', languageCode);
+  }
+
+  const apiKey = getSarvamApiKey();
+  const headers = new Headers();
+  headers.set('api-subscription-key', apiKey);
+  headers.set('Authorization', `Bearer ${apiKey}`);
+
+  const response = await fetch(`${SARVAM_API_BASE_URL}/speech-to-text`, {
+    method: 'POST',
+    headers,
+    body: formData,
+  });
+
+  if (!response.ok) {
+    const details = await parseErrorPayload(response);
+    logger.error('Sarvam streaming STT failed', { details });
+    throw new Error(details);
+  }
+
+  return response.json();
+};
+
+/**
+ * Streaming Text-to-Speech with chunked audio output
+ */
+export const synthesizeSarvamSpeechStream = async ({
+  text,
+  targetLanguageCode = 'en-IN',
+  speaker = DEFAULT_TTS_SPEAKER,
+  pace = 1,
+  onChunk,
+}) => {
+  const payload = await requestSarvam('/text-to-speech', {
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({
+      model: DEFAULT_TTS_MODEL,
+      text,
+      target_language_code: targetLanguageCode,
+      ...(speaker ? { speaker } : {}),
+      pace,
+    }),
+  });
+
+  const audioBase64 = payload?.audios?.[0];
+
+  if (!audioBase64) {
+    throw new Error('Sarvam did not return synthesized audio.');
+  }
+
+  // Emit chunks if callback provided
+  if (onChunk && Array.isArray(payload?.audios)) {
+    payload.audios.forEach((chunk, index) => {
+      onChunk({
+        index,
+        total: payload.audios.length,
+        audio: chunk,
+      });
+    });
+  }
+
+  return {
+    audioBase64,
+    raw: payload,
+  };
+};
+
+/**
+ * Multi-turn chat completion with streaming support
+ */
+export const createSarvamChatCompletionStream = async ({
+  messages,
+  model = DEFAULT_CHAT_MODEL,
+  temperature = 0.3,
+  maxTokens = 700,
+  onChunk,
+}) => {
+  const apiKey = getSarvamApiKey();
+  const headers = new Headers();
+  headers.set('api-subscription-key', apiKey);
+  headers.set('Authorization', `Bearer ${apiKey}`);
+  headers.set('Content-Type', 'application/json');
+
+  const response = await fetch(`${SARVAM_API_BASE_URL}/v1/chat/completions`, {
+    method: 'POST',
+    headers,
+    body: JSON.stringify({
+      model,
+      messages,
+      temperature,
+      max_tokens: maxTokens,
+      stream: true,
+    }),
+  });
+
+  if (!response.ok) {
+    const details = await parseErrorPayload(response);
+    logger.error('Sarvam streaming chat failed', { details });
+    throw new Error(details);
+  }
+
+  // For streaming responses, return the response object for manual handling
+  // or process the stream if onChunk is provided
+  if (onChunk && response.body) {
+    const reader = response.body.getReader();
+    const decoder = new TextDecoder();
+    let content = '';
+
+    try {
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+
+        const chunk = decoder.decode(value);
+        const lines = chunk.split('\n');
+
+        for (const line of lines) {
+          if (line.startsWith('data: ')) {
+            try {
+              const data = JSON.parse(line.slice(6));
+              const deltaContent = data?.choices?.[0]?.delta?.content || '';
+              if (deltaContent) {
+                content += deltaContent;
+                onChunk(deltaContent);
+              }
+            } catch (e) {
+              // Skip parsing errors
+            }
+          }
+        }
+      }
+    } finally {
+      reader.releaseLock();
+    }
+
+    return {
+      content: content.trim(),
+      raw: { streaming: true },
+    };
+  }
+
+  // Non-streaming fallback
+  return response.json().then(payload => {
+    const content = payload?.choices?.[0]?.message?.content?.trim();
+    if (!content) {
+      throw new Error('Sarvam returned an empty chat response.');
+    }
+    return {
+      content,
+      raw: payload,
+    };
+  });
+};

@@ -1,7 +1,7 @@
 import { useState, useRef, useEffect, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useNavigate } from "react-router-dom";
-import { X, Sparkles, Mic, MicOff, Volume2, StopCircle, Loader2, Navigation } from "lucide-react";
+import { X, Sparkles, Mic, MicOff, Volume2, StopCircle, Loader2, Navigation, Zap, Command } from "lucide-react";
 import ReactMarkdown from "react-markdown";
 import krishiAvatar from "@/assets/krishi-ai-avatar.png";
 import { Button } from "@/components/ui/button";
@@ -9,10 +9,13 @@ import { useLanguage } from "@/contexts/LanguageContext";
 import { AshokaChakra } from "@/components/ui/ashoka-chakra";
 import { streamChat, type AiMessage } from "@/lib/aiStream";
 import { toast } from "@/hooks/use-toast";
+import { useVoiceCommands } from "@/hooks/useVoiceCommands";
 
 interface Message {
   role: "user" | "assistant";
   content: string;
+  type?: "question" | "command";
+  commandType?: string;
 }
 
 const VOICE_PROCESS_DELAY_MS = 250;
@@ -45,6 +48,7 @@ const langMap: Record<string, string> = {
 
 export const FloatingAIAssistant = () => {
   const navigate = useNavigate();
+  const { executeVoiceCommand, getSuggestedCommands, isProcessing } = useVoiceCommands();
   const [isOpen, setIsOpen] = useState(false);
   const [messages, setMessages] = useState<Message[]>([]);
   const [lastTranscript, setLastTranscript] = useState("");
@@ -52,6 +56,7 @@ export const FloatingAIAssistant = () => {
   const [isListening, setIsListening] = useState(false);
   const [isSpeaking, setIsSpeaking] = useState(false);
   const [voices, setVoices] = useState<SpeechSynthesisVoice[]>([]);
+  const [showCommands, setShowCommands] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const recognitionRef = useRef<any>(null);
   const { t, language } = useLanguage();
@@ -134,12 +139,33 @@ export const FloatingAIAssistant = () => {
     recognition.continuous = false;
     recognition.interimResults = false;
 
-    recognition.onresult = (event: any) => {
+    recognition.onresult = async (event: any) => {
       const transcript = event.results[0]?.[0]?.transcript;
       if (transcript) {
         setLastTranscript(transcript);
-        if (!handleNavigationIntent(transcript)) {
-          setTimeout(() => handleSendMessage(transcript), VOICE_PROCESS_DELAY_MS);
+        
+        // Check if it's a command first
+        const { isCommand, result } = await executeVoiceCommand(transcript);
+        
+        if (isCommand && result) {
+          // It's a command - show command feedback
+          setMessages(prev => [...prev, {
+            role: "user",
+            content: transcript,
+            type: "command",
+            commandType: result.command,
+          }]);
+          
+          if (result.feedback) {
+            setMessages(prev => [...prev, {
+              role: "assistant",
+              content: `✨ ${result.feedback}`,
+              type: "command",
+            }]);
+          }
+        } else {
+          // Not a command - process as question
+          setTimeout(() => handleSendMessage(transcript), 250);
         }
       }
     };
@@ -152,7 +178,7 @@ export const FloatingAIAssistant = () => {
     };
     setIsListening(true);
     recognition.start();
-  }, [handleNavigationIntent, isListening, language]);
+  }, [handleNavigationIntent, isListening, language, executeVoiceCommand]);
 
   // ── Send message with real AI streaming ──
   const handleSendMessage = useCallback(async (messageText: string) => {
@@ -292,12 +318,22 @@ export const FloatingAIAssistant = () => {
                     {quickQuestions.map((q) => (
                       <button
                         key={q}
-                        onClick={() => { setInput(q); handleSendMessage(q); }}
+                        onClick={() => { handleSendMessage(q); }}
                         className="text-xs px-3 py-1.5 rounded-full border border-primary/30 text-primary hover:bg-primary/10 transition-colors"
                       >
                         {q}
                       </button>
                     ))}
+                  </div>
+                  <div className="mt-4 pt-3 border-t border-primary/20">
+                    <p className="text-xs text-muted-foreground mb-2">Try voice commands:</p>
+                    <div className="flex flex-wrap gap-1">
+                      {getSuggestedCommands().map((cmd) => (
+                        <span key={cmd} className="text-xs px-2 py-1 bg-accent/20 text-accent rounded-full">
+                          {cmd}
+                        </span>
+                      ))}
+                    </div>
                   </div>
                 </div>
               )}
@@ -375,6 +411,10 @@ export const FloatingAIAssistant = () => {
                 <div className="text-[11px] text-muted-foreground flex items-center gap-2">
                   <Navigation className="h-3.5 w-3.5" />
                   {t("ai.voice_nav_hint")}
+                </div>
+                <div className="text-[11px] text-accent flex items-center gap-2 mt-2">
+                  <Command className="h-3.5 w-3.5" />
+                  Commands: "go to crops", "show weather", "add crop"
                 </div>
               </div>
               {isListening && (
