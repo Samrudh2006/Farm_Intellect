@@ -17,20 +17,29 @@ interface Message {
 
 const VOICE_PROCESS_DELAY_MS = 250;
 const VOICE_SPEECH_RATE = 0.92;
+const VOICE_QUALITY_REGEX = /(neural|natural|wavenet|enhanced|google|microsoft|premium)/i;
 
 const NAV_TARGETS = [
-  { path: "/login", patterns: ["login", "log in", "sign in", "लॉगिन", "साइन इन"] },
-  { path: "/sms-register", patterns: ["sms", "message", "register", "रजिस्टर", "संदेश"] },
-  { path: "/", patterns: ["home", "homepage", "landing", "होम", "मुख्य पेज"] },
+  { path: "/login", patterns: [/\b(log ?in|login|sign ?in)\b/i, /लॉगिन/i, /साइन इन/i] },
+  { path: "/sms-register", patterns: [/\b(sms|register|registration)\b/i, /रजिस्टर/i, /संदेश/i] },
+  { path: "/", patterns: [/\b(home|homepage|landing)\b/i, /होम/i, /मुख्य पेज/i] },
 ] as const;
 
 const langMap: Record<string, string> = {
   en: "en-IN", hi: "hi-IN", bn: "bn-IN", te: "te-IN",
   ta: "ta-IN", pa: "pa-IN", mr: "mr-IN", gu: "gu-IN",
   kn: "kn-IN", ml: "ml-IN", or: "or-IN", ur: "ur-IN",
-  as: "as-IN", sa: "sa-IN", ne: "ne-NP", sd: "sd-IN",
-  ks: "ks-IN", kok: "kok-IN", doi: "doi-IN", mai: "mai-IN",
-  mni: "mni-IN", sat: "sat-IN", brx: "brx-IN",
+  as: "as-IN", // Assamese
+  sa: "sa-IN", // Sanskrit
+  ne: "ne-NP", // Nepali
+  sd: "sd-IN", // Sindhi
+  ks: "ks-IN", // Kashmiri
+  kok: "kok-IN", // Konkani
+  doi: "doi-IN", // Dogri
+  mai: "mai-IN", // Maithili
+  mni: "mni-IN", // Manipuri
+  sat: "sat-IN", // Santali
+  brx: "brx-IN", // Bodo
 };
 
 export const FloatingAIAssistant = () => {
@@ -64,12 +73,12 @@ export const FloatingAIAssistant = () => {
 
   const getBestVoice = useCallback(() => {
     const target = langMap[language] || "en-IN";
-    const locale = target.includes("-") ? target.split("-")[0] : target || "en";
-    const qualityRegex = /(neural|natural|wavenet|enhanced|google|microsoft|premium)/i;
+    const normalizedTarget = target || "en-IN";
+    const locale = normalizedTarget.split("-")[0] || "en";
     const exact = voices.filter((v) => v.lang.toLowerCase() === target.toLowerCase());
     const base = voices.filter((v) => v.lang.toLowerCase().startsWith(locale.toLowerCase()));
     const ranked = [...exact, ...base, ...voices];
-    return ranked.find((v) => qualityRegex.test(v.name)) || ranked[0] || null;
+    return ranked.find((v) => VOICE_QUALITY_REGEX.test(v.name)) || ranked[0] || null;
   }, [language, voices]);
 
   // ── TTS ──
@@ -96,8 +105,7 @@ export const FloatingAIAssistant = () => {
   }, []);
 
   const handleNavigationIntent = useCallback((text: string) => {
-    const lower = text.toLowerCase();
-    const matched = NAV_TARGETS.find((target) => target.patterns.some((pattern) => lower.includes(pattern)));
+    const matched = NAV_TARGETS.find((target) => target.patterns.some((pattern) => pattern.test(text)));
     if (!matched) return false;
 
     navigate(matched.path);
