@@ -8,6 +8,7 @@ import {
   synthesizeSarvamSpeech,
 } from '../services/sarvam.js';
 import { agriculturalIntelligence } from '../services/agriculturalIntelligence.js';
+import { voiceCommandEngine } from '../services/voiceCommandEngine.js';
 import prisma from '../config/database.js';
 
 const router = express.Router();
@@ -68,6 +69,39 @@ router.post('/process', authenticate, logActivity, async (req, res) => {
 
     const languageCode = normalizeLanguageCode(language);
     logger.info(`Processing voice in language: ${languageCode}`);
+
+    // Check if it's a voice command
+    const currentRoute = req.body.currentRoute || '/farmer/dashboard';
+    const commandParse = voiceCommandEngine.parseCommand(transcription, language, currentRoute);
+    
+    if (commandParse.isCommand && commandParse.command) {
+      logger.info(`Detected voice command: ${commandParse.command.name} (confidence: ${commandParse.confidence})`);
+      
+      // Save command interaction
+      try {
+        await prisma.voiceInteraction.create({
+          data: {
+            userId: req.user.id,
+            language: languageCode,
+            transcription,
+            response: `Command: ${commandParse.command.name}`,
+            intent: commandParse.type,
+            status: 'command_detected',
+          },
+        });
+      } catch (error) {
+        logger.warn('Failed to save command interaction:', error);
+      }
+
+      return res.json({
+        success: true,
+        transcription,
+        isCommand: true,
+        commandType: commandParse.type,
+        command: commandParse.command,
+        language: languageCode,
+      });
+    }
 
     // Step 1: Transcribe audio using Sarvam STT
     let transcription;
@@ -554,7 +588,7 @@ Keep responses conversational and helpful. Language: ${languageCode}`,
 function getFallbackResponse(query, languageCode) {
   const fallbacks = {
     'en-IN': `I understood your question: "${query}". For detailed agricultural advice, please try again or contact a local agricultural extension officer.`,
-    'hi-IN': `आपके सवाल को समझा: "${query}". विस्तृत कृषि सलाह के लिए, कृपया फिर से कोशिश करें या स्थानीय कृषि विस्तार अधिकारी से संपर्क करें।`,
+    'hi-IN': `आपके सवाल को समझा: "${query}". विस्तृत कृषि सलाह के लिए, कृपया फिर से क���शिश करें या स्थानीय कृषि विस्तार अधिकारी से संपर्क करें।`,
     'pa-IN': `ਮੈਂ ਤੁਹਾਡਾ ਸਵਾਲ ਸਮਝ ਗਿਆ: "${query}". ਵਿਸਥਾਰਤ ਖੇਤੀ ਸਲਾਹ ਲਈ, ਕਿਰਪਾ ਕਰਕੇ ਦੁਬਾਰਾ ਕੋਸ਼ਿਸ਼ ਕਰੋ ਜਾਂ ਸਥਾਨਕ ਖੇਤੀ ਵਿਸਤਾਰ ਅਧਿਕਾਰੀ ਨਾਲ ਸੰਪਰਕ ਕਰੋ।`,
   };
 
