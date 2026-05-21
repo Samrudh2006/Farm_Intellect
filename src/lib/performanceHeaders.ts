@@ -63,7 +63,7 @@ export const SECURITY_HEADERS = {
   "X-XSS-Protection": "1; mode=block",
   "Referrer-Policy": "strict-origin-when-cross-origin",
   "Permissions-Policy":
-    "geolocation=(self), microphone=(), camera=(), payment=(self), usb=()",
+    "geolocation=(self), microphone=(self), camera=(), payment=(self), usb=()",
   "Content-Security-Policy":
     "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' data: https:; font-src 'self' data: https://fonts.gstatic.com; connect-src 'self' https:",
 };
