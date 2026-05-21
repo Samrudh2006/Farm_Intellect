@@ -16,6 +16,7 @@ interface Message {
 }
 
 const VOICE_PROCESS_DELAY_MS = 250;
+const VOICE_SPEECH_RATE = 0.92;
 
 const NAV_TARGETS = [
   { path: "/login", patterns: ["login", "log in", "sign in", "लॉगिन", "साइन इन"] },
@@ -63,7 +64,7 @@ export const FloatingAIAssistant = () => {
 
   const getBestVoice = useCallback(() => {
     const target = langMap[language] || "en-IN";
-    const locale = target.split("-")[0];
+    const locale = target.includes("-") ? target.split("-")[0] : target || "en";
     const qualityRegex = /(neural|natural|wavenet|enhanced|google|microsoft|premium)/i;
     const exact = voices.filter((v) => v.lang.toLowerCase() === target.toLowerCase());
     const base = voices.filter((v) => v.lang.toLowerCase().startsWith(locale.toLowerCase()));
@@ -80,7 +81,7 @@ export const FloatingAIAssistant = () => {
     const voice = getBestVoice();
     utterance.lang = voice?.lang || langMap[language] || "en-IN";
     if (voice) utterance.voice = voice;
-    utterance.rate = 0.92;
+    utterance.rate = VOICE_SPEECH_RATE;
     utterance.pitch = 1;
     utterance.volume = 1;
     utterance.onstart = () => setIsSpeaking(true);
@@ -349,7 +350,7 @@ export const FloatingAIAssistant = () => {
                   {isStreaming ? (
                     <>
                       <Loader2 className="h-4 w-4 animate-spin mr-2" />
-                      Thinking...
+                      {t("common.loading")}
                     </>
                   ) : isListening ? (
                     <>
@@ -380,7 +381,7 @@ export const FloatingAIAssistant = () => {
               )}
               {lastTranscript && !isListening && (
                 <p className="mt-2 text-xs text-muted-foreground">
-                  Heard: <span className="text-foreground">{lastTranscript}</span>
+                  {t("ai.voice_heard_label")} <span className="text-foreground">{lastTranscript}</span>
                 </p>
               )}
             </div>

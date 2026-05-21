@@ -113,6 +113,7 @@ const en: Record<string, string> = {
   'ai.voice_stop_listening': 'Stop listening',
   'ai.voice_nav_hint': 'Say: open login, open SMS register, or go home.',
   'ai.voice_navigate': 'Navigation command executed',
+  'ai.voice_heard_label': 'Heard:',
   'ai.copied': 'Copied!',
   'ai.powered_by': 'Powered by Krishi AI',
   'ai.error_chat_failed': 'Chat is temporarily unavailable. Please try again.',
