@@ -922,18 +922,19 @@ export const VideoCallRoom = ({
                     <div className="flex items-center gap-1 px-2 py-1 bg-primary/90 rounded-full">
                       <div className="flex gap-0.5">
                         {[...Array(3)].map((_, i) => (
-                          <motion.div
-                            key={i}
-                            className="w-1 bg-primary-foreground rounded-full"
-                            animate={{
-                              height: [4, 12, 4],
-                            }}
-                            transition={{
-                              duration: 0.5,
-                              repeat: Infinity,
-                              delay: i * 0.1,
-                            }}
-                          />
+                           <motion.div
+                             key={i}
+                             className="w-1 bg-primary-foreground rounded-full origin-bottom"
+                             style={{ height: "12px" }}
+                             animate={{
+                               scaleY: [0.33, 1, 0.33],
+                             }}
+                             transition={{
+                               duration: 0.5,
+                               repeat: Infinity,
+                               delay: i * 0.1,
+                             }}
+                           />
                         ))}
                       </div>
                       <span className="text-xs text-primary-foreground ml-1">

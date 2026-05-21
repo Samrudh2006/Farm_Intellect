@@ -419,8 +419,9 @@ export const FloatingAIAssistant = () => {
               </div>
               {isListening && (
                 <motion.div
-                  initial={{ opacity: 0, height: 0 }}
-                  animate={{ opacity: 1, height: "auto" }}
+                  initial={{ opacity: 0, y: -6 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.2 }}
                   className="mt-2 flex items-center justify-center gap-2 text-xs text-destructive"
                 >
                   <span className="w-2 h-2 rounded-full bg-destructive animate-pulse" />
