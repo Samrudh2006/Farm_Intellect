@@ -54,97 +54,97 @@ const Index = () => {
     { 
       icon: null,
       image: "/icons/ai-recommendations.jpg",
-      title: "AI-Powered Recommendations", 
-      description: "Get personalised crop advice powered by machine learning algorithms",
+      title: t('landing.feature.ai.title'),
+      description: t('landing.feature.ai.description'),
       iconBg: "bg-orange-100 dark:bg-orange-900",
       borderColor: "border-orange-400",
       iconColor: "text-orange-600 dark:text-orange-300",
-      detailedDesc: "Our advanced ML algorithms analyze your farm data, soil conditions, weather patterns, and historical yields to provide personalized crop recommendations. Get AI-powered insights on optimal planting times, crop varieties, and farming practices tailored to your region and farm type.",
-      benefits: ["Personalized recommendations", "Historical data analysis", "Market trend integration", "Multi-crop comparison"]
+      detailedDesc: t('landing.feature.ai.details'),
+      benefits: [t('landing.feature.ai.benefit_1'), t('landing.feature.ai.benefit_2'), t('landing.feature.ai.benefit_3'), t('landing.feature.ai.benefit_4')]
     },
     { 
       icon: null,
       image: "/icons/weather-integration.jpg",
-      title: "Weather Integration", 
-      description: "Real-time weather data and forecasts for optimal farming decisions",
+      title: t('landing.feature.weather.title'),
+      description: t('landing.feature.weather.description'),
       iconBg: "bg-blue-100 dark:bg-blue-900",
       borderColor: "border-blue-400",
       iconColor: "text-blue-600 dark:text-blue-300",
-      detailedDesc: "Access real-time weather data with precision forecasts up to 15 days ahead. Receive alerts for extreme weather conditions, optimal irrigation timing, and pest emergence predictions based on weather patterns.",
-      benefits: ["Real-time weather updates", "15-day forecasts", "Extreme weather alerts", "Irrigation optimization"]
+      detailedDesc: t('landing.feature.weather.details'),
+      benefits: [t('landing.feature.weather.benefit_1'), t('landing.feature.weather.benefit_2'), t('landing.feature.weather.benefit_3'), t('landing.feature.weather.benefit_4')]
     },
     { 
       icon: null,
       image: "/icons/yield-optimization.jpg",
-      title: "Yield Optimisation", 
-      description: "Maximise your crop yields with data-driven insights",
+      title: t('landing.feature.yield.title'),
+      description: t('landing.feature.yield.description'),
       iconBg: "bg-green-100 dark:bg-green-900",
       borderColor: "border-green-400",
       iconColor: "text-green-600 dark:text-green-300",
-      detailedDesc: "Leverage predictive analytics to optimize every aspect of your farming. From fertilizer timing to harvest scheduling, our AI provides data-driven recommendations to maximize your yields while minimizing costs and environmental impact.",
-      benefits: ["Yield predictions", "Cost optimization", "Resource management", "Environmental impact tracking"]
+      detailedDesc: t('landing.feature.yield.details'),
+      benefits: [t('landing.feature.yield.benefit_1'), t('landing.feature.yield.benefit_2'), t('landing.feature.yield.benefit_3'), t('landing.feature.yield.benefit_4')]
     },
     { 
       icon: null,
       image: "/icons/pest-disease-control.jpg",
-      title: "Pest & Disease Control", 
-      description: "Early detection and prevention of crop threats",
+      title: t('landing.feature.pest.title'),
+      description: t('landing.feature.pest.description'),
       iconBg: "bg-orange-100 dark:bg-orange-900",
       borderColor: "border-orange-400",
       iconColor: "text-orange-600 dark:text-orange-300",
-      detailedDesc: "AI-powered image recognition identifies diseases and pests early, often before visible symptoms appear. Receive timely treatment recommendations and preventive measures to protect your crops from potential threats.",
-      benefits: ["Early pest detection", "Disease identification", "Treatment recommendations", "Prevention strategies"]
+      detailedDesc: t('landing.feature.pest.details'),
+      benefits: [t('landing.feature.pest.benefit_1'), t('landing.feature.pest.benefit_2'), t('landing.feature.pest.benefit_3'), t('landing.feature.pest.benefit_4')]
     },
     { 
       icon: null,
       image: "/icons/smart-irrigation.jpg",
-      title: "Smart Irrigation", 
-      description: "Optimise water usage with IoT sensor data and AI predictions",
+      title: t('landing.feature.irrigation.title'),
+      description: t('landing.feature.irrigation.description'),
       iconBg: "bg-blue-100 dark:bg-blue-900",
       borderColor: "border-blue-400",
       iconColor: "text-blue-600 dark:text-blue-300",
-      detailedDesc: "Connect IoT soil moisture sensors for real-time water status. Our AI algorithms optimize irrigation schedules based on weather forecasts, soil conditions, and crop requirements, reducing water waste while improving yields.",
-      benefits: ["Water usage optimization", "IoT sensor integration", "Cost savings", "Environmental conservation"]
+      detailedDesc: t('landing.feature.irrigation.details'),
+      benefits: [t('landing.feature.irrigation.benefit_1'), t('landing.feature.irrigation.benefit_2'), t('landing.feature.irrigation.benefit_3'), t('landing.feature.irrigation.benefit_4')]
     },
     { 
       icon: null,
       image: "/icons/market-analytics.jpg",
-      title: "Market Analytics", 
-      description: "Live mandi prices and profit predictions for better selling decisions",
+      title: t('landing.feature.market.title'),
+      description: t('landing.feature.market.description'),
       iconBg: "bg-green-100 dark:bg-green-900",
       borderColor: "border-green-400",
       iconColor: "text-green-600 dark:text-green-300",
-      detailedDesc: "Track live mandi prices across major markets, analyze price trends, and get AI-powered profit predictions. Make informed decisions on when and where to sell your crops for maximum returns.",
-      benefits: ["Live price tracking", "Trend analysis", "Profit predictions", "Market comparisons"]
+      detailedDesc: t('landing.feature.market.details'),
+      benefits: [t('landing.feature.market.benefit_1'), t('landing.feature.market.benefit_2'), t('landing.feature.market.benefit_3'), t('landing.feature.market.benefit_4')]
     },
     { 
       icon: null,
       image: "/icons/organic-farming.jpg",
-      title: "Organic Farming Guide", 
-      description: "Comprehensive organic farming techniques and certification help",
+      title: t('landing.feature.organic.title'),
+      description: t('landing.feature.organic.description'),
       iconBg: "bg-orange-100 dark:bg-orange-900",
       borderColor: "border-orange-400",
       iconColor: "text-orange-600 dark:text-orange-300",
-      detailedDesc: "Transition to organic farming with our comprehensive guide covering techniques, certifications, and market opportunities. Access expert knowledge on sustainable practices that increase both yield and profitability.",
-      benefits: ["Organic techniques", "Certification guidance", "Premium market access", "Sustainability tracking"]
+      detailedDesc: t('landing.feature.organic.details'),
+      benefits: [t('landing.feature.organic.benefit_1'), t('landing.feature.organic.benefit_2'), t('landing.feature.organic.benefit_3'), t('landing.feature.organic.benefit_4')]
     },
     { 
       icon: null,
       image: "/icons/crop-scanner.jpg",
-      title: "AI Crop Scanner", 
-      description: "Snap a photo to identify diseases, pests, and nutrient deficiencies",
+      title: t('landing.feature.scanner.title'),
+      description: t('landing.feature.scanner.description'),
       iconBg: "bg-purple-100 dark:bg-purple-900",
       borderColor: "border-purple-400",
       iconColor: "text-purple-600 dark:text-purple-300",
-      detailedDesc: "Use your smartphone to capture crop images. Our AI instantly identifies diseases, pests, and nutrient deficiencies with treatment recommendations. Instant diagnosis available offline too.",
-      benefits: ["Instant diagnosis", "Offline capability", "High accuracy", "Treatment recommendations"]
+      detailedDesc: t('landing.feature.scanner.details'),
+      benefits: [t('landing.feature.scanner.benefit_1'), t('landing.feature.scanner.benefit_2'), t('landing.feature.scanner.benefit_3'), t('landing.feature.scanner.benefit_4')]
     },
   ];
 
   const stats = [
-    { icon: Users, value: 10000, suffix: "+", label: "Active Farmers", color: "text-primary", bg: "bg-primary/10" },
-    { icon: TrendingUp, value: 35, suffix: "%", label: "Average Yield Increase", color: "text-accent", bg: "bg-accent/10" },
-    { icon: Shield, value: 98, suffix: "%", label: "Problem Detection Rate", color: "text-navy", bg: "bg-navy/10" },
+    { icon: Users, value: 10000, suffix: "+", label: t('landing.stats.active_farmers'), color: "text-primary", bg: "bg-primary/10" },
+    { icon: TrendingUp, value: 35, suffix: "%", label: t('landing.stats.yield_increase'), color: "text-accent", bg: "bg-accent/10" },
+    { icon: Shield, value: 98, suffix: "%", label: t('landing.stats.detection_rate'), color: "text-navy", bg: "bg-navy/10" },
   ];
 
   return (
@@ -162,16 +162,16 @@ const Index = () => {
         <div className="container mx-auto px-4 py-4 flex items-center justify-between">
           <div className="flex items-center gap-3">
             <AshokaChakra size={36} />
-            <h1 className="text-xl font-bold text-foreground font-heading">Smart Crop Advisory</h1>
+            <h1 className="text-xl font-bold text-foreground font-heading">{t('header.app_title')}</h1>
           </div>
           <div className="flex items-center gap-3">
             <LanguageSelector />
             <Link to="/login">
-              <Button variant="ghost" className="text-foreground hover:text-primary">Sign In</Button>
+              <Button variant="ghost" className="text-foreground hover:text-primary">{t('auth.signin')}</Button>
             </Link>
             <Link to="/login">
               <Button className="bg-accent text-accent-foreground hover:bg-accent/90 shadow-md glow-saffron">
-                Get Started
+                {t('landing.get_started')}
               </Button>
             </Link>
           </div>
@@ -214,7 +214,7 @@ const Index = () => {
 
             <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3 }}>
               <Badge className="mb-4 bg-accent/15 text-accent border-accent/30 text-sm px-4 py-1.5 backdrop-blur-sm" variant="outline">
-                🇮🇳 Proudly Indian — Next-Generation Farm Management
+                {t('landing.proudly_indian_badge')}
               </Badge>
             </motion.div>
 
@@ -276,15 +276,14 @@ const Index = () => {
           <div className="flex flex-col items-center gap-4 text-center md:flex-row md:text-left md:justify-between">
             <div className="max-w-2xl">
               <Badge className="mb-2">📱 New • Inclusive</Badge>
-              <h2 className="text-2xl font-bold sm:text-3xl">No smartphone? Start free SMS and upgrade to paid plans.</h2>
+              <h2 className="text-2xl font-bold sm:text-3xl">{t('landing.sms_banner.title')}</h2>
               <p className="mt-2 text-sm text-muted-foreground sm:text-base">
-                Weather warnings, mandi prices, pest alerts and government scheme updates — delivered straight to any
-                ₹500 keypad phone. Built for Bharat's 8 crore feature-phone farmers with free + paid plan support.
+                {t('landing.sms_banner.description')}
               </p>
             </div>
             <Link to="/sms-register">
               <Button size="lg" className="shadow-lg">
-                Register for SMS Alerts <ArrowRight className="ml-2 h-4 w-4" />
+                {t('landing.sms_banner.cta')} <ArrowRight className="ml-2 h-4 w-4" />
               </Button>
             </Link>
           </div>
@@ -348,7 +347,7 @@ const Index = () => {
                       onClick={() => setSelectedFeature(index)}
                       className="mt-2 w-full group-hover:bg-primary group-hover:text-primary-foreground transition-colors"
                     >
-                      Know More →
+                      {t('landing.know_more')} →
                     </Button>
                   </CardContent>
                 </Card>
@@ -387,11 +386,11 @@ const Index = () => {
             </DialogHeader>
             <div className="space-y-4 py-4">
               <div>
-                <h4 className="font-semibold text-base mb-2 text-foreground">Overview</h4>
+                <h4 className="font-semibold text-base mb-2 text-foreground">{t('landing.overview')}</h4>
                 <p className="text-muted-foreground leading-relaxed">{features[selectedFeature].detailedDesc}</p>
               </div>
               <div>
-                <h4 className="font-semibold text-base mb-3 text-foreground">Key Benefits</h4>
+                <h4 className="font-semibold text-base mb-3 text-foreground">{t('landing.key_benefits')}</h4>
                 <div className="grid grid-cols-2 gap-2">
                   {features[selectedFeature].benefits.map((benefit, i) => (
                     <div key={i} className="flex items-start gap-2">
@@ -404,7 +403,7 @@ const Index = () => {
               <div className="pt-4">
                 <Link to="/login">
                   <Button className="w-full bg-primary hover:bg-primary/90">
-                    Get Started Now
+                    {t('landing.get_started_now')}
                   </Button>
                 </Link>
               </div>
@@ -424,19 +423,19 @@ const Index = () => {
               className="space-y-6"
             >
               <motion.h2 variants={fadeUp} custom={0} className="text-3xl lg:text-4xl font-bold text-foreground font-heading">
-                Join Thousands of <span className="text-gradient-tricolor">Smart Farmers</span>
+                {t('landing.join_thousands')} <span className="text-gradient-tricolor">{t('landing.smart_farmers')}</span>
               </motion.h2>
               <motion.p variants={fadeUp} custom={1} className="text-xl text-muted-foreground">
-                Our platform has helped farmers increase yields by up to 35% while reducing costs and environmental impact.
+                {t('landing.join_description')}
               </motion.p>
               <div className="space-y-4">
                 {[
-                  "AI-powered crop recommendations",
-                  "Real-time weather monitoring",
-                  "Pest and disease alerts",
-                  "Expert consultation network",
-                  "Government scheme notifications",
-                  "Multi-language support"
+                  t('landing.benefit.ai_recommendations'),
+                  t('landing.benefit.weather_monitoring'),
+                  t('landing.benefit.pest_alerts'),
+                  t('landing.benefit.expert_network'),
+                  t('landing.benefit.scheme_notifications'),
+                  t('landing.benefit.multi_language')
                 ].map((benefit, index) => (
                   <motion.div
                     key={index}
@@ -455,7 +454,7 @@ const Index = () => {
               <motion.div variants={fadeUp} custom={8}>
                 <Link to="/login">
                   <Button size="lg" className="bg-accent text-accent-foreground hover:bg-accent/90 shadow-lg glow-saffron mt-4 group font-semibold">
-                    Get Started Today
+                    {t('landing.get_started_today')}
                     <ArrowRight className="ml-2 h-4 w-4 group-hover:translate-x-1 transition-transform" />
                   </Button>
                 </Link>
@@ -501,14 +500,14 @@ const Index = () => {
           >
             <div className="flex items-center justify-center gap-3 mb-4">
               <AshokaChakra size={28} animate={false} />
-              <span className="text-xl font-bold text-foreground font-heading">Smart Crop Advisory</span>
-            </div>
-            <p className="text-muted-foreground">
-              Empowering farmers with intelligent technology for sustainable agriculture 🇮🇳
-            </p>
-            <p className="text-xs text-muted-foreground/70 mt-4">
-              © 2025 Samrudh. All Rights Reserved.
-            </p>
+               <span className="text-xl font-bold text-foreground font-heading">{t('header.app_title')}</span>
+             </div>
+             <p className="text-muted-foreground">
+               {t('landing.footer_tagline')}
+             </p>
+             <p className="text-xs text-muted-foreground/70 mt-4">
+               {t('landing.footer_copyright')}
+             </p>
           </motion.div>
         </div>
         <div className="tricolor-bar h-1.5 mt-8" />
@@ -528,8 +527,8 @@ const Index = () => {
         <DialogContent className="max-w-2xl w-[95vw] p-6 bg-card border-border">
           <div className="flex flex-col items-center gap-6">
             <div className="text-center space-y-2">
-              <h2 className="text-2xl font-bold text-foreground">Bhoomi Aasha - Demo</h2>
-              <p className="text-muted-foreground">Listen to our audio demonstration</p>
+               <h2 className="text-2xl font-bold text-foreground">{t('landing.demo_title')}</h2>
+               <p className="text-muted-foreground">{t('landing.demo_subtitle')}</p>
             </div>
             <audio
               ref={audioRef}
