@@ -1,15 +1,25 @@
 /**
  * AI Configuration
  * Centralized configuration for all AI features
+ * API Key is loaded from environment variable AI_API_KEY
  */
 
+// Get API key from environment
+const getAPIKey = (): string => {
+  const key = process.env.REACT_APP_AI_API_KEY || process.env.AI_API_KEY || '';
+  if (!key) {
+    console.warn('[v0] AI_API_KEY environment variable is not set');
+  }
+  return key;
+};
+
 export const AI_CONFIG = {
-  // Primary API Key - Used for all AI operations
-  API_KEY: "sk-zQjinsXk7GC70XJdERZEsUKHaHUn104Dho0e8eC7rVGJVUHK",
+  // Primary API Key - Used for all AI operations (loaded from environment)
+  API_KEY: getAPIKey(),
   
   // OpenAI Configuration
   OPENAI: {
-    API_KEY: "sk-zQjinsXk7GC70XJdERZEsUKHaHUn104Dho0e8eC7rVGJVUHK",
+    API_KEY: getAPIKey(),
     BASE_URL: "https://api.openai.com/v1",
     MODELS: {
       CHAT: "gpt-3.5-turbo",
