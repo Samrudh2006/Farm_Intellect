@@ -97,12 +97,21 @@ export const LanguageProvider: React.FC<LanguageProviderProps> = ({ children }) 
     const normalize = (value: string) => value.replace(/\s+/g, ' ').trim();
     const skippableTags = new Set(['SCRIPT', 'STYLE', 'NOSCRIPT', 'CODE', 'PRE', 'KBD', 'SAMP']);
     const translatableAttributes: Array<'placeholder' | 'title' | 'aria-label'> = ['placeholder', 'title', 'aria-label'];
+    const skipCache = new WeakMap<Element, boolean>();
+
+    const isSkippableElement = (element: Element | null): boolean => {
+      if (!element) return false;
+      const cached = skipCache.get(element);
+      if (cached !== undefined) return cached;
+      const value = skippableTags.has(element.tagName) ||
+        Boolean(element.closest('[data-no-auto-translate], [data-i18n-ignore="true"], [contenteditable="true"], input, textarea, select'));
+      skipCache.set(element, value);
+      return value;
+    };
 
     const isSkippableNode = (node: Node): boolean => {
       const parent = node.parentElement;
-      if (!parent) return false;
-      if (skippableTags.has(parent.tagName)) return true;
-      return Boolean(parent.closest('[data-no-auto-translate], [data-i18n-ignore="true"], [contenteditable="true"], input, textarea, select'));
+      return isSkippableElement(parent);
     };
 
     const inferEnglishSource = (text: string): string | null => {
@@ -140,7 +149,7 @@ export const LanguageProvider: React.FC<LanguageProviderProps> = ({ children }) 
     };
 
     const processElementAttributes = (el: Element) => {
-      if (isSkippableNode(el)) return;
+      if (isSkippableElement(el)) return;
       const attrMapRef = elementOriginalAttrsRef.current;
       const existing = attrMapRef.get(el) || {};
       let changed = false;
@@ -171,14 +180,16 @@ export const LanguageProvider: React.FC<LanguageProviderProps> = ({ children }) 
         processTextNode(root as Text);
         return;
       }
-      if (root.nodeType !== Node.ELEMENT_NODE && root.nodeType !== Node.DOCUMENT_NODE) {
+      if (root.nodeType === Node.DOCUMENT_NODE) {
+        processSubtree(document.body);
+        return;
+      }
+      if (root.nodeType !== Node.ELEMENT_NODE) {
         return;
       }
 
       const rootElement = root as Element;
-      if (root.nodeType === Node.ELEMENT_NODE) {
-        processElementAttributes(rootElement);
-      }
+      processElementAttributes(rootElement);
 
       const walker = document.createTreeWalker(root, NodeFilter.SHOW_TEXT);
       let textNode: Node | null = walker.nextNode();
@@ -187,28 +198,37 @@ export const LanguageProvider: React.FC<LanguageProviderProps> = ({ children }) 
         textNode = walker.nextNode();
       }
 
-      if (root.nodeType === Node.ELEMENT_NODE) {
-        const attrNodes = rootElement.querySelectorAll('[placeholder], [title], [aria-label]');
-        attrNodes.forEach((node) => processElementAttributes(node));
-      } else if (root.nodeType === Node.DOCUMENT_NODE) {
-        const attrNodes = document.querySelectorAll('[placeholder], [title], [aria-label]');
-        attrNodes.forEach((node) => processElementAttributes(node));
-      }
+      const attrNodes = rootElement.querySelectorAll('[placeholder], [title], [aria-label]');
+      attrNodes.forEach((node) => processElementAttributes(node));
     };
 
     processSubtree(document.body);
 
+    const pendingNodes = new Set<Node>();
+    let rafId: number | null = null;
+    const enqueueNode = (node: Node) => {
+      pendingNodes.add(node);
+      if (rafId !== null) return;
+      rafId = window.requestAnimationFrame(() => {
+        for (const pendingNode of pendingNodes) {
+          processSubtree(pendingNode);
+        }
+        pendingNodes.clear();
+        rafId = null;
+      });
+    };
+
     const observer = new MutationObserver((mutations) => {
       for (const mutation of mutations) {
         if (mutation.type === 'characterData') {
-          processTextNode(mutation.target as Text);
+          enqueueNode(mutation.target);
           continue;
         }
         if (mutation.type === 'attributes' && mutation.target instanceof Element) {
-          processElementAttributes(mutation.target);
+          enqueueNode(mutation.target);
           continue;
         }
-        mutation.addedNodes.forEach((addedNode) => processSubtree(addedNode));
+        mutation.addedNodes.forEach((addedNode) => enqueueNode(addedNode));
       }
     });
 
@@ -220,7 +240,12 @@ export const LanguageProvider: React.FC<LanguageProviderProps> = ({ children }) 
       attributeFilter: translatableAttributes,
     });
 
-    return () => observer.disconnect();
+    return () => {
+      observer.disconnect();
+      if (rafId !== null) {
+        window.cancelAnimationFrame(rafId);
+      }
+    };
   }, [language, localePhraseMaps]);
 
   const value: LanguageContextType = {
