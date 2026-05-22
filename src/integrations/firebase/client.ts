@@ -4,14 +4,15 @@
 import { initializeApp, FirebaseError } from "firebase/app";
 import { getAuth, RecaptchaVerifier, signInWithPhoneNumber, ConfirmationResult, User, onAuthStateChanged as firebaseOnAuthStateChanged } from "firebase/auth";
 
+// Load Firebase config from environment variables
 const firebaseConfig = {
-  apiKey: "AIzaSyD4sPDW7IzQk63CLjOlXf_QA_lP-BINvMQ",
-  authDomain: "farmintellect65.firebaseapp.com",
-  projectId: "farmintellect65",
-  storageBucket: "farmintellect65.firebasestorage.app",
-  messagingSenderId: "960040509665",
-  appId: "1:960040509665:web:b5fe823a0a1b2cf18817a0",
-  measurementId: "G-FG6QGRRP9W"
+  apiKey: import.meta.env.VITE_FIREBASE_API_KEY || "",
+  authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN || "",
+  projectId: import.meta.env.VITE_FIREBASE_PROJECT_ID || "",
+  storageBucket: import.meta.env.VITE_FIREBASE_STORAGE_BUCKET || "",
+  messagingSenderId: import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID || "",
+  appId: import.meta.env.VITE_FIREBASE_APP_ID || "",
+  measurementId: import.meta.env.VITE_FIREBASE_MEASUREMENT_ID || ""
 };
 
 // Initialize Firebase with error handling
@@ -20,6 +21,10 @@ let auth: any = null;
 let confirmationResultGlobal: ConfirmationResult | null = null;
 
 try {
+  // Validate Firebase config is available
+  if (!firebaseConfig.apiKey) {
+    console.error("CRITICAL: Firebase API key is not configured. Set VITE_FIREBASE_API_KEY in your .env file.");
+  }
   app = initializeApp(firebaseConfig);
   auth = getAuth(app);
 } catch (error) {
