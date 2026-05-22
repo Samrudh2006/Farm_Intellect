@@ -184,7 +184,7 @@ const Index = () => {
         <div className="absolute inset-0 z-0">
           <img
             src="/images/hero-farming.jpg"
-            alt="Indian farming landscape with golden wheat fields"
+            alt={t('landing.hero_image_alt')}
             className="w-full h-full object-cover"
             loading="eager"
             fetchPriority="high"
@@ -275,7 +275,7 @@ const Index = () => {
         <div className="container mx-auto px-4">
           <div className="flex flex-col items-center gap-4 text-center md:flex-row md:text-left md:justify-between">
             <div className="max-w-2xl">
-              <Badge className="mb-2">📱 New • Inclusive</Badge>
+              <Badge className="mb-2">{t('landing.sms_banner.badge')}</Badge>
               <h2 className="text-2xl font-bold sm:text-3xl">{t('landing.sms_banner.title')}</h2>
               <p className="mt-2 text-sm text-muted-foreground sm:text-base">
                 {t('landing.sms_banner.description')}
