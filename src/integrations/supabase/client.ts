@@ -5,26 +5,29 @@ import type { Database } from './types';
 const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL;
 const SUPABASE_PUBLISHABLE_KEY = import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY;
 
-const fallbackSupabaseUrl = 'https://exynaicvgadoenjfunqz.supabase.co';
-const fallbackSupabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImV4eW5haWN2Z2Fkb2VuamZ1bnF6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzI3NzUwNjgsImV4cCI6MjA4ODM1MTA2OH0.T-xiyOGqzXkfFrg1FxsRyb6f_ErMMKGH8CmBOyVqgu8';
-const resolvedSupabaseUrl = SUPABASE_URL || fallbackSupabaseUrl;
-const resolvedSupabaseKey = SUPABASE_PUBLISHABLE_KEY || fallbackSupabaseKey;
+// DO NOT USE HARDCODED KEYS - Use environment variables instead
+// Set VITE_SUPABASE_URL and VITE_SUPABASE_PUBLISHABLE_KEY in your .env file
+const resolvedSupabaseUrl = SUPABASE_URL;
+const resolvedSupabaseKey = SUPABASE_PUBLISHABLE_KEY;
 
 export const hasSupabaseEnv = Boolean(resolvedSupabaseUrl && resolvedSupabaseKey);
 
 if (!SUPABASE_URL || !SUPABASE_PUBLISHABLE_KEY) {
-  console.warn(
-    'Supabase preview environment variables are missing. Falling back to the bundled public client config so preview auth can still work.',
+  console.error(
+    'CRITICAL: Supabase environment variables are missing (VITE_SUPABASE_URL, VITE_SUPABASE_PUBLISHABLE_KEY). Please set them in your .env file.',
   );
 }
 
 // Import the supabase client like this:
 // import { supabase } from "@/integrations/supabase/client";
 
-export const supabase = createClient<Database>(resolvedSupabaseUrl, resolvedSupabaseKey, {
-  auth: {
-    storage: localStorage,
-    persistSession: true,
-    autoRefreshToken: true,
-  }
-});
+// Safely create client only if both credentials are available
+export const supabase = resolvedSupabaseUrl && resolvedSupabaseKey 
+  ? createClient<Database>(resolvedSupabaseUrl, resolvedSupabaseKey, {
+      auth: {
+        storage: localStorage,
+        persistSession: true,
+        autoRefreshToken: true,
+      }
+    })
+  : null;
