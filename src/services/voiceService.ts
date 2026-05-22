@@ -147,35 +147,34 @@ class VoiceService {
    * Record audio from microphone
    */
   async recordAudio(durationMs: number = 10000): Promise<Blob> {
-    return new Promise(async (resolve, reject) => {
-      try {
-        const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-        const mediaRecorder = new MediaRecorder(stream, { mimeType: 'audio/webm' });
-        const chunks: Blob[] = [];
+    return new Promise((resolve, reject) => {
+      navigator.mediaDevices.getUserMedia({ audio: true })
+        .then((stream) => {
+          const mediaRecorder = new MediaRecorder(stream, { mimeType: 'audio/webm' });
+          const chunks: Blob[] = [];
 
-        mediaRecorder.ondataavailable = (event) => {
-          if (event.data.size > 0) {
-            chunks.push(event.data);
-          }
-        };
+          mediaRecorder.ondataavailable = (event) => {
+            if (event.data.size > 0) {
+              chunks.push(event.data);
+            }
+          };
 
-        mediaRecorder.onstop = () => {
-          stream.getTracks().forEach(track => track.stop());
-          const blob = new Blob(chunks, { type: 'audio/webm' });
-          resolve(blob);
-        };
+          mediaRecorder.onstop = () => {
+            stream.getTracks().forEach(track => track.stop());
+            const blob = new Blob(chunks, { type: 'audio/webm' });
+            resolve(blob);
+          };
 
-        mediaRecorder.start();
+          mediaRecorder.start();
 
-        // Auto-stop after duration
-        setTimeout(() => {
-          if (mediaRecorder.state === 'recording') {
-            mediaRecorder.stop();
-          }
-        }, durationMs);
-      } catch (error) {
-        reject(error);
-      }
+          // Auto-stop after duration
+          setTimeout(() => {
+            if (mediaRecorder.state === 'recording') {
+              mediaRecorder.stop();
+            }
+          }, durationMs);
+        })
+        .catch(reject);
     });
   }
 
