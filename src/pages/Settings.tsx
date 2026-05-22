@@ -29,7 +29,6 @@ import {
 
 const Settings = () => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
-  const [showApiKey, setShowApiKey] = useState(false);
   
   const user = {
     name: "Admin User",
@@ -303,18 +302,23 @@ const Settings = () => {
                     </div>
                     <div className="space-y-2">
                       <Label htmlFor="apiKey">OpenAI API Key</Label>
+                      <p className="text-sm text-muted-foreground">
+                        The API key is stored securely in environment variables and is not displayed here. 
+                        To change it, update the AI_API_KEY variable in your environment.
+                      </p>
                       <div className="flex gap-2">
                         <Input
                           id="apiKey"
-                          type={showApiKey ? "text" : "password"}
-                          value="sk-zQjinsXk7GC70XJdERZEsUKHaHUn104Dho0e8eC7rVGJVUHK"
-                          readOnly
+                          type="password"
+                          placeholder="••••••••••••••••••••"
+                          disabled
+                          value=""
                         />
                         <Button
                           variant="outline"
-                          onClick={() => setShowApiKey(!showApiKey)}
+                          disabled
                         >
-                          {showApiKey ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                          <Eye className="h-4 w-4" />
                         </Button>
                       </div>
                     </div>
