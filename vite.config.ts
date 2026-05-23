@@ -2,6 +2,7 @@ import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react-swc";
 import path from "path";
 import { componentTagger } from "lovable-tagger";
+import { visualizer } from "rollup-plugin-visualizer";
 
 const vendorChunkGroups: Array<[string, string[]]> = [
   ["react-vendor", ["react", "react-dom"]],
@@ -30,6 +31,22 @@ export default defineConfig(({ mode }) => ({
     setupFiles: "./src/test/setup.ts",
     css: true,
     include: ["src/**/*.{test,spec}.{ts,tsx}"],
+    coverage: {
+      provider: "v8",
+      reporter: ["text", "html", "lcov", "json"],
+      include: ["src/**/*.{ts,tsx}"],
+      exclude: [
+        "node_modules/",
+        "src/test/",
+        "src/main.tsx",
+        "**/*.d.ts",
+        "**/index.ts",
+      ],
+      lines: 50,
+      functions: 50,
+      branches: 40,
+      statements: 50,
+    },
   },
   plugins: [
     react(),
@@ -43,6 +60,13 @@ export default defineConfig(({ mode }) => ({
       },
     },
     mode === "development" && componentTagger(),
+    visualizer({
+      filename: "dist/stats.html",
+      title: "Bundle Analysis",
+      open: false,
+      gzipSize: true,
+      brotliSize: false,
+    }),
   ].filter(Boolean),
   resolve: {
     alias: {

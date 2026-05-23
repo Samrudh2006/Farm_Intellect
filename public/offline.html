@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Farm Intellect - Offline</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
+        'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
+        sans-serif;
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+
+    .container {
+      background: white;
+      border-radius: 12px;
+      box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+      max-width: 500px;
+      padding: 40px;
+      text-align: center;
+    }
+
+    .icon {
+      font-size: 64px;
+      margin-bottom: 20px;
+    }
+
+    h1 {
+      color: #333;
+      font-size: 28px;
+      margin-bottom: 12px;
+      font-weight: 600;
+    }
+
+    p {
+      color: #666;
+      font-size: 16px;
+      line-height: 1.6;
+      margin-bottom: 20px;
+    }
+
+    .status {
+      background: #f0f4ff;
+      border-left: 4px solid #667eea;
+      padding: 16px;
+      border-radius: 6px;
+      margin: 24px 0;
+      text-align: left;
+    }
+
+    .status-title {
+      font-weight: 600;
+      color: #333;
+      margin-bottom: 8px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .status-indicator {
+      display: inline-block;
+      width: 12px;
+      height: 12px;
+      background: #ff6b6b;
+      border-radius: 50%;
+      animation: pulse 2s infinite;
+    }
+
+    @keyframes pulse {
+      0%, 100% {
+        opacity: 1;
+      }
+      50% {
+        opacity: 0.5;
+      }
+    }
+
+    .status-list {
+      font-size: 14px;
+      color: #666;
+      list-style: none;
+    }
+
+    .status-list li {
+      padding: 4px 0;
+    }
+
+    .status-list li:before {
+      content: '→ ';
+      color: #667eea;
+      font-weight: 600;
+      margin-right: 6px;
+    }
+
+    .action-buttons {
+      display: flex;
+      gap: 12px;
+      margin-top: 28px;
+    }
+
+    button {
+      flex: 1;
+      padding: 12px 24px;
+      border: none;
+      border-radius: 6px;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+
+    .btn-primary {
+      background: #667eea;
+      color: white;
+    }
+
+    .btn-primary:hover {
+      background: #5568d3;
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+    }
+
+    .btn-secondary {
+      background: #f0f4ff;
+      color: #667eea;
+      border: 1px solid #667eea;
+    }
+
+    .btn-secondary:hover {
+      background: #e8ecff;
+      transform: translateY(-2px);
+    }
+
+    .footer {
+      margin-top: 32px;
+      padding-top: 20px;
+      border-top: 1px solid #eee;
+      font-size: 13px;
+      color: #999;
+    }
+
+    .cached-info {
+      background: #f5fff5;
+      border-left-color: #51cf66;
+      margin-top: 16px;
+    }
+
+    .cached-info .status-title {
+      color: #2f9e44;
+    }
+
+    .cached-info .status-indicator {
+      background: #51cf66;
+      animation: none;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="icon">🌾</div>
+    
+    <h1>You're Offline</h1>
+    <p>Farm Intellect requires an internet connection to access most features.</p>
+
+    <div class="status">
+      <div class="status-title">
+        <span class="status-indicator"></span>
+        Connection Status
+      </div>
+      <ul class="status-list">
+        <li>No internet connection detected</li>
+        <li>Cached data is available for viewing</li>
+        <li>Real-time updates are unavailable</li>
+      </ul>
+    </div>
+
+    <div class="status cached-info">
+      <div class="status-title">
+        <span class="status-indicator"></span>
+        What You Can Do
+      </div>
+      <ul class="status-list">
+        <li>View previously cached data</li>
+        <li>Browse offline-available pages</li>
+        <li>Changes will sync when online</li>
+      </ul>
+    </div>
+
+    <div class="action-buttons">
+      <button class="btn-primary" onclick="tryAgain()">Try Again</button>
+      <button class="btn-secondary" onclick="goHome()">Go Home</button>
+    </div>
+
+    <div class="footer">
+      <p>Farm Intellect v1.0 • Offline Mode</p>
+      <p style="margin-top: 8px; color: #ccc;">Connection will be monitored automatically</p>
+    </div>
+  </div>
+
+  <script>
+    function tryAgain() {
+      location.reload();
+    }
+
+    function goHome() {
+      window.location.href = '/';
+    }
+
+    // Monitor connection status
+    window.addEventListener('online', () => {
+      console.log('[Offline] Connection restored');
+      // Optional: show notification or redirect
+    });
+
+    window.addEventListener('offline', () => {
+      console.log('[Offline] Connection lost');
+    });
+  </script>
+</body>
+</html>
