@@ -52,3 +52,8 @@ npm run test
 - Contribution guide: [CONTRIBUTING.md](CONTRIBUTING.md)
 - System and operations docs: [docs/](docs)
 - Archived historical status reports: [docs/archive/top-level-reports/](docs/archive/top-level-reports)
+
+## Deployment note
+
+- Set `VITE_ROBOTS_POLICY=index, follow` for production builds.
+- Keep `VITE_ROBOTS_POLICY=noindex, nofollow` for preview/staging builds.

@@ -36,12 +36,17 @@ export const AI_CONFIG = {
   },
 };
 
+if (import.meta.env.PROD && AI_CONFIG.API_BASE_URL.startsWith("http://")) {
+  console.warn("[v0] VITE_API_BASE_URL should use https:// in production deployments.");
+}
+
 export function isFeatureEnabled(feature: keyof typeof AI_CONFIG.FEATURES): boolean {
   return AI_CONFIG.FEATURES[feature];
 }
 
 export function getAPIKeyStatus() {
   return {
+    // Browser does not manage provider keys by design; keys are backend-only.
     isConfigured: false,
     isValid: false,
     partial: "Managed on server",
