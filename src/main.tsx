@@ -31,7 +31,32 @@ if (savedTheme === "dark" || (!savedTheme && window.matchMedia("(prefers-color-s
 // Register service worker
 if ("serviceWorker" in navigator) {
   window.addEventListener("load", () => {
-    navigator.serviceWorker.register("/sw.js").catch((error) => {
+    navigator.serviceWorker.register("/service-worker.js").then((registration) => {
+      console.log("[v0] Service Worker registered successfully", registration);
+      
+      // Check for updates periodically
+      setInterval(() => {
+        registration.update();
+      }, 60000); // Check every 60 seconds
+      
+      // Listen for new service worker
+      registration.addEventListener("updatefound", () => {
+        const newWorker = registration.installing;
+        if (newWorker) {
+          newWorker.addEventListener("statechange", () => {
+            if (newWorker.state === "installed" && navigator.serviceWorker.controller) {
+              // New service worker is ready, notify user
+              console.log("[v0] New service worker available - app will update on next reload");
+              // Optionally show notification to user
+              if (window.confirm("A new version of Farm Intellect is available. Reload to update?")) {
+                newWorker.postMessage({ type: "SKIP_WAITING" });
+                window.location.reload();
+              }
+            }
+          });
+        }
+      });
+    }).catch((error) => {
       console.error("[v0] Service worker registration failed:", error);
     });
   });
