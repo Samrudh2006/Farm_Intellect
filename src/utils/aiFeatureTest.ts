@@ -8,11 +8,19 @@ export interface AITestResult {
 }
 
 const runHealthCheck = async (): Promise<boolean> => {
+  const url = `${AI_CONFIG.API_BASE_URL}${AI_CONFIG.ENDPOINTS.HEALTH}`;
   try {
-    const response = await fetch(`${AI_CONFIG.API_BASE_URL}${AI_CONFIG.ENDPOINTS.HEALTH}`);
+    const response = await fetch(url);
+    if (!response.ok) {
+      console.error("[v0] AI diagnostics health check failed:", {
+        url,
+        status: response.status,
+        statusText: response.statusText,
+      });
+    }
     return response.ok;
   } catch (error) {
-    console.error("[v0] AI diagnostics health check failed:", error);
+    console.error("[v0] AI diagnostics health check failed:", { url, error });
     return false;
   }
 };

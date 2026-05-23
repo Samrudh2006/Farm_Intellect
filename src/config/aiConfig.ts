@@ -37,7 +37,7 @@ export const AI_CONFIG = {
 };
 
 if (import.meta.env.PROD && AI_CONFIG.API_BASE_URL.startsWith("http://")) {
-  console.warn("[v0] VITE_API_BASE_URL should use https:// in production deployments.");
+  console.warn("[v0] Set VITE_API_BASE_URL to an https:// URL in production.");
 }
 
 export function isFeatureEnabled(feature: keyof typeof AI_CONFIG.FEATURES): boolean {
