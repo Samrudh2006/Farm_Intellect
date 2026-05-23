@@ -11,7 +11,8 @@ const runHealthCheck = async (): Promise<boolean> => {
   try {
     const response = await fetch(`${AI_CONFIG.API_BASE_URL}${AI_CONFIG.ENDPOINTS.HEALTH}`);
     return response.ok;
-  } catch {
+  } catch (error) {
+    console.error("[v0] AI diagnostics health check failed:", error);
     return false;
   }
 };

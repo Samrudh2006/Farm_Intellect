@@ -4,9 +4,10 @@
  */
 
 const configuredBaseUrl = import.meta.env.VITE_API_BASE_URL as string | undefined;
+const defaultApiBaseUrl = "http://localhost:3001";
 
 export const AI_CONFIG = {
-  API_BASE_URL: (configuredBaseUrl || "http://localhost:3001").replace(/\/$/, ""),
+  API_BASE_URL: (configuredBaseUrl || defaultApiBaseUrl).replace(/\/$/, ""),
   FEATURES: {
     CHAT_AI: true,
     DISEASE_DETECTION: true,

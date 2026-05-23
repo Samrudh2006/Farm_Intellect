@@ -29,7 +29,7 @@ export const useRoleGuard = (allowedRoles?: AppRole[]): RoleGuardResult => {
 
   const role = profile.role as AppRole;
   if (!allowedRoles.includes(role)) {
-    return { status: "forbidden", redirectTo: roleHomeRoutes[role] || "/farmer/dashboard" };
+    return { status: "forbidden", redirectTo: roleHomeRoutes[role] ?? "/login" };
   }
 
   return { status: "allowed" };
