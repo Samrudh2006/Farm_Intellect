@@ -1,6 +1,5 @@
 import { createRoot } from "react-dom/client";
 import * as Sentry from "@sentry/react";
-import { BrowserTracing } from "@sentry/tracing";
 import App from "./App.tsx";
 import "./index.css";
 import { startOfflineSync } from "@/lib/offlineSync";
@@ -10,13 +9,6 @@ if (import.meta.env.VITE_SENTRY_DSN) {
   Sentry.init({
     dsn: import.meta.env.VITE_SENTRY_DSN,
     environment: import.meta.env.MODE,
-    integrations: [
-      new BrowserTracing({
-        routingInstrumentation: Sentry.reactRouterV6Instrumentation(
-          window.history as any
-        ),
-      }),
-    ],
     tracesSampleRate: import.meta.env.MODE === 'production' ? 0.1 : 1.0,
     beforeSend(event) {
       // Filter out 404 errors
@@ -79,4 +71,3 @@ try {
   Sentry.captureException(err);
   rootElement.innerHTML = '<div style="padding: 20px; color: red;"><h1>Application Error</h1><p>Failed to load the application. Please refresh the page or clear your browser cache.</p></div>';
 }
-

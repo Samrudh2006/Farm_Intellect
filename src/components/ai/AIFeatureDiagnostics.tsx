@@ -53,7 +53,7 @@ export function AIFeatureDiagnostics() {
               <h3 className="font-semibold mb-2">API Key Status</h3>
               <div className="bg-gray-100 p-3 rounded-lg text-sm font-mono space-y-1">
                 <div>Key: {getAPIKeyStatus().keyPartial}</div>
-                <div>Configured: {getAPIKeyStatus().configured ? "✓ Yes" : "✗ No"}</div>
+                <div>Configured in browser: {getAPIKeyStatus().configured ? "✓ Yes" : "✗ No (server-managed)"}</div>
               </div>
             </div>
 
@@ -70,9 +70,9 @@ export function AIFeatureDiagnostics() {
                 <h3 className="font-semibold mb-2">Configuration</h3>
                 <div className="space-y-2">
                   <div className="flex justify-between items-center">
-                    <span>API Key Valid:</span>
-                    <Badge variant={configStatus.isValid ? "default" : "destructive"}>
-                      {configStatus.isValid ? "Valid" : "Invalid"}
+                    <span>Client-side AI Key:</span>
+                    <Badge variant={configStatus.isValid ? "default" : "secondary"}>
+                      {configStatus.isValid ? "Present" : "Not stored in browser"}
                     </Badge>
                   </div>
                   <div>

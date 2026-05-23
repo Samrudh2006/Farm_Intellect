@@ -301,10 +301,10 @@ const Settings = () => {
                       />
                     </div>
                     <div className="space-y-2">
-                      <Label htmlFor="apiKey">OpenAI API Key</Label>
+                      <Label htmlFor="apiKey">AI Provider Key</Label>
                       <p className="text-sm text-muted-foreground">
-                        The API key is stored securely in environment variables and is not displayed here. 
-                        To change it, update the AI_API_KEY variable in your environment.
+                        AI provider keys are stored only in backend environment variables and never exposed to browser code.
+                        To change them, update backend/.env and redeploy the backend service.
                       </p>
                       <div className="flex gap-2">
                         <Input

@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <!-- Security Headers -->
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
-    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; img-src 'self' data: blob: https:; font-src 'self' https://fonts.gstatic.com https://fonts.googleapis.com; connect-src 'self' https://*.supabase.co https://*.vercel.com https://*.lovable.app ws: wss: http://localhost:* http://127.0.0.1:*; frame-ancestors 'self'; base-uri 'self'; form-action 'self'; object-src 'none'; media-src 'self' blob:;" />
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; img-src 'self' data: blob: https:; font-src 'self' https://fonts.gstatic.com https://fonts.googleapis.com; connect-src 'self' https://*.supabase.co https://*.vercel.com https://*.lovable.app ws: wss: http://localhost:* http://127.0.0.1:*; frame-ancestors 'self'; base-uri 'self'; form-action 'self'; object-src 'none'; media-src 'self' blob:;" />
     <meta http-equiv="X-Content-Type-Options" content="nosniff" />
     <meta http-equiv="X-Frame-Options" content="SAMEORIGIN" />
     <meta name="referrer" content="strict-origin-when-cross-origin" />
@@ -15,40 +15,24 @@
     <meta name="description" content="India's smart agriculture platform: AI crop recommendations, weather forecasts, pest detection, market prices & government schemes for farmers." />
     <meta name="author" content="Smart Crop Advisory" />
     <meta name="keywords" content="smart farming, crop advisory, Indian agriculture, AI farming, kisan, PM-KISAN, mandi prices" />
-    <!-- Robots: only index on production domain -->
-    <meta name="robots" content="index, follow" />
-    <script>
-      // Prevent indexing of preview/staging deployments
-      if (window.location.hostname !== 'farm-intellect-65.lovable.app' && !window.location.hostname.includes('localhost')) {
-        const robotsMeta = document.querySelector('meta[name="robots"]');
-        if (robotsMeta) robotsMeta.setAttribute('content', 'noindex, nofollow');
-      }
-    </script>
+    <meta name="robots" content="%ROBOTS_POLICY%" />
     <link rel="manifest" href="/manifest.json" />
     <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
     <link rel="icon" href="/favicon.png" type="image/png" />
 
-    <!-- Core fonts: Poppins (non-render-blocking via preload + swap) -->
+    <!-- Core fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700;800&display=swap" onload="this.onload=null;this.rel='stylesheet'" />
-    <noscript><link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700;800&display=swap" rel="stylesheet" /></noscript>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700;800&display=swap" />
 
     <!-- LCP hint: preload hero image so browser discovers it from HTML immediately -->
     <link rel="preload" as="image" href="/hero-farming.jpg" fetchpriority="high" />
 
-    <!-- Deferred regional fonts (non-render-blocking) -->
-    <link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Noto+Sans+Devanagari:wght@400;600;700&display=swap" onload="this.onload=null;this.rel='stylesheet'" />
-    <link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Noto+Sans+Bengali:wght@400;600;700&family=Noto+Sans+Tamil:wght@400;600;700&family=Noto+Sans+Telugu:wght@400;600;700&family=Noto+Sans+Kannada:wght@400;600;700&family=Noto+Sans+Malayalam:wght@400;600;700&family=Noto+Sans+Gujarati:wght@400;600;700&family=Noto+Sans+Oriya:wght@400;600;700&display=swap" onload="this.onload=null;this.rel='stylesheet'" />
-    <link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Noto+Sans+Gurmukhi:wght@400;600;700&family=Noto+Nastaliq+Urdu:wght@400;700&family=Noto+Sans+Arabic:wght@400;600;700&display=swap" onload="this.onload=null;this.rel='stylesheet'" />
-    <link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Noto+Sans+Ol+Chiki:wght@400;600;700&family=Noto+Sans+Meetei+Mayek:wght@400;600;700&display=swap" onload="this.onload=null;this.rel='stylesheet'" />
-    <!-- Fallback for no-JS -->
-    <noscript>
-      <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Devanagari:wght@400;600;700&display=swap" rel="stylesheet" />
-      <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Bengali:wght@400;600;700&family=Noto+Sans+Tamil:wght@400;600;700&family=Noto+Sans+Telugu:wght@400;600;700&family=Noto+Sans+Kannada:wght@400;600;700&family=Noto+Sans+Malayalam:wght@400;600;700&family=Noto+Sans+Gujarati:wght@400;600;700&family=Noto+Sans+Oriya:wght@400;600;700&display=swap" rel="stylesheet" />
-      <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Gurmukhi:wght@400;600;700&family=Noto+Nastaliq+Urdu:wght@400;700&family=Noto+Sans+Arabic:wght@400;600;700&display=swap" rel="stylesheet" />
-      <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Ol+Chiki:wght@400;600;700&family=Noto+Sans+Meetei+Mayek:wght@400;600;700&display=swap" rel="stylesheet" />
-    </noscript>
+    <!-- Regional fonts -->
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+Devanagari:wght@400;600;700&display=swap" />
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+Bengali:wght@400;600;700&family=Noto+Sans+Tamil:wght@400;600;700&family=Noto+Sans+Telugu:wght@400;600;700&family=Noto+Sans+Kannada:wght@400;600;700&family=Noto+Sans+Malayalam:wght@400;600;700&family=Noto+Sans+Gujarati:wght@400;600;700&family=Noto+Sans+Oriya:wght@400;600;700&display=swap" />
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+Gurmukhi:wght@400;600;700&family=Noto+Nastaliq+Urdu:wght@400;700&family=Noto+Sans+Arabic:wght@400;600;700&display=swap" />
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+Ol+Chiki:wght@400;600;700&family=Noto+Sans+Meetei+Mayek:wght@400;600;700&display=swap" />
 
     <meta property="og:title" content="KrishiSarthi — AI-Powered Smart Agriculture for India 🌾" />
     <meta property="og:description" content="22-language AI crop advisory, weather, pest detection, market prices & government schemes for Indian farmers." />
