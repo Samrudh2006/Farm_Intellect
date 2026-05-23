@@ -15,6 +15,9 @@ const vendorChunkGroups: Array<[string, string[]]> = [
   ["markdown-vendor", ["react-markdown"]],
 ];
 
+// Safe default for local/preview builds; set VITE_ROBOTS_POLICY="index, follow" for production indexing.
+const robotsPolicy = process.env.VITE_ROBOTS_POLICY || "noindex, nofollow";
+
 // https://vitejs.dev/config/
 export default defineConfig(({ mode }) => ({
   server: {
@@ -28,7 +31,19 @@ export default defineConfig(({ mode }) => ({
     css: true,
     include: ["src/**/*.{test,spec}.{ts,tsx}"],
   },
-  plugins: [react(), mode === "development" && componentTagger()].filter(Boolean),
+  plugins: [
+    react(),
+    {
+      name: "robots-policy-meta",
+      transformIndexHtml(html) {
+        if (!html.includes("%ROBOTS_POLICY%")) {
+          throw new Error("Missing %ROBOTS_POLICY% placeholder in index.html.");
+        }
+        return html.replace(/%ROBOTS_POLICY%/g, robotsPolicy);
+      },
+    },
+    mode === "development" && componentTagger(),
+  ].filter(Boolean),
   resolve: {
     alias: {
       "@": path.resolve(__dirname, "./src"),

@@ -26,6 +26,9 @@ backend/logs/
 backend/*.db
 backend/*.db-journal
 backend/uploads/
+lint-report.txt
+bun.lock
+bun.lockb
 
 # Editor directories and files
 .vscode/*

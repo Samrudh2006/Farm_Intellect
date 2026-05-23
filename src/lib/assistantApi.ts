@@ -1,8 +1,4 @@
 import { apiFetch } from '@/lib/api';
-import { getAPIKey } from '@/utils/aiFeatureTest';
-
-// Get the configured API key for all AI operations
-const OPENAI_API_KEY = getAPIKey();
 
 export type AssistantRole = 'user' | 'assistant' | 'system';
 
