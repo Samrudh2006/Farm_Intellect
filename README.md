@@ -264,51 +264,51 @@ mindmap
 <table>
 <tr>
 <td align="center" width="33%">
-<img src="https://user-images.githubusercontent.com/74038190/216122041-518ac897-8d92-4c6b-9b3f-ca01dcaf38ee.png" width="60"/>
+<img src="public/icons/crop-scanner.jpg" width="60"/>
 <h3>🔬 Crop Disease Scanner</h3>
 <sub>Snap a photo of any leaf. Get instant diagnosis with <b>95%+ accuracy</b>. Receive both organic and chemical treatment plans, costed in ₹, with local vendor suggestions.</sub>
 </td>
 <td align="center" width="33%">
-<img src="https://user-images.githubusercontent.com/74038190/216121919-3122d452-bf6b-4f4d-bdf2-f8985dc25c64.png" width="60"/>
+<img src="public/icons/weather-integration.jpg" width="60"/>
 <h3>🌦️ Hyperlocal Weather</h3>
 <sub>Village-level 7-day forecasts fusing <b>IMD + OpenWeather + ISRO satellite</b>. Push alerts for rain, frost, heatwave, and pest-favorable conditions.</sub>
 </td>
 <td align="center" width="33%">
-<img src="https://user-images.githubusercontent.com/74038190/216122003-1cf2cef7-3eea-4f8a-9b46-3dcf42c11a2c.png" width="60"/>
+<img src="public/icons/market-analytics.jpg" width="60"/>
 <h3>💹 Mandi Price Tracker</h3>
 <sub>Live prices for <b>3,000+ markets across India</b> via Agmarknet. Compare nearby mandis, see 30-day trends, get MSP alerts.</sub>
 </td>
 </tr>
 <tr>
 <td align="center" width="33%">
-<img src="https://user-images.githubusercontent.com/74038190/216122069-5b8169d7-1d8e-4a13-b245-a8e4176c99f8.png" width="60"/>
+<img src="public/icons/organic-farming.jpg" width="60"/>
 <h3>🏛️ Scheme Matcher</h3>
 <sub>Personalized match across <b>1,200+ central & state schemes</b>. One-tap eligibility check, document checklist, application links.</sub>
 </td>
 <td align="center" width="33%">
-<img src="https://user-images.githubusercontent.com/74038190/216122039-c1b9e74e-c1a9-4b3a-9e6f-7e2c6f7c3a8b.png" width="60"/>
+<img src="public/icons/pest-disease-control.jpg" width="60"/>
 <h3>🗣️ 22-Language Voice AI</h3>
 <sub>Speak in <b>Hindi, Tamil, Telugu, Marathi, Bengali, Punjabi</b> and 16 more. Powered by <b>Bhashini</b> + Web Speech API.</sub>
 </td>
 <td align="center" width="33%">
-<img src="https://user-images.githubusercontent.com/74038190/216122093-7e4b9b9a-3a7e-4f1a-9e3c-8e5e8e5e8e5e.png" width="60"/>
+<img src="public/icons/ai-recommendations.jpg" width="60"/>
 <h3>🤖 Krishi AI Assistant</h3>
 <sub>Conversational agronomist powered by <b>Gemini + RAG</b>. Ask anything — sowing dates, fertilizer dosage, pest control.</sub>
 </td>
 </tr>
 <tr>
 <td align="center" width="33%">
-<img src="https://user-images.githubusercontent.com/74038190/216122108-92b5be7a-3a7e-4f1a-9e3c-8e5e8e5e8e5e.png" width="60"/>
+<img src="public/icons/yield-optimization.jpg" width="60"/>
 <h3>📅 Smart Crop Calendar</h3>
 <sub>Personalized sowing → harvest timeline. Reminders for irrigation, fertilizer, pest scouting based on your geo + crop.</sub>
 </td>
 <td align="center" width="33%">
-<img src="https://user-images.githubusercontent.com/74038190/216122112-92b5be7a-3a7e-4f1a-9e3c-8e5e8e5e8e5e.png" width="60"/>
+<img src="public/icons/icon-192.png" width="60"/>
 <h3>📱 Offline PWA</h3>
 <sub>Works on <b>2G & airplane mode</b>. Service Workers cache scans, prices, schemes. Installs like a native app.</sub>
 </td>
 <td align="center" width="33%">
-<img src="https://user-images.githubusercontent.com/74038190/216122116-92b5be7a-3a7e-4f1a-9e3c-8e5e8e5e8e5e.png" width="60"/>
+<img src="public/icons/smart-irrigation.jpg" width="60"/>
 <h3>🌱 Soil Health Insights</h3>
 <sub>Upload <b>Soil Health Card</b> photo → OCR + AI generates a fertilizer plan tailored to your N-P-K levels.</sub>
 </td>
@@ -1213,7 +1213,7 @@ If Farm Intellect 65 helps even one farmer feed our nation, please:
 
 ### 👀 Visitor Count
 
-<img src="https://profile-counter.glitch.me/farm-intellect-65/count.svg" alt="Visitor Count"/>
+<img src="https://visitor-badge.laobi.icu/badge?page_id=Samrudh2006.farm-intellect-65" alt="Visitor Count"/>
 
 <br/><br/>
 
