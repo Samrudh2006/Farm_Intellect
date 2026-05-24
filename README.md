@@ -2,7 +2,7 @@
 
 <img src="https://capsule-render.vercel.app/api?type=waving&color=0:FF9933,50:FFFFFF,100:138808&height=200&section=header&text=Krishi%20AI&fontSize=70&fontColor=000080&animation=fadeIn&fontAlignY=38&desc=Farm%20Intellect%20%7C%20Powered%20by%20Bharat%20%F0%9F%87%AE%F0%9F%87%B3&descAlignY=58&descSize=18" width="100%" alt="Krishi AI Banner"/>
 
-<img src="./public/icons/icon-512.png" alt="Krishi AI Logo" width="150" />
+<img src="public/icons/icon-512.png" alt="Krishi AI Logo" width="150" />
 
 # 🌾 Krishi AI — Farm Intellect
 
@@ -89,7 +89,7 @@
 
 | Login | Product overview |
 | --- | --- |
-| <img src="./docs/screenshots/login-page.png" alt="Krishi AI login page" width="420" /> | <img src="./public/features-showcase.png" alt="Krishi AI feature showcase" width="420" /> |
+| <img src="docs/screenshots/login-page.png" alt="Krishi AI login page" width="420" /> | <img src="public/features-showcase.png" alt="Krishi AI feature showcase" width="420" /> |
 | Secure 4-role sign-in flow | Snapshot of the product experience |
 
 ---
@@ -114,7 +114,7 @@ flowchart TB
 
     subgraph Backend["⚡ BACKEND SERVICES 🟢"]
         direction LR
-        EF["Edge / API Services"]
+        EF["Supabase Edge<br/>Functions / APIs"]
         DB["PostgreSQL<br/>(12 Tables)"]
         ST["File Storage"]
     end
