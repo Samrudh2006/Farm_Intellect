@@ -114,7 +114,7 @@ flowchart TB
 
     subgraph Backend["⚡ BACKEND SERVICES 🟢"]
         direction LR
-        EF["Supabase Edge<br/>Functions / APIs"]
+        EF["Supabase Edge<br/>Functions"]
         DB["PostgreSQL<br/>(12 Tables)"]
         ST["File Storage"]
     end
