@@ -87,10 +87,10 @@
 
 ## 📸 Screenshots
 
-| Login | Product overview |
+| Login | Feature showcase |
 | --- | --- |
 | <img src="docs/screenshots/login-page.png" alt="Krishi AI login page" width="420" /> | <img src="public/features-showcase.png" alt="Krishi AI feature showcase" width="420" /> |
-| Secure 4-role sign-in flow | Snapshot of the product experience |
+| Secure 4-role sign-in flow | High-level feature overview |
 
 ---
 
