@@ -264,51 +264,51 @@ mindmap
 <table>
 <tr>
 <td align="center" width="33%">
-<img src="./public/icons/crop-scanner.jpg" width="60"/>
+<img src="public/icons/crop-scanner.jpg" width="60"/>
 <h3>🔬 Crop Disease Scanner</h3>
 <sub>Snap a photo of any leaf. Get instant diagnosis with <b>95%+ accuracy</b>. Receive both organic and chemical treatment plans, costed in ₹, with local vendor suggestions.</sub>
 </td>
 <td align="center" width="33%">
-<img src="./public/icons/weather-integration.jpg" width="60"/>
+<img src="public/icons/weather-integration.jpg" width="60"/>
 <h3>🌦️ Hyperlocal Weather</h3>
 <sub>Village-level 7-day forecasts fusing <b>IMD + OpenWeather + ISRO satellite</b>. Push alerts for rain, frost, heatwave, and pest-favorable conditions.</sub>
 </td>
 <td align="center" width="33%">
-<img src="./public/icons/market-analytics.jpg" width="60"/>
+<img src="public/icons/market-analytics.jpg" width="60"/>
 <h3>💹 Mandi Price Tracker</h3>
 <sub>Live prices for <b>3,000+ markets across India</b> via Agmarknet. Compare nearby mandis, see 30-day trends, get MSP alerts.</sub>
 </td>
 </tr>
 <tr>
 <td align="center" width="33%">
-<img src="./public/icons/organic-farming.jpg" width="60"/>
+<img src="public/icons/organic-farming.jpg" width="60"/>
 <h3>🏛️ Scheme Matcher</h3>
 <sub>Personalized match across <b>1,200+ central & state schemes</b>. One-tap eligibility check, document checklist, application links.</sub>
 </td>
 <td align="center" width="33%">
-<img src="./public/icons/pest-disease-control.jpg" width="60"/>
+<img src="public/icons/pest-disease-control.jpg" width="60"/>
 <h3>🗣️ 22-Language Voice AI</h3>
 <sub>Speak in <b>Hindi, Tamil, Telugu, Marathi, Bengali, Punjabi</b> and 16 more. Powered by <b>Bhashini</b> + Web Speech API.</sub>
 </td>
 <td align="center" width="33%">
-<img src="./public/icons/ai-recommendations.jpg" width="60"/>
+<img src="public/icons/ai-recommendations.jpg" width="60"/>
 <h3>🤖 Krishi AI Assistant</h3>
 <sub>Conversational agronomist powered by <b>Gemini + RAG</b>. Ask anything — sowing dates, fertilizer dosage, pest control.</sub>
 </td>
 </tr>
 <tr>
 <td align="center" width="33%">
-<img src="./public/icons/yield-optimization.jpg" width="60"/>
+<img src="public/icons/yield-optimization.jpg" width="60"/>
 <h3>📅 Smart Crop Calendar</h3>
 <sub>Personalized sowing → harvest timeline. Reminders for irrigation, fertilizer, pest scouting based on your geo + crop.</sub>
 </td>
 <td align="center" width="33%">
-<img src="./public/icons/icon-192.png" width="60"/>
+<img src="public/icons/icon-192.png" width="60"/>
 <h3>📱 Offline PWA</h3>
 <sub>Works on <b>2G & airplane mode</b>. Service Workers cache scans, prices, schemes. Installs like a native app.</sub>
 </td>
 <td align="center" width="33%">
-<img src="./public/icons/smart-irrigation.jpg" width="60"/>
+<img src="public/icons/smart-irrigation.jpg" width="60"/>
 <h3>🌱 Soil Health Insights</h3>
 <sub>Upload <b>Soil Health Card</b> photo → OCR + AI generates a fertilizer plan tailored to your N-P-K levels.</sub>
 </td>
