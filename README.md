@@ -286,7 +286,7 @@ mindmap
 <sub>Personalized match across <b>1,200+ central & state schemes</b>. One-tap eligibility check, document checklist, application links.</sub>
 </td>
 <td align="center" width="33%">
-<img src="./public/icons/ai-recommendations.jpg" width="60"/>
+<img src="./src/assets/krishi-ai-logo.png" width="60"/>
 <h3>🗣️ 22-Language Voice AI</h3>
 <sub>Speak in <b>Hindi, Tamil, Telugu, Marathi, Bengali, Punjabi</b> and 16 more. Powered by <b>Bhashini</b> + Web Speech API.</sub>
 </td>
