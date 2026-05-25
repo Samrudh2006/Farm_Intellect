@@ -1,4 +1,4 @@
-import { Suspense, type ReactNode } from "react";
+import { Suspense, type ReactNode, useEffect } from "react";
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -17,6 +17,7 @@ import { CookieConsentBanner } from "@/components/system/CookieConsentBanner";
 import { useRoleGuard } from "@/hooks/useRoleGuard";
 import { type AppRole } from "@/lib/roles";
 import { publicRoutes, protectedRoutes, notFoundComponent, type LazyPage } from "@/routes/routeConfig";
+import { initializePerformanceMonitoring } from "@/lib/performanceMonitoring";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -102,6 +103,10 @@ const AnimatedRoutes = () => {
 };
 
 const App = () => {
+  useEffect(() => {
+    initializePerformanceMonitoring();
+  }, []);
+
   return (
     <QueryClientProvider client={queryClient}>
       <AppErrorBoundary>
