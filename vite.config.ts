@@ -74,23 +74,34 @@ export default defineConfig(({ mode }) => ({
     },
   },
   build: {
+    // Target 2G network speeds (~50-100 Kbps)
+    minify: "terser",
+    terserOptions: {
+      compress: {
+        drop_console: mode === "production",
+        passes: 2, // Multiple passes for better compression
+      },
+      mangle: {
+        toplevel: true,
+      },
+    },
+    chunkSizeWarningLimit: 500, // Warn at 500kb
     rollupOptions: {
       output: {
-        manualChunks(id) {
-          if (!id.includes("node_modules")) {
-            return undefined;
-          }
-
-          const matchedGroup = vendorChunkGroups.find(([, packages]) =>
-            packages.some((pkg) => id.includes(`/node_modules/${pkg}/`) || id.includes(`\\node_modules\\${pkg}\\`)),
-          );
-
-          if (matchedGroup) {
-            return matchedGroup[0];
-          }
-
-          return undefined;
+        // Aggressive code splitting for 2G
+        manualChunks: {
+          // Vendor chunks (already defined above will be used)
+          ...Object.fromEntries(vendorChunkGroups.map(([name]) => [name, []])),
+          // Lazy load heavy components
+          'satellite-viewer': ['src/components/satellite/NDVIViewer.tsx'],
+          'field-drawer': ['src/components/field/MobileFieldDrawer.tsx'],
+          'soil-management': ['src/components/soil/SoilHealthPage.tsx'],
         },
+        // Optimize chunk naming for caching
+        chunkFileNames: 'chunks/[name]-[hash:8].js',
+        entryFileNames: '[name]-[hash:8].js',
+        // Inline small chunks to reduce HTTP requests
+        inlineDynamicImports: false,
       },
     },
   },
