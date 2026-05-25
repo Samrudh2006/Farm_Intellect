@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { Header } from "@/components/layout/Header";
 import { Sidebar } from "@/components/layout/Sidebar";
@@ -20,10 +20,14 @@ import {
   TrendingUp,
   Shield,
   CheckCircle,
-  ArrowRight
+  ArrowRight,
+  Mic,
+  Volume2
 } from "lucide-react";
 import { useCurrentUser } from "@/hooks/useCurrentUser";
 import { motion } from "framer-motion";
+import { enhanceBhashiniAudio, analyzeAudioQuality } from "@/lib/audioQuality";
+import { getEnhancedBhashiniClient } from "@/lib/bhashiniEnhanced";
 
 // Available experts for consultation
 const experts = [

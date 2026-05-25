@@ -4,7 +4,9 @@ import { Sidebar } from "@/components/layout/Sidebar";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { FieldHistoryTimeline } from "@/components/features/FieldHistoryTimeline";
+import { MobileFieldDrawer } from "@/components/field/MobileFieldDrawer";
 import { useCurrentUser } from "@/hooks/useCurrentUser";
 import { 
   Map,
@@ -199,7 +201,14 @@ const FieldMap = () => {
             </div>
           </div>
 
-          {/* Map and Field Details */}
+          {/* Map and Field Details with Tabs */}
+          <Tabs defaultValue="map" className="w-full">
+            <TabsList className="grid w-full grid-cols-2 mb-6">
+              <TabsTrigger value="map">Satellite Map</TabsTrigger>
+              <TabsTrigger value="draw">Draw Field</TabsTrigger>
+            </TabsList>
+            
+            <TabsContent value="map" className="mt-0">
           <div className="grid gap-6 lg:grid-cols-3">
             {/* Interactive Map Placeholder */}
             <div className="lg:col-span-2">
@@ -487,6 +496,12 @@ const FieldMap = () => {
             }))}
             selectedField={selectedField}
           />
+            </TabsContent>
+            
+            <TabsContent value="draw" className="mt-0">
+              <MobileFieldDrawer />
+            </TabsContent>
+          </Tabs>
         </div>
       </main>
     </div>

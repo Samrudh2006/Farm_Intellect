@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Progress } from "@/components/ui/progress";
+import { NDVIViewer } from "@/components/satellite/NDVIViewer";
 import { 
   TrendingUp, 
   BarChart3, 
@@ -19,7 +20,8 @@ import {
   Filter,
   RefreshCw,
   MapPin,
-  DollarSign
+  DollarSign,
+  Satellite
 } from "lucide-react";
 
 const Analytics = () => {
@@ -142,11 +144,15 @@ const Analytics = () => {
 
           {/* Analytics Tabs */}
           <Tabs defaultValue="overview" className="space-y-6">
-            <TabsList className="grid w-full grid-cols-4">
+            <TabsList className="grid w-full grid-cols-5">
               <TabsTrigger value="overview">Overview</TabsTrigger>
               <TabsTrigger value="crops">Crop Performance</TabsTrigger>
               <TabsTrigger value="regions">Regional Analysis</TabsTrigger>
               <TabsTrigger value="trends">Trends</TabsTrigger>
+              <TabsTrigger value="satellite" className="flex items-center gap-2">
+                <Satellite className="h-4 w-4" />
+                <span className="hidden sm:inline">Satellite</span>
+              </TabsTrigger>
             </TabsList>
 
             <TabsContent value="overview" className="space-y-6">
@@ -323,6 +329,16 @@ const Analytics = () => {
                   </div>
                 </CardContent>
               </Card>
+            </TabsContent>
+
+            <TabsContent value="satellite" className="space-y-6">
+              <div className="grid gap-6">
+                <NDVIViewer fieldId={1} fieldName="Field A" />
+              </div>
+              <div className="grid gap-6 md:grid-cols-2">
+                <NDVIViewer fieldId={2} fieldName="Field B" />
+                <NDVIViewer fieldId={3} fieldName="Field C" />
+              </div>
             </TabsContent>
           </Tabs>
         </div>
