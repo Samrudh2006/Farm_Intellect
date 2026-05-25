@@ -414,3 +414,10 @@ export const getWeatherAlerts = (cropId: string, das: number): CropCalendarEntry
 
 export const getCalendarZones = (): string[] =>
   [...new Set(cropCalendarData.map(c => c.zone))];
+
+export const getSeasonFromDate = (date: Date): CropCalendarEntry["season"] => {
+  const month = date.getMonth();
+  if (month >= 5 && month <= 9) return "Kharif";
+  if (month >= 2 && month <= 4) return "Zaid";
+  return "Rabi";
+};
