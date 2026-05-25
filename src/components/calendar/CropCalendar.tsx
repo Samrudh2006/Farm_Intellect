@@ -23,7 +23,7 @@ import {
   CloudRain,
   Sparkles,
 } from "lucide-react";
-import { format } from "date-fns";
+import { format, parseISO } from "date-fns";
 import { getCalendarByCrop, getCalendarBySeason, getSeasonFromDate, cropCalendarData } from "@/data/cropCalendar";
 
 interface CropEntry {
@@ -480,7 +480,11 @@ export const CropCalendar = () => {
                 id="calendar-planning-date"
                 type="date"
                 value={format(selectedDate, "yyyy-MM-dd")}
-                onChange={(event) => setSelectedDate(new Date(`${event.target.value}T00:00:00`))}
+                onChange={(event) => {
+                  if (event.target.value) {
+                    setSelectedDate(parseISO(event.target.value));
+                  }
+                }}
               />
             </div>
             <div className="rounded-lg border bg-muted/30 p-4">

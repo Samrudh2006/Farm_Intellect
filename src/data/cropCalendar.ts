@@ -417,6 +417,7 @@ export const getCalendarZones = (): string[] =>
 
 export const getSeasonFromDate = (date: Date): CropCalendarEntry["season"] => {
   const month = date.getMonth();
+  // JS months are 0-indexed: Kharif = Jun-Oct (5-9), Zaid = Mar-May (2-4), Rabi = Nov-Feb.
   if (month >= 5 && month <= 9) return "Kharif";
   if (month >= 2 && month <= 4) return "Zaid";
   return "Rabi";
