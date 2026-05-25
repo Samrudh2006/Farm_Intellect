@@ -310,3 +310,58 @@ export function exportNDVIAsCSV(ndvi: NDVIData): string {
 
   return rows.map((row) => row.join(",")).join("\n");
 }
+
+/**
+ * NDVI Service API - Main service object for field NDVI calculations
+ */
+export const ndviService = {
+  calculateFieldNDVI: async (fieldId: number, fieldName: string): Promise<NDVIData> => {
+    // Generate mock data for demonstration
+    const mockField: FieldPolygon = {
+      id: fieldId,
+      name: fieldName,
+      coordinates: [
+        { lat: 28.7041, lng: 77.1025 },
+        { lat: 28.7055, lng: 77.1025 },
+        { lat: 28.7055, lng: 77.1045 },
+        { lat: 28.7041, lng: 77.1045 },
+      ],
+      area: 5.2,
+      crop: "Wheat",
+      createdAt: new Date(),
+    };
+
+    return generateMockNDVIData(mockField);
+  },
+
+  getHistory: (fieldId: number, daysBack: number = 60): NDVIHistoryEntry[] => {
+    const mockField: FieldPolygon = {
+      id: fieldId,
+      name: `Field ${fieldId}`,
+      coordinates: [],
+      area: 0,
+      crop: "",
+      createdAt: new Date(),
+    };
+    return generateNDVIHistory(mockField, daysBack);
+  },
+
+  detectStress: (ndvi: NDVIData): StressAlert[] => {
+    return detectFieldStress(ndvi);
+  },
+
+  getRecommendations: (ndvi: number) => {
+    const irrigation = getIrrigationRecommendation(ndvi);
+    const fertilization = getFertilizationRecommendation(ndvi);
+    return { irrigation, fertilization };
+  },
+};
+
+interface FieldPolygon {
+  id: number;
+  name: string;
+  coordinates: Array<{ lat: number; lng: number }>;
+  area: number;
+  crop: string;
+  createdAt: Date;
+}

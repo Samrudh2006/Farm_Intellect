@@ -376,3 +376,42 @@ export function analyze3rdPartyScripts(): { name: string; impact: number }[] {
 
   return thirdPartyScripts.sort((a, b) => b.impact - a.impact);
 }
+
+/**
+ * Initialize performance monitoring across the application
+ */
+export async function initializePerformanceMonitoring(): Promise<void> {
+  try {
+    // Measure core web vitals
+    const metrics = await measureCoreWebVitals();
+
+    // Analyze performance
+    const recommendations = analyzePerformance(metrics);
+
+    // Report metrics
+    reportMetrics(metrics);
+
+    // Log recommendations in development
+    if (process.env.NODE_ENV === "development") {
+      console.log("[perf] Recommendations:", recommendations);
+    }
+
+    // Monitor long tasks
+    monitorLongTasks((duration) => {
+      if (duration > 50) {
+        console.warn(`[perf] Long task detected: ${Math.round(duration)}ms`);
+      }
+    });
+
+    // Register service worker for offline support
+    if ("serviceWorker" in navigator && process.env.NODE_ENV === "production") {
+      try {
+        await navigator.serviceWorker.register("/service-worker.js");
+      } catch (error) {
+        console.debug("[perf] Service worker registration failed:", error);
+      }
+    }
+  } catch (error) {
+    console.warn("[perf] Performance monitoring initialization failed:", error);
+  }
+}
