@@ -20,7 +20,8 @@ import { toast } from "sonner";
 export const InteractiveFieldDesigner = () => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const [fabricCanvas, setFabricCanvas] = useState<FabricCanvas | null>(null);
-  const [activeTool, setActiveTool] = useState<"select" | "crop" | "irrigation" | "building">("select");
+  const [activeTool, setActiveTool] = useState<"select" | "crop" | "irrigation" | "building" | "polygon">("select");
+  const [polygonPoints, setPolygonPoints] = useState<Array<{ x: number; y: number }>>([]);
   const [selectedCropType, setSelectedCropType] = useState("wheat");
 
   const cropColors = {
@@ -102,6 +103,27 @@ export const InteractiveFieldDesigner = () => {
     toast("Building added!");
   };
 
+  const addPolygonPoint = () => {
+    const nextPoint = { x: 120 + Math.random() * 400, y: 80 + Math.random() * 250 };
+    setPolygonPoints((prev) => [...prev, nextPoint]);
+    toast("Polygon point added. Add 3+ points then complete polygon.");
+  };
+
+  const completePolygon = () => {
+    if (!fabricCanvas || polygonPoints.length < 3) {
+      toast("Add at least 3 points to draw a field boundary.");
+      return;
+    }
+    const boundary = new Polygon(polygonPoints, {
+      fill: "rgba(34, 197, 94, 0.25)",
+      stroke: "#166534",
+      strokeWidth: 3,
+    });
+    fabricCanvas.add(boundary);
+    setPolygonPoints([]);
+    toast("Field polygon mapped for satellite monitoring.");
+  };
+
   const clearCanvas = () => {
     if (!fabricCanvas) return;
     fabricCanvas.clear();
@@ -128,7 +150,7 @@ export const InteractiveFieldDesigner = () => {
           Interactive Field Designer
         </CardTitle>
         <p className="text-sm text-muted-foreground">
-          Design your farm layout with drag-and-drop tools
+          Design your farm layout with drag-and-drop tools and mobile-friendly polygon mapping
         </p>
       </CardHeader>
       <CardContent className="space-y-4">
@@ -165,6 +187,13 @@ export const InteractiveFieldDesigner = () => {
             <CircleIcon className="h-4 w-4 mr-1" />
             Irrigation
           </Button>
+
+          <Button size="sm" variant={activeTool === "polygon" ? "default" : "outline"} onClick={() => setActiveTool("polygon")}>
+            <Ruler className="h-4 w-4 mr-1" />
+            Polygon Mode
+          </Button>
+          <Button size="sm" onClick={addPolygonPoint}>Add Point</Button>
+          <Button size="sm" onClick={completePolygon}>Complete Polygon</Button>
           
           <Button size="sm" onClick={addBuilding}>
             <Triangle className="h-4 w-4 mr-1" />

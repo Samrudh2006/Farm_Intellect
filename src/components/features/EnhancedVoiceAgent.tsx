@@ -6,6 +6,7 @@ import { Card } from '@/components/ui/card';
 import { Mic, MicOff, Volume2, Copy, Trash2, RefreshCw } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { cn } from '@/lib/utils';
+import { apiBaseUrl } from '@/lib/api';
 
 interface VoiceInteraction {
   id: string;
@@ -66,6 +67,7 @@ export const EnhancedVoiceAgent = ({
   const [interactions, setInteractions] = useState<VoiceInteraction[]>([]);
   const [error, setError] = useState<string | null>(null);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
+  const [noiseProfile, setNoiseProfile] = useState<"standard" | "outdoor">("outdoor");
 
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
   const audioContextRef = useRef<AudioContext | null>(null);
@@ -84,7 +86,7 @@ export const EnhancedVoiceAgent = ({
       const token = localStorage.getItem('authToken');
       if (!token) return;
 
-      const response = await fetch(`/api/voice/history?limit=20&language=${selectedLanguage}`, {
+      const response = await fetch(`${apiBaseUrl}/api/voice/history?limit=20&language=${selectedLanguage}`, {
         headers: { Authorization: `Bearer ${token}` },
       });
 
@@ -103,7 +105,15 @@ export const EnhancedVoiceAgent = ({
       setError(null);
       audioChunksRef.current = [];
 
-      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      const stream = await navigator.mediaDevices.getUserMedia({
+        audio: {
+          echoCancellation: true,
+          noiseSuppression: true,
+          autoGainControl: noiseProfile === "outdoor",
+          sampleRate: noiseProfile === "outdoor" ? 16000 : 44100,
+          channelCount: 1,
+        },
+      });
       audioContextRef.current = new (window.AudioContext || (window as any).webkitAudioContext)();
 
       mediaRecorderRef.current = new MediaRecorder(stream, {
@@ -132,7 +142,7 @@ export const EnhancedVoiceAgent = ({
       console.error('[v0] Recording error:', err);
       setError('Failed to access microphone. Please check permissions.');
     }
-  }, [selectedLanguage]);
+  }, [noiseProfile, selectedLanguage]);
 
   // Stop recording
   const stopRecording = useCallback(() => {
@@ -154,7 +164,7 @@ export const EnhancedVoiceAgent = ({
         const base64Audio = (reader.result as string).split(',')[1];
 
         const token = localStorage.getItem('authToken');
-        const response = await fetch('/api/voice/process', {
+        const response = await fetch(`${apiBaseUrl}/api/voice/process`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
@@ -163,6 +173,7 @@ export const EnhancedVoiceAgent = ({
           body: JSON.stringify({
             audioBuffer: base64Audio,
             language: selectedLanguage.split('-')[0],
+            noiseEnvironment: noiseProfile,
             mimeType: 'audio/webm',
           }),
         });
@@ -248,8 +259,12 @@ export const EnhancedVoiceAgent = ({
       {/* Language Selector */}
       <Card className='p-4'>
         <div className='flex items-center justify-between'>
-          <h3 className='text-sm font-semibold'>Select Language</h3>
-          <select
+          <div className='space-y-1'>
+            <h3 className='text-sm font-semibold'>Select Language</h3>
+            <p className='text-xs text-muted-foreground'>Bhashini hardening: outdoor noise shield is enabled by default.</p>
+          </div>
+          <div className='flex items-center gap-2'>
+            <select
             value={selectedLanguage}
             onChange={(e) => {
               setSelectedLanguage(e.target.value);
@@ -262,7 +277,16 @@ export const EnhancedVoiceAgent = ({
                 {lang.name}
               </option>
             ))}
-          </select>
+            </select>
+            <select
+              value={noiseProfile}
+              onChange={(e) => setNoiseProfile(e.target.value as "standard" | "outdoor")}
+              className='px-3 py-2 border rounded-lg text-sm bg-white'
+            >
+              <option value='outdoor'>Outdoor Noise Shield</option>
+              <option value='standard'>Standard Mode</option>
+            </select>
+          </div>
         </div>
       </Card>
 
