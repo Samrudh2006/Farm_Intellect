@@ -117,7 +117,7 @@ router.get('/suggestions', authenticate, async (req, res) => {
   try {
     const { currentRoute = '/farmer/dashboard' } = req.query;
 
-    const suggestions: Record<string, string[]> = {
+    const suggestions = {
       '/farmer/crops': [
         'Show my crops',
         'Add new crop',
@@ -223,7 +223,7 @@ router.get('/stats', authenticate, async (req, res) => {
 // ─── Helper Functions ───
 
 function getActionForCommandType(commandType: string) {
-  const actions: Record<string, string> = {
+  const actions = {
     navigation: 'navigate',
     data: 'data',
     form: 'form',

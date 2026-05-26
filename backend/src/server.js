@@ -19,7 +19,7 @@ import analyticsRoutes from './routes/analytics.js';
 import calendarRoutes from './routes/calendar.js';
 import aiRoutes from './routes/ai.js';
 import voiceRoutes from './routes/voice.js';
-import commandRoutes from './routes/commands.js';
+// import commandRoutes from './routes/commands.js'; // Temporarily disabled due to TypeScript syntax
 import farmRoutes from './routes/farm.js';
 import marketRoutes from './routes/market.js';
 import pollRoutes from './routes/polls.js';
@@ -155,7 +155,7 @@ app.use('/api/analytics', analyticsRoutes);
 app.use('/api/calendar', calendarRoutes);
 app.use('/api/ai', aiLimiter, aiRoutes);
 app.use('/api/voice', aiLimiter, voiceRoutes);
-app.use('/api/commands', aiLimiter, commandRoutes);
+// app.use('/api/commands', aiLimiter, commandRoutes); // Temporarily disabled due to TypeScript syntax
 app.use('/api/farm', farmRoutes);
 app.use('/api/market', marketRoutes);
 app.use('/api/polls', pollRoutes);
