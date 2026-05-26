@@ -17,7 +17,7 @@ import { LanguageSelector } from "@/components/ui/language-selector";
 import { AshokaChakra } from "@/components/ui/ashoka-chakra";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/contexts/AuthContext";
-import { supabase, hasSupabaseEnv } from "@/integrations/supabase/client";
+import { supabase } from "@/integrations/supabase/client";
 import { indianStates, getCitiesByState } from "@/data/indianLocations";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { logSecurityEvent } from "@/lib/securityMonitoring";
