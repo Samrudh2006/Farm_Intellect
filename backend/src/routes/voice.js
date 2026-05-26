@@ -7,7 +7,7 @@ import {
   transcribeSarvamAudio,
   synthesizeSarvamSpeech,
 } from '../services/sarvam.js';
-import { agriculturalIntelligence } from '../services/agriculturalIntelligence.js';
+// import { agriculturalIntelligence } from '../services/agriculturalIntelligence.js'; // Temporarily disabled due to TypeScript syntax
 import { voiceCommandEngine } from '../services/voiceCommandEngine.js';
 import prisma from '../config/database.js';
 

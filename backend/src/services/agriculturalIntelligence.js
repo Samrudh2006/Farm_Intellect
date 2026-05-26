@@ -10,16 +10,15 @@ import prisma from '../config/database.js';
 export class AgriculturalIntelligence {
   /**
    * Enrich AI response with contextual agricultural data
+   * @param {string} response - The AI response text
+   * @param {string} userId - The user ID
+   * @param {Object} context - Context object
+   * @param {string} context.transcription - The user transcription
+   * @param {string} context.intent - The detected intent
+   * @param {string} context.language - The language used
+   * @returns {Promise<string>} Enriched response
    */
-  async enrichResponse(
-    response: string,
-    userId: string,
-    context: {
-      transcription: string;
-      intent: string;
-      language: string;
-    }
-  ): Promise<string> {
+  async enrichResponse(response, userId, context) {
     try {
       // Get user's farm context
       const userFarm = await this.getUserFarmContext(userId);
@@ -227,7 +226,7 @@ export class AgriculturalIntelligence {
         'general': [
           'मिट्टी की जांच हर 2 साल में करवाएं',
           'जैविक खाद का उपयोग करें',
-          'फसल चक्र अपनाएं',
+          'फसल चक���र अपनाएं',
         ],
         'irrigation': [
           'बारिश से पहले सिंचाई न करें',
