@@ -70,9 +70,32 @@ router.post('/process', authenticate, logActivity, async (req, res) => {
     const languageCode = normalizeLanguageCode(language);
     logger.info(`Processing voice in language: ${languageCode}`);
 
+    // Step 1: Transcribe audio using Sarvam STT
+    let transcription;
+    try {
+      const audioData = Buffer.from(audioBuffer, 'base64');
+      const sttResult = await transcribeSarvamAudio({
+        buffer: audioData,
+        fileName: 'voice-query.webm',
+        mimeType,
+        languageCode,
+        mode: 'transcribe',
+      });
+
+      transcription = sttResult?.transcript || '';
+      if (!transcription) {
+        return res.status(400).json({ error: 'Could not transcribe audio' });
+      }
+
+      logger.info(`Transcribed: "${transcription}"`);
+    } catch (error) {
+      logger.error('STT Error:', error);
+      return res.status(500).json({ error: 'Failed to transcribe audio' });
+    }
+
     // Check if it's a voice command
     const currentRoute = req.body.currentRoute || '/farmer/dashboard';
-    const commandParse = voiceCommandEngine.parseCommand(transcription, language, currentRoute);
+    const commandParse = voiceCommandEngine.parseCommand(transcription, languageCode, currentRoute);
     
     if (commandParse.isCommand && commandParse.command) {
       logger.info(`Detected voice command: ${commandParse.command.name} (confidence: ${commandParse.confidence})`);
@@ -101,29 +124,6 @@ router.post('/process', authenticate, logActivity, async (req, res) => {
         command: commandParse.command,
         language: languageCode,
       });
-    }
-
-    // Step 1: Transcribe audio using Sarvam STT
-    let transcription;
-    try {
-      const audioData = Buffer.from(audioBuffer, 'base64');
-      const sttResult = await transcribeSarvamAudio({
-        buffer: audioData,
-        fileName: 'voice-query.webm',
-        mimeType,
-        languageCode,
-        mode: 'transcribe',
-      });
-
-      transcription = sttResult?.transcript || '';
-      if (!transcription) {
-        return res.status(400).json({ error: 'Could not transcribe audio' });
-      }
-
-      logger.info(`Transcribed: "${transcription}"`);
-    } catch (error) {
-      logger.error('STT Error:', error);
-      return res.status(500).json({ error: 'Failed to transcribe audio' });
     }
 
     // Step 2: Route to AI for agricultural response
