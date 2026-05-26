@@ -194,7 +194,18 @@ const Login = () => {
 
       if (error) {
         console.error("[v0] Signup failed:", error.message);
-        toast({ title: "Signup Failed", description: error.message, variant: "destructive" });
+        
+        // Provide user-friendly error messages
+        let errorDescription = error.message;
+        if (error.message?.includes("rate_limit")) {
+          errorDescription = "Too many signup attempts. Please wait a few minutes before trying again.";
+        } else if (error.message?.includes("already registered")) {
+          errorDescription = "This Aadhaar is already registered. Please sign in instead.";
+        } else if (error.message?.includes("invalid")) {
+          errorDescription = "Invalid email format. Please check your Aadhaar number.";
+        }
+        
+        toast({ title: "Signup Failed", description: errorDescription, variant: "destructive" });
       } else {
         console.log("[v0] Signup successful, waiting for profile load...");
         toast({ title: "🎉 Account Created!", description: "You are now logged in" });
