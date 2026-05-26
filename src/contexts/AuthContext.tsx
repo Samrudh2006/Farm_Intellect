@@ -171,7 +171,14 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       },
     });
 
-    if (error) return { error: error as Error };
+    if (error) {
+      // Enhance error message for better UX
+      const enhancedError = new Error(error.message);
+      if (error.message?.includes("rate_limit")) {
+        enhancedError.message = "Too many signup attempts. Please wait a few minutes and try again.";
+      }
+      return { error: enhancedError };
+    }
 
     // Profile is auto-created via database trigger
     return { error: null };
