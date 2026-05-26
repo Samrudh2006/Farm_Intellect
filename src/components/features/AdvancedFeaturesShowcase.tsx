@@ -6,6 +6,7 @@ import { CropRotationOptimizer } from "@/components/features/CropRotationOptimiz
 import { MarketPricePredictor } from "@/components/features/MarketPricePredictor";
 import { CarbonFootprintCalculator } from "@/components/features/CarbonFootprintCalculator";
 import { FarmerCollaborationHub } from "@/components/features/FarmerCollaborationHub";
+import { SmartCropCalendar } from "@/components/features/SmartCropCalendar";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
@@ -17,7 +18,8 @@ import {
   Award,
   TrendingUp,
   Sparkles,
-  Target
+  Target,
+  Calendar
 } from "lucide-react";
 
 export const AdvancedFeaturesShowcase = () => {
@@ -25,10 +27,18 @@ export const AdvancedFeaturesShowcase = () => {
     {
       id: "field-designer",
       title: "Interactive Field Designer",
-      description: "Drag-and-drop field layout planning with real-time optimization",
+      description: "Mobile-friendly polygon field mapping for satellite monitoring",
       component: <InteractiveFieldDesigner />,
       badge: "NEW",
       icon: <Target className="h-5 w-5" />
+    },
+    {
+      id: "smart-crop-calendar",
+      title: "Smart Crop Calendar",
+      description: "Soil health + NDVI imagery linked to dynamic sowing schedules",
+      component: <SmartCropCalendar />,
+      badge: "SATELLITE",
+      icon: <Calendar className="h-5 w-5" />
     },
     {
       id: "disease-scanner",
@@ -98,6 +108,7 @@ export const AdvancedFeaturesShowcase = () => {
       case "PREDICTIVE": return "bg-pink-500 text-white";
       case "SUSTAINABLE": return "bg-emerald-500 text-white";
       case "COMMUNITY": return "bg-red-500 text-white";
+      case "SATELLITE": return "bg-cyan-600 text-white";
       default: return "bg-gray-500 text-white";
     }
   };
@@ -131,7 +142,7 @@ export const AdvancedFeaturesShowcase = () => {
 
       {/* Features Tabs */}
       <Tabs defaultValue={features[0].id} className="w-full">
-        <TabsList className="grid w-full grid-cols-2 md:grid-cols-4 lg:grid-cols-8 h-auto">
+        <TabsList className="grid w-full grid-cols-2 md:grid-cols-4 lg:grid-cols-9 h-auto">
           {features.map((feature) => (
             <TabsTrigger 
               key={feature.id} 
