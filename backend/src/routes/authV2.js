@@ -33,21 +33,29 @@ const signupLimiter = rateLimit({
 
 // Validation rules
 const signupValidation = [
-  body('email').isEmail().normalizeEmail().withMessage('Invalid email format'),
-  body('password')
-    .isLength({ min: 8 })
-    .withMessage('Password must be at least 8 characters')
-    .matches(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])/)
-    .withMessage('Password must contain uppercase, lowercase, number and special character'),
-  body('fullName').trim().isLength({ min: 2 }).withMessage('Name must be at least 2 characters'),
+  body('phoneNumber')
+    .isMobilePhone('en-IN')
+    .withMessage('Invalid phone number'),
+  body('aadhaarNumber')
+    .trim()
+    .isLength({ min: 12, max: 12 })
+    .isNumeric()
+    .withMessage('Aadhaar must be 12 digits'),
+  body('passkey')
+    .isLength({ min: 4 })
+    .withMessage('Passkey must be at least 4 characters'),
+  body('fullName')
+    .trim()
+    .isLength({ min: 2 })
+    .withMessage('Name must be at least 2 characters'),
+  body('location')
+    .optional()
+    .isObject()
+    .withMessage('Location must be an object'),
   body('role')
     .optional()
     .isIn(['farmer', 'merchant', 'expert'])
     .withMessage('Invalid role'),
-  body('phoneNumber')
-    .optional()
-    .isMobilePhone('en-IN')
-    .withMessage('Invalid phone number'),
 ];
 
 const loginValidation = [
@@ -67,7 +75,7 @@ const otpLoginValidation = [
 
 /**
  * POST /api/auth/signup
- * Create a new user account
+ * Create a new user account with Aadhaar + Phone + Passkey
  */
 router.post('/signup', signupLimiter, signupValidation, async (req, res) => {
   try {
@@ -80,34 +88,95 @@ router.post('/signup', signupLimiter, signupValidation, async (req, res) => {
       });
     }
 
-    const { email, password, fullName, role = 'farmer', phoneNumber, aadhaarNumber } = req.body;
+    const { phoneNumber, aadhaarNumber, passkey, fullName, location, role = 'farmer' } = req.body;
 
-    logger.info(`Signup attempt for email: ${email}`);
+    logger.info(`Signup attempt for Aadhaar: ${aadhaarNumber}, Phone: ${phoneNumber}`);
 
-    const result = await supabaseAuthService.signUp(email, password, {
+    // Create email from phone number and Aadhaar
+    const email = `aadhaar_${aadhaarNumber}@farm-intellect.local`;
+    
+    // Signup with generated email and passkey as password
+    const result = await supabaseAuthService.signUp(email, passkey, {
       full_name: fullName,
       role,
       phone_number: phoneNumber,
       aadhaar_number: aadhaarNumber,
+      location: location,
     });
 
     if (!result.success) {
       logger.error(`Signup failed: ${result.error}`);
       return res.status(400).json({
         success: false,
-        error: result.error,
+        error: result.error || 'Signup failed. Please try again.',
       });
     }
 
-    logger.info(`User signed up successfully: ${email}`);
+    logger.info(`User signed up successfully: Aadhaar ${aadhaarNumber}`);
 
     return res.status(201).json({
       success: true,
       message: 'Account created successfully',
       user: result.user,
+      data: {
+        phoneNumber,
+        aadhaarNumber,
+        fullName,
+      },
     });
   } catch (error) {
     logger.error(`Signup error: ${error.message}`);
+    return res.status(500).json({
+      success: false,
+      error: 'Internal server error. Please try again.',
+    });
+  }
+});
+
+/**
+ * POST /api/auth/login-aadhaar
+ * Login with Aadhaar + Phone + Passkey
+ */
+router.post('/login-aadhaar', loginLimiter, [
+  body('phoneNumber').isMobilePhone('en-IN').withMessage('Invalid phone number'),
+  body('aadhaarNumber').trim().isLength({ min: 12, max: 12 }).isNumeric().withMessage('Invalid Aadhaar'),
+  body('passkey').notEmpty().withMessage('Passkey is required'),
+], async (req, res) => {
+  try {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      return res.status(400).json({
+        success: false,
+        error: 'Validation failed',
+        details: errors.array(),
+      });
+    }
+
+    const { phoneNumber, aadhaarNumber, passkey } = req.body;
+    const email = `aadhaar_${aadhaarNumber}@farm-intellect.local`;
+
+    logger.info(`Aadhaar login attempt: ${aadhaarNumber}, Phone: ${phoneNumber}`);
+
+    const result = await supabaseAuthService.login(email, passkey);
+
+    if (!result.success) {
+      logger.warn(`Login failed for Aadhaar: ${aadhaarNumber}`);
+      return res.status(401).json({
+        success: false,
+        error: 'Invalid Aadhaar number, phone, or passkey',
+      });
+    }
+
+    logger.info(`User logged in successfully with Aadhaar: ${aadhaarNumber}`);
+
+    return res.status(200).json({
+      success: true,
+      message: 'Login successful',
+      token: result.token,
+      user: result.user,
+    });
+  } catch (error) {
+    logger.error(`Aadhaar login error: ${error.message}`);
     return res.status(500).json({
       success: false,
       error: 'Internal server error',
