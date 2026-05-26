@@ -4,17 +4,18 @@ import type { Database } from './types';
 
 const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL;
 const SUPABASE_PUBLISHABLE_KEY = import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY;
+const SUPABASE_ANON_KEY = import.meta.env.VITE_SUPABASE_ANON_KEY;
 
 // DO NOT USE HARDCODED KEYS - Use environment variables instead
-// Set VITE_SUPABASE_URL and VITE_SUPABASE_PUBLISHABLE_KEY in your .env file
+// Set VITE_SUPABASE_URL and either VITE_SUPABASE_PUBLISHABLE_KEY or VITE_SUPABASE_ANON_KEY in your .env file
 const resolvedSupabaseUrl = SUPABASE_URL;
-const resolvedSupabaseKey = SUPABASE_PUBLISHABLE_KEY;
+const resolvedSupabaseKey = SUPABASE_PUBLISHABLE_KEY || SUPABASE_ANON_KEY;
 
 export const hasSupabaseEnv = Boolean(resolvedSupabaseUrl && resolvedSupabaseKey);
 
-if (!SUPABASE_URL || !SUPABASE_PUBLISHABLE_KEY) {
+if (!SUPABASE_URL || !resolvedSupabaseKey) {
   console.error(
-    'CRITICAL: Supabase environment variables are missing (VITE_SUPABASE_URL, VITE_SUPABASE_PUBLISHABLE_KEY). Please set them in your .env file.',
+    'CRITICAL: Supabase environment variables are missing. Required: VITE_SUPABASE_URL and one of VITE_SUPABASE_PUBLISHABLE_KEY or VITE_SUPABASE_ANON_KEY.',
   );
 }
 
