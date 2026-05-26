@@ -74,6 +74,11 @@ export default defineConfig(({ mode }) => ({
     },
   },
   build: {
+    target: "es2018",
+    cssCodeSplit: true,
+    assetsInlineLimit: 2048,
+    modulePreload: { polyfill: false },
+    chunkSizeWarningLimit: 450,
     rollupOptions: {
       output: {
         manualChunks(id) {
