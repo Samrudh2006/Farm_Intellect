@@ -35,8 +35,8 @@ const pendingOTPs = new Map<string, { otp: string; password: string; expiresAt: 
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
-const aadhaarToEmail = (aadhaar: string) => `aadhaar_${aadhaar.replace(/\s/g, "")}@farmapp.local`;
-const phoneToEmail = (phone: string) => `phone_${phone.replace(/\D/g, "")}@farmapp.local`;
+const aadhaarToEmail = (aadhaar: string) => `aadhaar_${aadhaar.replace(/\s/g, "")}@farmapp.local.io`;
+const phoneToEmail = (phone: string) => `phone_${phone.replace(/\D/g, "")}@farmapp.local.io`;
 
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [user, setUser] = useState<SupabaseUser | null>(null);
@@ -171,7 +171,14 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       },
     });
 
-    if (error) return { error: error as Error };
+    if (error) {
+      // Enhance error message for better UX
+      const enhancedError = new Error(error.message);
+      if (error.message?.includes("rate_limit")) {
+        enhancedError.message = "Too many signup attempts. Please wait a few minutes and try again.";
+      }
+      return { error: enhancedError };
+    }
 
     // Profile is auto-created via database trigger
     return { error: null };
@@ -281,5 +288,10 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 export const useAuth = () => {
   const context = useContext(AuthContext);
   if (!context) throw new Error("useAuth must be used within AuthProvider");
+  return context;
+};
+
+export const useAuthSafe = () => {
+  const context = useContext(AuthContext);
   return context;
 };
