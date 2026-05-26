@@ -20,9 +20,9 @@
     "seed": "node prisma/seed.js"
   },
   "dependencies": {
-    "@sentry/node": "^8.33.1",
     "@prisma/client": "^5.7.1",
-    "@supabase/supabase-js": "^2.57.4",
+    "@sentry/node": "^8.33.1",
+    "@supabase/supabase-js": "^2.106.2",
     "bcryptjs": "^2.4.3",
     "cors": "^2.8.5",
     "dotenv": "^16.3.1",
@@ -35,8 +35,8 @@
     "multer": "^2.1.1",
     "node-cron": "^3.0.3",
     "nodemailer": "^8.0.1",
-    "prom-client": "^15.1.3",
     "prisma": "^5.7.1",
+    "prom-client": "^15.1.3",
     "socket.io": "^4.7.4",
     "twilio": "^4.19.0",
     "uuid": "^9.0.1",

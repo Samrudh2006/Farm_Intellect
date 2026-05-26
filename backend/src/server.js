@@ -9,6 +9,7 @@ import { resolveAuthenticatedUser, authenticate, authorize } from './middleware/
 import * as Sentry from '@sentry/node';
 
 import authRoutes from './routes/auth.js';
+import authV2Routes from './routes/authV2.js';
 import userRoutes from './routes/users.js';
 import documentRoutes from './routes/documents.js';
 import notificationRoutes from './routes/notifications.js';
@@ -143,7 +144,8 @@ app.use(metricsMiddleware);
 app.use('/uploads', express.static('uploads'));
 
 // Routes
-app.use('/api/auth', authLimiter, authRoutes);
+// Use new Supabase-based auth routes (authV2) instead of Prisma-based auth routes
+app.use('/api/auth', authLimiter, authV2Routes);
 app.use('/api/users', userRoutes);
 app.use('/api/documents', documentRoutes);
 app.use('/api/notifications', notificationRoutes);
