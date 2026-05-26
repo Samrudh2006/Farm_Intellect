@@ -35,8 +35,8 @@ const pendingOTPs = new Map<string, { otp: string; password: string; expiresAt: 
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
-const aadhaarToEmail = (aadhaar: string) => `aadhaar_${aadhaar.replace(/\s/g, "")}@farmapp.local`;
-const phoneToEmail = (phone: string) => `phone_${phone.replace(/\D/g, "")}@farmapp.local`;
+const aadhaarToEmail = (aadhaar: string) => `aadhaar_${aadhaar.replace(/\s/g, "")}@farmapp.local.io`;
+const phoneToEmail = (phone: string) => `phone_${phone.replace(/\D/g, "")}@farmapp.local.io`;
 
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [user, setUser] = useState<SupabaseUser | null>(null);
