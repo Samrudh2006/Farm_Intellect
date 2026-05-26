@@ -6,7 +6,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route, useLocation, Navigate } from "react-router-dom";
 import { AnimatePresence } from "framer-motion";
 import { LanguageProvider } from "@/contexts/LanguageContext";
-import { AuthProvider } from "@/contexts/AuthContext";
+import { AuthProvider, useAuth } from "@/contexts/AuthContext";
 import { PageTransition } from "@/components/layout/PageTransition";
 import { AppErrorBoundary } from "@/components/system/AppErrorBoundary";
 import { SeoHead } from "@/components/system/SeoHead";
@@ -34,6 +34,8 @@ const RouteLoader = () => (
     <span className="h-8 w-8 rounded-full border-4 border-primary/30 border-t-primary animate-spin" />
   </div>
 );
+
+
 
 const ProtectedRoute = ({ children, allowedRoles }: { children: ReactNode; allowedRoles?: AppRole[] }) => {
   const guard = useRoleGuard(allowedRoles);
@@ -79,8 +81,13 @@ const renderProtectedPage = (Component: LazyPage, allowedRoles?: AppRole[]) => (
   <ProtectedRoute allowedRoles={allowedRoles}>{renderPage(Component)}</ProtectedRoute>
 );
 
-const AnimatedRoutes = () => {
+const RoutesWrapper = () => {
   const location = useLocation();
+  const { loading } = useAuth();
+
+  if (loading) {
+    return <RouteLoader />;
+  }
 
   return (
     <AnimatePresence mode="wait">
@@ -98,6 +105,14 @@ const AnimatedRoutes = () => {
         <Route path="*" element={renderPage(notFoundComponent)} />
       </Routes>
     </AnimatePresence>
+  );
+};
+
+const AnimatedRoutes = () => {
+  return (
+    <Suspense fallback={<RouteLoader />}>
+      <RoutesWrapper />
+    </Suspense>
   );
 };
 
