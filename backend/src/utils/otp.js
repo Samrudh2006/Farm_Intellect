@@ -1,176 +1,98 @@
-import nodemailer from 'nodemailer';
-import twilio from 'twilio';
-import prisma from '../config/database.js';
-import { generateOTP } from './auth.js';
 import { logger } from './logger.js';
 
-// Email transporter
-const emailTransporter = nodemailer.createTransporter({
-  host: process.env.EMAIL_HOST,
-  port: process.env.EMAIL_PORT,
-  secure: false,
-  auth: {
-    user: process.env.EMAIL_USER,
-    pass: process.env.EMAIL_PASS,
-  },
-});
+// Simple OTP generator for testing
+function generateOTP(length = 6) {
+  return Math.floor(Math.random() * Math.pow(10, length))
+    .toString()
+    .padStart(length, '0');
+}
 
-// Twilio client
-const twilioClient = process.env.TWILIO_ACCOUNT_SID && process.env.TWILIO_AUTH_TOKEN 
-  ? twilio(process.env.TWILIO_ACCOUNT_SID, process.env.TWILIO_AUTH_TOKEN)
-  : null;
+// Store OTPs in memory for testing (in production, use Supabase edge functions)
+const otpStore = new Map();
 
+/**
+ * Send OTP via email or SMS
+ * For testing, OTP is logged to console
+ */
 export const sendOTP = async (userId, contact, type, purpose) => {
   try {
-    // Generate OTP
     const code = generateOTP(6);
     const expiryMinutes = parseInt(process.env.OTP_EXPIRY_MINUTES) || 10;
     const expiresAt = new Date(Date.now() + expiryMinutes * 60 * 1000);
 
-    // Save OTP to database
-    await prisma.otpCode.create({
-      data: {
-        userId,
-        code,
-        type,
-        purpose,
-        expiresAt
-      }
+    // Store OTP in memory
+    const otpKey = `${type}:${contact}`;
+    otpStore.set(otpKey, {
+      code,
+      expiresAt,
+      verified: false,
     });
 
-    // Send OTP
-    if (type === 'EMAIL') {
-      await sendEmailOTP(contact, code, purpose);
-    } else if (type === 'SMS') {
-      await sendSMSOTP(contact, code, purpose);
-    }
+    logger.info(`[TESTING] OTP for ${contact}: ${code} (expires in ${expiryMinutes} minutes)`);
+    console.log(`\n[TEST OTP] ${type.toUpperCase()}: ${contact}\nCode: ${code}\n`);
 
-    logger.info(`OTP sent to ${contact} for ${purpose}`);
+    return {
+      success: true,
+      message: 'OTP sent successfully',
+      otp: code, // Return OTP for testing
+    };
   } catch (error) {
-    logger.error('Send OTP error:', error);
-    throw new Error('Failed to send OTP');
+    logger.error(`Failed to send OTP: ${error.message}`);
+    return {
+      success: false,
+      error: 'Failed to send OTP',
+    };
   }
 };
 
-export const verifyOTP = async (userId, code, purpose) => {
+/**
+ * Verify OTP
+ */
+export const verifyOTP = async (contact, code, type) => {
   try {
-    const otpRecord = await prisma.otpCode.findFirst({
-      where: {
-        userId,
-        code,
-        purpose,
-        usedAt: null,
-        expiresAt: {
-          gt: new Date()
-        }
-      }
-    });
+    const otpKey = `${type}:${contact}`;
+    const otpRecord = otpStore.get(otpKey);
 
     if (!otpRecord) {
-      return false;
+      return {
+        success: false,
+        error: 'OTP not found or expired',
+      };
     }
 
-    // Mark OTP as used
-    await prisma.otpCode.update({
-      where: { id: otpRecord.id },
-      data: { usedAt: new Date() }
-    });
+    if (new Date() > otpRecord.expiresAt) {
+      otpStore.delete(otpKey);
+      return {
+        success: false,
+        error: 'OTP has expired',
+      };
+    }
 
-    return true;
+    if (otpRecord.code !== code) {
+      return {
+        success: false,
+        error: 'Invalid OTP',
+      };
+    }
+
+    // Mark OTP as verified
+    otpRecord.verified = true;
+
+    logger.info(`OTP verified for ${contact}`);
+    return {
+      success: true,
+      message: 'OTP verified successfully',
+    };
   } catch (error) {
-    logger.error('Verify OTP error:', error);
-    return false;
+    logger.error(`OTP verification error: ${error.message}`);
+    return {
+      success: false,
+      error: 'OTP verification failed',
+    };
   }
 };
 
-const sendEmailOTP = async (email, code, purpose) => {
-  const subject = getEmailSubject(purpose);
-  const text = getEmailText(code, purpose);
-
-  await emailTransporter.sendMail({
-    from: process.env.EMAIL_USER,
-    to: email,
-    subject,
-    text,
-    html: getEmailHTML(code, purpose)
-  });
-};
-
-const sendSMSOTP = async (phone, code, purpose) => {
-  if (!twilioClient) {
-    logger.warn('Twilio not configured, skipping SMS OTP');
-    return;
-  }
-
-  const message = getSMSMessage(code, purpose);
-
-  await twilioClient.messages.create({
-    body: message,
-    from: process.env.TWILIO_PHONE_NUMBER,
-    to: phone
-  });
-};
-
-const getEmailSubject = (purpose) => {
-  const subjects = {
-    'signup': 'Verify your Smart Crop Advisory account',
-    'login': 'Your login verification code',
-    'reset-password': 'Password reset verification',
-    'critical-action': 'Security verification required'
-  };
-  return subjects[purpose] || 'Verification Code';
-};
-
-const getEmailText = (code, purpose) => {
-  const messages = {
-    'signup': `Welcome to Smart Crop Advisory! Your verification code is: ${code}`,
-    'login': `Your login verification code is: ${code}`,
-    'reset-password': `Your password reset code is: ${code}`,
-    'critical-action': `Your security verification code is: ${code}`
-  };
-  return messages[purpose] || `Your verification code is: ${code}`;
-};
-
-const getEmailHTML = (code, purpose) => {
-  return `
-    <!DOCTYPE html>
-    <html>
-    <head>
-      <style>
-        .container { max-width: 600px; margin: 0 auto; font-family: Arial, sans-serif; }
-        .header { background: #16a34a; color: white; padding: 20px; text-align: center; }
-        .content { padding: 20px; }
-        .code { font-size: 24px; font-weight: bold; color: #16a34a; text-align: center; padding: 20px; background: #f0f9f0; border-radius: 8px; margin: 20px 0; }
-        .footer { background: #f5f5f5; padding: 20px; text-align: center; font-size: 12px; color: #666; }
-      </style>
-    </head>
-    <body>
-      <div class="container">
-        <div class="header">
-          <h1>Smart Crop Advisory</h1>
-        </div>
-        <div class="content">
-          <h2>${getEmailSubject(purpose)}</h2>
-          <p>${getEmailText(code, purpose)}</p>
-          <div class="code">${code}</div>
-          <p>This code will expire in 10 minutes.</p>
-          <p>If you didn't request this code, please ignore this email.</p>
-        </div>
-        <div class="footer">
-          <p>© 2024 Smart Crop Advisory. All rights reserved.</p>
-        </div>
-      </div>
-    </body>
-    </html>
-  `;
-};
-
-const getSMSMessage = (code, purpose) => {
-  const messages = {
-    'signup': `Smart Crop Advisory: Your verification code is ${code}`,
-    'login': `Smart Crop Advisory: Your login code is ${code}`,
-    'reset-password': `Smart Crop Advisory: Your password reset code is ${code}`,
-    'critical-action': `Smart Crop Advisory: Your security code is ${code}`
-  };
-  return messages[purpose] || `Smart Crop Advisory: Your verification code is ${code}`;
+export default {
+  sendOTP,
+  verifyOTP,
 };
