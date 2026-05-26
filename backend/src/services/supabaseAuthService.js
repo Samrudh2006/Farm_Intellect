@@ -30,16 +30,29 @@ class SupabaseAuthService {
       }
 
       // Create user profile in public.profiles table
+      // Split full_name into first_name and last_name
+      const fullName = userData.full_name || '';
+      const nameParts = fullName.split(' ');
+      const firstName = nameParts[0] || '';
+      const lastName = nameParts.slice(1).join(' ') || '';
+
+      // Extract location data
+      const location = userData.location || {};
+      
       const { data: profile, error: profileError } = await supabase
         .from('profiles')
         .insert([
           {
             id: authData.user.id,
             email,
-            full_name: userData.full_name || '',
+            first_name: firstName,
+            last_name: lastName,
             role: userData.role || 'farmer',
             aadhaar_number: userData.aadhaar_number || null,
             phone_number: userData.phone_number || null,
+            state: location.state || null,
+            district: location.city || null, // Using city as district for now
+            village: location.village || null,
           },
         ])
         .select()
