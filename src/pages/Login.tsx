@@ -17,7 +17,7 @@ import { LanguageSelector } from "@/components/ui/language-selector";
 import { AshokaChakra } from "@/components/ui/ashoka-chakra";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/contexts/AuthContext";
-import { supabase } from "@/integrations/supabase/client";
+import { supabase, hasSupabaseEnv } from "@/integrations/supabase/client";
 import { indianStates, getCitiesByState } from "@/data/indianLocations";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { logSecurityEvent } from "@/lib/securityMonitoring";
@@ -365,6 +365,7 @@ const Login = () => {
 
   // ── Real SMS OTP via edge function ──
   const sendRealOTP = async (phone: string, purpose: string) => {
+    if (!supabase) throw new Error("Backend not configured");
     const fullPhone = `+91${phone.replace(/\D/g, "")}`;
     const { data, error } = await supabase.functions.invoke("send-otp", {
       body: { phone: fullPhone, purpose },
@@ -409,6 +410,7 @@ const Login = () => {
 
     setLoading(true);
     try {
+      if (!supabase) throw new Error("Backend not configured");
       // Verify against real OTP in database
       const fullPhone = `+91${formData.phone.replace(/\D/g, "")}`;
       const { data, error: verifyError } = await supabase.functions.invoke("verify-otp", {
@@ -466,6 +468,7 @@ const Login = () => {
 
     setLoading(true);
     try {
+      if (!supabase) throw new Error("Backend not configured");
       const fullPhone = `+91${forgotPhone.replace(/\D/g, "")}`;
       const { data, error } = await supabase.functions.invoke("verify-otp", {
         body: { phone: fullPhone, code: otpCode, purpose: "reset-passkey" },
@@ -502,6 +505,7 @@ const Login = () => {
 
     setLoading(true);
     try {
+      if (!supabase) throw new Error("Backend not configured");
       const fullPhone = `+91${forgotPhone.replace(/\D/g, "")}`;
       const { data, error } = await supabase.functions.invoke("reset-passkey", {
         body: { phone: fullPhone, reset_token: resetToken, new_passkey: newPasskey },
