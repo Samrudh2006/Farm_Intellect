@@ -1,173 +1,71 @@
-Proprietary Software License
-============================
+<a name="license-top"></a>
 
-Copyright (c) 2025 Samrudh. All Rights Reserved.
+<div align="center">
 
-Project: Krishi AI — Farm Intellect
-      AI-Powered Smart Agriculture Platform for Indian Farmers
+<img src="https://capsule-render.vercel.app/api?type=waving&color=0:FF9933,50:FFFFFF,100:138808&height=220&section=header&text=Proprietary%20License&fontSize=58&fontColor=1A202C&fontAlignY=38&desc=Krishi%20AI%20%E2%80%A2%20Intellectual%20Property%20Terms&descAlignY=60&descSize=20&animation=fadeIn" width="100%" alt="License Banner"/>
 
-================================================================================
-                          TERMS AND CONDITIONS
-================================================================================
+<br/>
 
-1. DEFINITIONS
+<img src="https://readme-typing-svg.demolab.com?font=Fira+Code&weight=700&size=22&duration=3000&pause=800&color=FF9933&center=true&vCenter=true&width=760&lines=Copyright+(c)+2025-2026+Samrudh;All+Rights+Reserved;Proprietary+Software+License;Evaluation+and+Demonstration+Only.+🇮🇳" alt="Typing"/>
 
-   "Software" means the entirety of the Krishi AI — Farm Intellect project,
-   including but not limited to all source code, object code, compiled binaries,
-   documentation, images, icons, audio files, datasets, database schemas,
-   configuration files, design assets, user interface designs, algorithms,
-   AI models, prompts, training data, and any other materials contained within
-   this repository or distributed alongside it.
+<br/><br/>
 
-   "Author" means Samrudh, the original creator and sole copyright holder of
-   the Software.
+<p>
+  <img src="https://img.shields.io/badge/License-Proprietary-red?style=for-the-badge&logo=github&logoColor=white&labelColor=800000" alt="License Type"/>
+  <img src="https://img.shields.io/badge/Jurisdiction-India_🇮🇳-FF9933?style=for-the-badge&logoColor=white&labelColor=138808" alt="Jurisdiction"/>
+  <img src="https://img.shields.io/badge/Use-Demonstration_Only-blue?style=for-the-badge&logoColor=white&labelColor=1d2d44" alt="Use Scope"/>
+</p>
 
-   "You" (or "Your") means any individual or legal entity exercising
-   permissions under this License.
+<br/>
 
-2. COPYRIGHT OWNERSHIP
+<img src="https://user-images.githubusercontent.com/74038190/212284100-561aa473-3905-4a80-b561-0d28506553ee.gif" width="100%" height="3" alt="divider"/>
 
-   The Software is the exclusive intellectual property of the Author. All
-   rights, title, and interest in and to the Software, including all
-   intellectual property rights therein, are and shall remain the exclusive
-   property of the Author.
+</div>
 
-   No transfer of ownership is implied or granted by this License.
+<br/>
 
-3. RESTRICTIONS
+> [!CAUTION]
+> **UNAUTHORIZED COPYING, MODIFICATION, OR DISTRIBUTION OF THIS SOFTWARE IS STRICTLY PROHIBITED.**  
+> This source code is made publicly visible for evaluation and portfolio demonstration purposes only.
 
-   Unless expressly authorized in writing by the Author, You may NOT:
+---
 
-   a) COPY — Reproduce, duplicate, or make copies of any part of the Software,
-      whether in whole or in part, in any medium or format.
+## 🌾 Terms and Conditions
 
-   b) MODIFY — Alter, adapt, translate, reverse engineer, decompile,
-      disassemble, or create derivative works based on the Software or any
-      part thereof.
+### 1. Definitions
+- **"Software"** means the entirety of the Krishi AI — Farm Intellect project, including all source code, object code, datasets (crop diseases, pest parameters, ICAR calendars, mandi price indices), designs, and configuration assets.
+- **"Author"** means Samrudh, the original creator and sole copyright holder of the Software.
+- **"You"** means any entity exercising permissions under this license.
 
-   c) DISTRIBUTE — Publish, distribute, sublicense, sell, rent, lease, lend,
-      or otherwise transfer the Software or any part thereof to any third
-      party, whether for commercial or non-commercial purposes.
+### 2. Copyright Ownership
+The Software is the exclusive intellectual property of the Author. All title, rights, and interest remain solely with the Author. No transfer of ownership is implied or granted by this License.
 
-   d) PUBLIC DISPLAY — Publicly display, publicly perform, broadcast, or
-      transmit the Software or any part thereof.
+### 3. Restrictions
+Unless explicitly authorized in writing by the Author, you may **NOT**:
+* **Copy**: Duplicate or reproduce the Software in whole or in part in any medium.
+* **Modify**: Alter, reverse engineer, decompile, or create derivative works.
+* **Distribute**: Publish, sell, rent, lease, or transfer the Software to any third party.
+* **Commercial Use**: Use any part of this Software or its datasets to build commercial products.
+* **Remove Notices**: Delete or obscure any copyright attribution markings.
 
-   e) COMMERCIAL USE — Use the Software, or any part thereof, for any
-      commercial purpose, including but not limited to incorporating it into
-      commercial products or services.
+### 4. Viewing Permission
+This repository is public for portfolio evaluation and demonstration purposes only. Public visibility does not constitute a license to deploy or run copies of this Software outside of evaluation bounds.
 
-   f) CLAIM AUTHORSHIP — Represent, imply, or claim ownership, authorship,
-      or co-authorship of the Software or any part thereof.
+---
 
-   g) REMOVE NOTICES — Remove, alter, or obscure any copyright notices,
-      license information, attribution, or proprietary markings contained
-      in or on the Software.
+## 🏛️ Governing Law and Jurisdictions
+This License shall be governed by and construed in accordance with the laws of India. Any disputes arising in connection with this Software shall be subject to the exclusive jurisdiction of the courts of India.
 
-   h) DATA EXTRACTION — Extract, scrape, harvest, or mine any datasets,
-      knowledge bases, agricultural data, or AI training data contained
-      within the Software.
+---
 
-4. VIEWING PERMISSION
+<div align="center">
 
-   This repository is made publicly visible for DEMONSTRATION AND PORTFOLIO
-   PURPOSES ONLY. Public visibility does NOT constitute a grant of any rights
-   to use, copy, modify, distribute, or create derivative works from the
-   Software. Viewing the source code is permitted solely for the purpose of
-   evaluating the Author's work.
+<img src="https://capsule-render.vercel.app/api?type=waving&color=0:138808,50:FFFFFF,100:FF9933&height=140&section=footer&fontSize=0&animation=fadeIn" width="100%"/>
 
-5. PERMITTED USE (WITH WRITTEN AUTHORIZATION ONLY)
+<br/>
 
-   Any use of the Software beyond viewing requires prior, explicit, written
-   authorization from the Author. Requests for authorization may be directed
-   to the Author through the contact information provided in this repository.
+[![Back to Top](https://img.shields.io/badge/⬆_BACK_TO_TOP-FF9933?style=for-the-badge&labelColor=138808)](#license-top)
 
-   Authorized use, if granted, will be subject to additional terms and
-   conditions specified in a separate written agreement.
+<sub>© 2026 Farm Intellect 65 · All Rights Reserved · MIT License</sub>
 
-6. AGRICULTURAL DATASETS & KNOWLEDGE BASE
-
-   The curated agricultural datasets included in this Software (crop disease
-   data, pest databases, Kisan Call Centre knowledge, ICAR crop calendars,
-   mandi price references, soil health parameters, satellite/NDVI data, and
-   crop production statistics) are compiled and curated by the Author.
-
-   While certain source data may originate from public government databases,
-   the specific compilation, curation, formatting, and integration of these
-   datasets within this Software is the intellectual property of the Author
-   and is subject to the same restrictions as the rest of the Software.
-
-7. AI MODELS & PROMPTS
-
-   All AI prompts, model configurations, fine-tuning data, system messages,
-   and AI-related intellectual property within this Software are proprietary
-   and may not be extracted, reproduced, or used in any other project or
-   product without written authorization.
-
-8. TRADEMARKS
-
-   "Krishi AI", "Farm Intellect", "KrishiSarthi", and associated logos,
-   icons, and branding materials are trademarks of the Author. No right to
-   use these trademarks is granted by this License.
-
-9. NO WARRANTY
-
-   THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS
-   OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-   FITNESS FOR A PARTICULAR PURPOSE, AND NONINFRINGEMENT.
-
-10. LIMITATION OF LIABILITY
-
-    IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY CLAIM, DAMAGES, OR OTHER
-    LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT, OR OTHERWISE, ARISING
-    FROM, OUT OF, OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
-    DEALINGS IN THE SOFTWARE.
-
-11. INDEMNIFICATION
-
-    You agree to indemnify, defend, and hold harmless the Author from and
-    against any and all claims, damages, losses, liabilities, costs, and
-    expenses (including reasonable attorneys' fees) arising from Your
-    unauthorized use of the Software.
-
-12. TERMINATION
-
-    Any rights granted under this License (if any) will terminate
-    automatically and without notice if You fail to comply with any term
-    of this License. Upon termination, You must immediately cease all use
-    of the Software and destroy all copies in Your possession.
-
-13. GOVERNING LAW
-
-    This License shall be governed by and construed in accordance with the
-    laws of India. Any disputes arising under or in connection with this
-    License shall be subject to the exclusive jurisdiction of the courts
-    of India.
-
-14. SEVERABILITY
-
-    If any provision of this License is held to be unenforceable or invalid,
-    such provision will be modified to the minimum extent necessary to make
-    it enforceable, and the remaining provisions will continue in full force
-    and effect.
-
-15. ENTIRE AGREEMENT
-
-    This License constitutes the entire agreement between You and the Author
-    regarding the Software and supersedes all prior negotiations,
-    representations, or agreements relating to the Software.
-
-================================================================================
-                           CONTACT INFORMATION
-================================================================================
-
-For licensing inquiries, permissions, or authorized use requests:
-
-   Author:    Samrudh
-   Project:   Krishi AI — Farm Intellect
-   GitHub:    https://github.com/samrudh
-
-================================================================================
-
-© 2025 Samrudh. All Rights Reserved.
-Unauthorized copying, modification, distribution, or use of this Software,
-via any medium, is strictly prohibited.
+</div>
