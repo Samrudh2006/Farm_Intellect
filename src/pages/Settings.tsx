@@ -37,6 +37,7 @@ import {
   hasRegistered,
 } from "@/lib/biometricAuth";
 import { useCurrentUser } from "@/hooks/useCurrentUser";
+import { useAuth } from "@/contexts/AuthContext";
 import { useToast } from "@/hooks/use-toast";
 
 const Settings = () => {
@@ -49,6 +50,12 @@ const Settings = () => {
   const [bioFingerprintRegistered, setBioFingerprintRegistered] = useState(false);
   const [bioFaceRegistered, setBioFaceRegistered] = useState(false);
   const [bioLoading, setBioLoading] = useState<"fingerprint" | "face" | null>(null);
+  // Credential prompt for biometric registration
+  const [bioPrompt, setBioPrompt] = useState<{ kind: "fingerprint" | "face" } | null>(null);
+  const [bioAadhaar, setBioAadhaar] = useState("");
+  const [bioPasskey, setBioPasskey] = useState("");
+  const [showBioPasskey, setShowBioPasskey] = useState(false);
+  const { signInWithAadhaar } = useAuth();
 
   useEffect(() => {
     isBiometricSupported().then(async (ok) => {
@@ -61,15 +68,44 @@ const Settings = () => {
   }, []);
 
   const handleBioRegister = async (kind: "fingerprint" | "face") => {
+    // Show credential prompt instead of registering immediately
+    setBioAadhaar("");
+    setBioPasskey("");
+    setBioPrompt({ kind });
+  };
+
+  const handleBioRegisterConfirm = async () => {
+    if (!bioPrompt) return;
+    const kind = bioPrompt.kind;
+    const cleanAadhaar = bioAadhaar.replace(/\s/g, "");
+
+    if (!/^\d{12}$/.test(cleanAadhaar)) {
+      toast({ title: "Invalid Aadhaar", description: "Please enter your 12-digit Aadhaar number.", variant: "destructive" });
+      return;
+    }
+    if (!bioPasskey || bioPasskey.length < 4) {
+      toast({ title: "Invalid Passkey", description: "Please enter your passkey (min 4 characters).", variant: "destructive" });
+      return;
+    }
+
     setBioLoading(kind);
     try {
+      // Verify credentials first
+      const { error } = await signInWithAadhaar(cleanAadhaar, bioPasskey);
+      if (error) {
+        toast({ title: "Invalid credentials", description: "Aadhaar or passkey is incorrect. Cannot register biometric.", variant: "destructive" });
+        setBioLoading(null);
+        return;
+      }
+      // Credentials verified — now register biometric
       await registerBiometric(kind, {
-        aadhaar: user.aadhaar || user.id || "unknown",
-        passkey: user.passkey || "",
-        label: user.name || "User",
+        aadhaar: cleanAadhaar,
+        passkey: bioPasskey,
+        label: user.name || cleanAadhaar,
       });
       if (kind === "fingerprint") setBioFingerprintRegistered(true);
       else setBioFaceRegistered(true);
+      setBioPrompt(null);
       toast({
         title: kind === "face" ? "Face ID registered ✓" : "Fingerprint registered ✓",
         description: "You can now use this biometric to sign in quickly.",
@@ -347,6 +383,67 @@ const Settings = () => {
                       <p className="text-sm text-muted-foreground">
                         Manage biometric credentials stored on this device. Each device stores credentials independently.
                       </p>
+
+                      {/* Credential prompt for registration */}
+                      {bioPrompt && (
+                        <div className="p-4 border-2 border-primary/30 rounded-lg bg-primary/5 space-y-3">
+                          <p className="text-sm font-medium flex items-center gap-2">
+                            {bioPrompt.kind === "fingerprint" ? <Fingerprint className="h-4 w-4 text-primary" /> : <ScanFace className="h-4 w-4 text-primary" />}
+                            Verify your identity to register {bioPrompt.kind === "fingerprint" ? "fingerprint" : "Face ID"}
+                          </p>
+                          <p className="text-xs text-muted-foreground">Enter your Aadhaar and Passkey to confirm it's you before enrolling your biometric.</p>
+                          <div className="space-y-2">
+                            <Label htmlFor="bio-aadhaar" className="text-xs">Aadhaar Number</Label>
+                            <Input
+                              id="bio-aadhaar"
+                              placeholder="XXXX XXXX XXXX"
+                              maxLength={14}
+                              value={bioAadhaar}
+                              onChange={(e) => {
+                                const digits = e.target.value.replace(/\D/g, "").slice(0, 12);
+                                setBioAadhaar(digits.replace(/(\d{4})(?=\d)/g, "$1 "));
+                              }}
+                            />
+                          </div>
+                          <div className="space-y-2">
+                            <Label htmlFor="bio-passkey" className="text-xs">Passkey</Label>
+                            <div className="relative">
+                              <Input
+                                id="bio-passkey"
+                                type={showBioPasskey ? "text" : "password"}
+                                placeholder="Enter your passkey"
+                                value={bioPasskey}
+                                onChange={(e) => setBioPasskey(e.target.value)}
+                              />
+                              <button
+                                type="button"
+                                className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+                                onClick={() => setShowBioPasskey(!showBioPasskey)}
+                              >
+                                {showBioPasskey ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                              </button>
+                            </div>
+                          </div>
+                          <div className="flex gap-2">
+                            <Button
+                              size="sm"
+                              onClick={handleBioRegisterConfirm}
+                              disabled={bioLoading !== null}
+                              className="flex-1"
+                            >
+                              {bioLoading ? "Verifying..." : `Register ${bioPrompt.kind === "fingerprint" ? "Fingerprint" : "Face ID"}`}
+                            </Button>
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              onClick={() => setBioPrompt(null)}
+                              disabled={bioLoading !== null}
+                            >
+                              Cancel
+                            </Button>
+                          </div>
+                        </div>
+                      )}
                       {/* Fingerprint */}
                       <div className="flex items-center justify-between p-4 border rounded-lg">
                         <div className="flex items-center gap-3">
