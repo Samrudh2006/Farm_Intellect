@@ -9,7 +9,7 @@
 <!-- ──────────────  TYPING ANIMATION HERO  ────────────── -->
 
 <a href="https://samrudh2006.github.io/farm-intellect-65/">
-  <img src="https://readme-typing-svg.demolab.com?font=Fira+Code&weight=800&size=34&duration=2600&pause=900&color=22C55E&center=true&vCenter=true&multiline=true&repeat=true&width=900&height=120&lines=%F0%9F%8C%BE+Welcome+to+Farm+Intellect+65;%F0%9F%A4%96+AI+%E2%80%A2+Vision+%E2%80%A2+Voice+%E2%80%A2+Vernacular;%F0%9F%93%B1+22+Languages+%E2%80%A2+PWA+%E2%80%A2+Offline-First;%F0%9F%92%9A+Built+for+Every+Indian+Farmer+%F0%9F%87%AE%F0%9F%87%B3" alt="Typing Hero"/>
+  <img src="https://readme-typing-svg.demolab.com?font=Fira+Code&weight=800&size=34&duration=2600&pause=900&color=22C55E&center=true&vCenter=true&multiline=true&repeat=true&width=900&height=170&lines=%F0%9F%8C%BE+Welcome+to+Farm+Intellect+65;%F0%9F%A4%96+AI+%E2%80%A2+Vision+%E2%80%A2+Voice+%E2%80%A2+Vernacular;%F0%9F%93%B1+22+Languages+%E2%80%A2+PWA+%E2%80%A2+Offline-First;%F0%9F%92%9A+Built+for+Every+Indian+Farmer+%F0%9F%87%AE%F0%9F%87%B3" alt="Typing Hero"/>
 </a>
 
 <br/><br/>
