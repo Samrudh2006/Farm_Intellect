@@ -32,6 +32,8 @@ interface AuthContextType {
 
 // Store pending OTPs in memory (simulation)
 const pendingOTPs = new Map<string, { otp: string; password: string; expiresAt: number }>();
+const BACKEND_NOT_CONFIGURED_ERROR =
+  "Backend not configured. Set VITE_SUPABASE_URL and VITE_SUPABASE_PUBLISHABLE_KEY (or VITE_SUPABASE_ANON_KEY) in .env.";
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
