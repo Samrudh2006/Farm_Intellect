@@ -9,7 +9,7 @@ import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
-import { supabase } from "@/integrations/supabase/client";
+import { hasSupabaseEnv, supabase } from "@/integrations/supabase/client";
 import { indianStates, getCitiesByState } from "@/data/indianLocations";
 import { languageOptions } from "@/i18n/languages";
 import { ArrowLeft, MessageSquare, PhoneCall, ShieldCheck, Sprout } from "lucide-react";
@@ -55,6 +55,18 @@ const SmsRegister = () => {
       return;
     }
     setSubmitting(true);
+
+    if (!hasSupabaseEnv) {
+      // Mock registration behavior
+      setSubmitting(false);
+      setDone(true);
+      toast({
+        title: "✅ Registered (Local Demo Mode)",
+        description: "Local Demo Mode: Subscription registered in simulated local registry.",
+      });
+      return;
+    }
+
     const phoneE164 = `+91${parsed.data.phone}`;
     const { error } = await supabase.from("sms_subscribers").insert({
       name: parsed.data.name,
@@ -77,10 +89,10 @@ const SmsRegister = () => {
       return;
     }
     setDone(true);
-      toast({
-        title: "✅ Registered",
-        description: "Free tier is active. For paid upgrades, contact your local Krishi Sevak/Sarpanch or platform support.",
-      });
+    toast({
+      title: "✅ Registered",
+      description: "Free tier is active. For paid upgrades, contact your local Krishi Sevak/Sarpanch or platform support.",
+    });
   };
 
   return (

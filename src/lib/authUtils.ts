@@ -1,4 +1,4 @@
-import { supabase } from '@/integrations/supabase/client';
+import { hasSupabaseEnv, supabase } from '@/integrations/supabase/client';
 import { profileApi } from './supabaseApi';
 
 // Email validation
@@ -58,6 +58,11 @@ export const sanitizePhoneInput = (phone: string): string => {
 // Safe sign out
 export const safeSignOut = async (): Promise<{ success: boolean; error?: Error }> => {
   try {
+    if (!hasSupabaseEnv) {
+      sessionStorage.clear();
+      localStorage.removeItem("mock_user_session");
+      return { success: true };
+    }
     const { error } = await supabase.auth.signOut();
     if (error) throw error;
     
@@ -77,6 +82,11 @@ export const updatePassword = async (newPassword: string): Promise<{ success: bo
     const validation = validatePassword(newPassword);
     if (!validation.valid) {
       return { success: false, error: validation.errors.join(', ') };
+    }
+
+    if (!hasSupabaseEnv) {
+      console.debug("[Mock Auth] Password updated locally");
+      return { success: true };
     }
 
     const { error } = await supabase.auth.updateUser({
@@ -100,6 +110,11 @@ export const requestPasswordReset = async (email: string): Promise<{ success: bo
   try {
     if (!validateEmail(email)) {
       return { success: false, error: 'Invalid email format' };
+    }
+
+    if (!hasSupabaseEnv) {
+      console.debug("[Mock Auth] Password reset requested for", email);
+      return { success: true };
     }
 
     const { error } = await supabase.auth.resetPasswordForEmail(email, {
@@ -134,6 +149,11 @@ export const updateUserMetadata = async (
       }
     }
 
+    if (!hasSupabaseEnv) {
+      console.debug("[Mock Auth] User metadata updated locally:", sanitizedMetadata);
+      return { success: true };
+    }
+
     // Update via profile API
     await profileApi.updateProfile(userId, sanitizedMetadata);
 
@@ -148,6 +168,9 @@ export const updateUserMetadata = async (
 // Check if user session is valid
 export const isSessionValid = async (): Promise<boolean> => {
   try {
+    if (!hasSupabaseEnv) {
+      return !!localStorage.getItem("mock_user_session");
+    }
     const { data: { session } } = await supabase.auth.getSession();
     return !!session;
   } catch {
@@ -158,6 +181,18 @@ export const isSessionValid = async (): Promise<boolean> => {
 // Get current user safely
 export const getCurrentUser = async () => {
   try {
+    if (!hasSupabaseEnv) {
+      const savedSession = localStorage.getItem("mock_user_session");
+      if (savedSession) {
+        try {
+          const { user } = JSON.parse(savedSession);
+          return user;
+        } catch {
+          return null;
+        }
+      }
+      return null;
+    }
     const { data: { user } } = await supabase.auth.getUser();
     return user;
   } catch (error) {
@@ -169,6 +204,9 @@ export const getCurrentUser = async () => {
 // Refresh session
 export const refreshSession = async (): Promise<{ success: boolean; error?: string }> => {
   try {
+    if (!hasSupabaseEnv) {
+      return { success: true };
+    }
     const { data, error } = await supabase.auth.refreshSession();
     
     if (error) {
@@ -223,6 +261,10 @@ export const recordLoginAttempt = async (
   ipAddress?: string
 ): Promise<void> => {
   try {
+    if (!hasSupabaseEnv) {
+      console.debug("[Mock Auth] Recorded login attempt:", { email, success, ipAddress });
+      return;
+    }
     const { data: { user } } = await supabase.auth.getUser();
     
     if (user) {
@@ -245,6 +287,10 @@ export const recordLoginAttempt = async (
 // Check if email is already registered
 export const checkEmailExists = async (email: string): Promise<boolean> => {
   try {
+    if (!hasSupabaseEnv) {
+      const mockUsers = JSON.parse(localStorage.getItem("mock_registered_users") || "{}");
+      return Object.values(mockUsers).some((u: any) => u.user?.email === email.toLowerCase());
+    }
     const { data, error } = await supabase
       .from('profiles')
       .select('id')

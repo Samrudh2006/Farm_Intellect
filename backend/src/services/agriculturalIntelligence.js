@@ -11,15 +11,7 @@ export class AgriculturalIntelligence {
   /**
    * Enrich AI response with contextual agricultural data
    */
-  async enrichResponse(
-    response: string,
-    userId: string,
-    context: {
-      transcription: string;
-      intent: string;
-      language: string;
-    }
-  ): Promise<string> {
+  async enrichResponse(response, userId, context) {
     try {
       // Get user's farm context
       const userFarm = await this.getUserFarmContext(userId);
@@ -63,7 +55,7 @@ export class AgriculturalIntelligence {
   /**
    * Get user's farm context and profile
    */
-  private async getUserFarmContext(userId: string): Promise<any> {
+  async getUserFarmContext(userId) {
     try {
       const user = await prisma.user.findUnique({
         where: { id: parseInt(userId) },
@@ -82,7 +74,7 @@ export class AgriculturalIntelligence {
   /**
    * Append crop recommendation data with location-specific info
    */
-  private async appendCropRecommendationData(farmContext: any): Promise<string> {
+  async appendCropRecommendationData(farmContext) {
     try {
       // Get seasonal crops for the region
       const season = this.getCurrentSeason();
@@ -105,7 +97,7 @@ export class AgriculturalIntelligence {
   /**
    * Append disease prevention measures specific to location
    */
-  private async appendDiseasePrevention(farmContext: any, language: string): Promise<string> {
+  async appendDiseasePrevention(farmContext, language) {
     try {
       const climate = this.getClimateData(farmContext.location);
 
@@ -127,7 +119,7 @@ export class AgriculturalIntelligence {
   /**
    * Append current market prices for region
    */
-  private async appendMarketData(farmContext: any): Promise<string> {
+  async appendMarketData(farmContext) {
     try {
       // In production, fetch from real market data APIs
       // For now, provide general guidance
@@ -149,7 +141,7 @@ export class AgriculturalIntelligence {
   /**
    * Append soil-specific recommendations
    */
-  private async appendSoilData(farmContext: any): Promise<string> {
+  async appendSoilData(farmContext) {
     try {
       const soilAdvice = '\n\nSoil Management Action Plan:';
       const actions = [
@@ -169,7 +161,7 @@ export class AgriculturalIntelligence {
   /**
    * Append weather-based irrigation guidance
    */
-  private async appendWeatherData(farmContext: any): Promise<string> {
+  async appendWeatherData(farmContext) {
     try {
       // Get current weather (simplified)
       const weatherAdvice = '\n\nWeather-Based Irrigation Guide:';
@@ -190,7 +182,7 @@ export class AgriculturalIntelligence {
   /**
    * Get current agricultural season
    */
-  private getCurrentSeason(): string {
+  getCurrentSeason() {
     const month = new Date().getMonth() + 1;
 
     if (month >= 10 || month <= 2) {
@@ -205,9 +197,9 @@ export class AgriculturalIntelligence {
   /**
    * Get climate data for region (simplified)
    */
-  private getClimateData(location: string): any {
+  getClimateData(location) {
     // Simplified climate data - in production, fetch from weather APIs
-    const climateMap: Record<string, any> = {
+    const climateMap = {
       'Punjab': { humidity_level: 65, temp_range: '15-32°C', rainfall: 'Moderate' },
       'Haryana': { humidity_level: 60, temp_range: '12-40°C', rainfall: 'Low-Moderate' },
       'Maharashtra': { humidity_level: 70, temp_range: '18-38°C', rainfall: 'Moderate-High' },
@@ -221,8 +213,8 @@ export class AgriculturalIntelligence {
   /**
    * Generate multi-language agricultural tips
    */
-  getRegionalTips(language: string, category: string): string[] {
-    const tips: Record<string, Record<string, string[]>> = {
+  getRegionalTips(language, category) {
+    const tips = {
       'hi-IN': {
         'general': [
           'मिट्टी की जांच हर 2 साल में करवाएं',

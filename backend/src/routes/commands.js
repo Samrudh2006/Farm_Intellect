@@ -117,7 +117,7 @@ router.get('/suggestions', authenticate, async (req, res) => {
   try {
     const { currentRoute = '/farmer/dashboard' } = req.query;
 
-    const suggestions: Record<string, string[]> = {
+    const suggestions = {
       '/farmer/crops': [
         'Show my crops',
         'Add new crop',
@@ -154,7 +154,7 @@ router.get('/suggestions', authenticate, async (req, res) => {
       'Go home',
     ];
 
-    const commands = suggestions[currentRoute as string] || defaultSuggestions;
+    const commands = suggestions[currentRoute] || defaultSuggestions;
 
     res.json({
       success: true,
@@ -174,12 +174,12 @@ router.get('/history', authenticate, async (req, res) => {
   try {
     const { limit = 20, commandType } = req.query;
 
-    const where: any = { userId: req.user.id };
+    const where = { userId: req.user.id };
     if (commandType) where.commandType = commandType;
 
     const history = await prisma.voiceCommandLog.findMany({
       where,
-      take: parseInt(limit as string),
+      take: parseInt(limit),
       orderBy: { createdAt: 'desc' },
     });
 
@@ -222,8 +222,8 @@ router.get('/stats', authenticate, async (req, res) => {
 
 // ─── Helper Functions ───
 
-function getActionForCommandType(commandType: string) {
-  const actions: Record<string, string> = {
+function getActionForCommandType(commandType) {
+  const actions = {
     navigation: 'navigate',
     data: 'data',
     form: 'form',
@@ -232,7 +232,7 @@ function getActionForCommandType(commandType: string) {
   return actions[commandType] || 'execute';
 }
 
-function getFeedbackForCommand(command: any, commandType: string) {
+function getFeedbackForCommand(command, commandType) {
   const name = command.name?.replace(/_/g, ' ') || command;
 
   switch (commandType) {
@@ -249,7 +249,7 @@ function getFeedbackForCommand(command: any, commandType: string) {
   }
 }
 
-async function handleDataCommand(command: any, userId: string) {
+async function handleDataCommand(command, userId) {
   switch (command.action) {
     case 'fetch_crops':
       return {
@@ -291,7 +291,7 @@ async function handleDataCommand(command: any, userId: string) {
   }
 }
 
-function handleControlCommand(command: any) {
+function handleControlCommand(command) {
   switch (command.action) {
     case 'clear_history':
       return {
@@ -329,7 +329,7 @@ function handleControlCommand(command: any) {
   }
 }
 
-function getNavigationCommands(role: string) {
+function getNavigationCommands(role) {
   const baseCommands = [
     { name: 'crops', label: 'Go to crops', route: '/farmer/crops', keywords: ['crop', 'plants'] },
     { name: 'advisory', label: 'Show advisory', route: '/farmer/advisory', keywords: ['advice', 'tips'] },
@@ -350,7 +350,7 @@ function getNavigationCommands(role: string) {
   return baseCommands;
 }
 
-function getFormCommands(role: string) {
+function getFormCommands(role) {
   const baseForms = [
     { name: 'register_farm', label: 'Register farm', form: 'farm-registration', route: '/farmer/features' },
     { name: 'add_crop', label: 'Add crop', form: 'crop-addition', route: '/farmer/crops' },
@@ -367,7 +367,7 @@ function getFormCommands(role: string) {
   return baseForms;
 }
 
-function getDataCommands(role: string) {
+function getDataCommands(role) {
   const baseData = [
     { name: 'list_crops', label: 'List my crops', action: 'fetch_crops' },
     { name: 'market_prices', label: 'Market prices', action: 'fetch_market_prices' },

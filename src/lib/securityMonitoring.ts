@@ -1,4 +1,4 @@
-import { supabase } from '@/integrations/supabase/client';
+import { hasSupabaseEnv, supabase } from '@/integrations/supabase/client';
 
 // ============= ERROR LOGGING =============
 
@@ -123,6 +123,10 @@ class ErrorLogger {
     this.errorQueue = [];
 
     try {
+      if (!hasSupabaseEnv) {
+        console.debug("[Mock Security Logger] Flushed errors:", logsToSend);
+        return;
+      }
       const { data: { user } } = await supabase.auth.getUser();
 
       // Insert error logs
@@ -182,6 +186,10 @@ export interface SecurityEvent {
 
 export const logSecurityEvent = async (event: SecurityEvent): Promise<void> => {
   try {
+    if (!hasSupabaseEnv) {
+      console.debug("[Mock Security Logger] Logged security event:", event);
+      return;
+    }
     const { data: { user } } = await supabase.auth.getUser();
 
     await supabase.from('audit_logs').insert([
@@ -298,6 +306,10 @@ export const logDataAccess = async (
   action: 'read' | 'create' | 'update' | 'delete'
 ): Promise<void> => {
   try {
+    if (!hasSupabaseEnv) {
+      console.debug("[Mock Security Logger] Logged data access:", { userId, entityType, entityId, action });
+      return;
+    }
     await supabase.from('audit_logs').insert([
       {
         user_id: userId,

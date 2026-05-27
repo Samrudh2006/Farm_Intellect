@@ -19,6 +19,43 @@ export async function streamChat({
   onDone: () => void;
   onError?: (error: string) => void;
 }) {
+  const isMock = !import.meta.env.VITE_SUPABASE_URL || 
+                 import.meta.env.VITE_SUPABASE_URL.includes("<project-ref>") ||
+                 import.meta.env.VITE_SUPABASE_URL.includes("mockproject");
+
+  if (isMock) {
+    let responseText = "Welcome to Krishi AI local helper! I can assist with crop advisory, disease scanning, and weather guidance.";
+    if (mode === "disease") {
+      responseText = "Based on the leaf scan, we detected **Cercospora Leaf Spot**.\n\n**Remedy:**\n1. Remove infected leaves.\n2. Spray Neem oil or copper fungicide.\n3. Avoid overhead watering to reduce moisture on leaves.";
+    } else if (mode === "recommendation") {
+      responseText = "I recommend **Wheat** or **Mustard** for your soil composition and the current winter season.\n\n* Soil pH: 6.5\n* Expected Water: Moderate\n* Growth duration: 120-140 days";
+    } else if (mode === "yield") {
+      responseText = "Predicted Yield: **4.5 Tons/Hectare** under normal weather conditions. This estimate is based on typical regional soil reports and historical yields.";
+    } else {
+      const userMsg = messages[messages.length - 1]?.content.toLowerCase() || "";
+      if (userMsg.includes("wheat") || userMsg.includes("गेहूं")) {
+        responseText = "Wheat is a Rabi crop sown in winter. It requires well-drained loam soils and cool weather during the growing season. Maintain regular irrigation at critical stages.";
+      } else if (userMsg.includes("rice") || userMsg.includes("धान")) {
+        responseText = "Rice is a Kharif crop that requires clayey loam soil and standing water. Sow in June-July and harvest in November. Ensure consistent water levels.";
+      } else if (userMsg.includes("scheme") || userMsg.includes("योजना")) {
+        responseText = "You qualify for **PM-KISAN** (₹6,000/year direct transfer) and **PM Fasal Bima Yojana** (Crop insurance safety net). Contact local block office for enrollment.";
+      }
+    }
+
+    const words = responseText.split(" ");
+    let index = 0;
+    const interval = setInterval(() => {
+      if (index < words.length) {
+        onDelta(words[index] + " ");
+        index++;
+      } else {
+        clearInterval(interval);
+        onDone();
+      }
+    }, 40);
+    return;
+  }
+
   try {
     const { supabase } = await import("@/integrations/supabase/client");
     const { data: { session } } = await supabase.auth.getSession();

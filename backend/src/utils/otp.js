@@ -5,7 +5,7 @@ import { generateOTP } from './auth.js';
 import { logger } from './logger.js';
 
 // Email transporter
-const emailTransporter = nodemailer.createTransporter({
+const emailTransporter = nodemailer.createTransport({
   host: process.env.EMAIL_HOST,
   port: process.env.EMAIL_PORT,
   secure: false,
