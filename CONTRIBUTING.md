@@ -2,7 +2,7 @@
 
 <div align="center">
 
-<img src="https://capsule-render.vercel.app/api?type=waving&color=0:1e40af,25:3b82f6,50:60a5fa,75:93c5fd,100:dbeafe&height=220&section=header&text=Contributing%20Guide&fontSize=58&fontColor=ffffff&fontAlignY=38&desc=Every%20Line%20of%20Code%20Feeds%20a%20Farmer&descAlignY=60&descSize=20&animation=fadeIn" width="100%" alt="Contributing Banner"/>
+<img src="https://github.com/user-attachments/assets/cb527723-1fd8-4a86-9ef3-e6127e0a72cc" width="100%" alt="Contributing Banner"/>
 
 <br/>
 
