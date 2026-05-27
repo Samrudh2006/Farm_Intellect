@@ -25,6 +25,7 @@ const robotsPolicy = process.env.VITE_ROBOTS_POLICY || "noindex, nofollow";
 
 // https://vitejs.dev/config/
 export default defineConfig(({ mode }) => ({
+  base: "/farm-intellect-65/",
   define: {
     'import.meta.env.VITE_SUPABASE_URL': JSON.stringify(SUPABASE_URL),
     'import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY': JSON.stringify(SUPABASE_ANON_KEY),
