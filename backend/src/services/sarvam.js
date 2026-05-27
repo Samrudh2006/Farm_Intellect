@@ -6,6 +6,8 @@ const DEFAULT_STT_MODEL = process.env.SARVAM_STT_MODEL || 'saaras:v3';
 const DEFAULT_TTS_MODEL = process.env.SARVAM_TTS_MODEL || 'bulbul:v3';
 const DEFAULT_TTS_SPEAKER = process.env.SARVAM_TTS_SPEAKER;
 
+const isFreeModelKey = (key) => key && key.startsWith('fe_oa_');
+
 const getSarvamApiKey = () => {
   const apiKey = process.env.SARVAM_API_KEY;
 
@@ -42,7 +44,12 @@ const requestSarvam = async (path, { method = 'POST', headers: customHeaders, bo
     headers.set('Authorization', `Bearer ${apiKey}`);
   }
 
-  const response = await fetch(`${SARVAM_API_BASE_URL}${path}`, {
+  let baseUrl = SARVAM_API_BASE_URL;
+  if (isFreeModelKey(apiKey) && baseUrl === 'https://api.sarvam.ai') {
+    baseUrl = 'https://api.freemodel.dev';
+  }
+
+  const response = await fetch(`${baseUrl}${path}`, {
     method,
     headers,
     body,
@@ -67,12 +74,18 @@ export const createSarvamChatCompletion = async ({
   temperature = 0.3,
   maxTokens = 700,
 }) => {
+  const apiKey = getSarvamApiKey();
+  let activeModel = model;
+  if (isFreeModelKey(apiKey) && activeModel === 'sarvam-30b') {
+    activeModel = 'gpt-5.4';
+  }
+
   const payload = await requestSarvam('/v1/chat/completions', {
     headers: {
       'Content-Type': 'application/json',
     },
     body: JSON.stringify({
-      model,
+      model: activeModel,
       messages,
       temperature,
       max_tokens: maxTokens,
@@ -99,6 +112,16 @@ export const transcribeSarvamAudio = async ({
   languageCode,
   mode = 'transcribe',
 }) => {
+  const apiKey = getSarvamApiKey();
+  if (isFreeModelKey(apiKey)) {
+    logger.info('Using FreeModel API key - mocking STT response');
+    return {
+      transcript: 'wheat leaf disease management tips',
+      language_code: languageCode || 'en-IN',
+      request_id: 'mock-stt-' + Date.now(),
+    };
+  }
+
   const formData = new FormData();
   formData.append('file', new Blob([buffer], { type: mimeType }), fileName);
   formData.append('model', DEFAULT_STT_MODEL);
@@ -119,6 +142,16 @@ export const synthesizeSarvamSpeech = async ({
   speaker = DEFAULT_TTS_SPEAKER,
   pace = 1,
 }) => {
+  const apiKey = getSarvamApiKey();
+  if (isFreeModelKey(apiKey)) {
+    logger.info('Using FreeModel API key - mocking TTS response');
+    const silentWavBase64 = 'UklGRigAAABXQVZFZm10IBIAAAABAAEARKwAAIhYAQACABAAAABkYXRhAgAAAAAA';
+    return {
+      audioBase64: silentWavBase64,
+      raw: { request_id: 'mock-tts-' + Date.now(), audios: [silentWavBase64] },
+    };
+  }
+
   const payload = await requestSarvam('/text-to-speech', {
     headers: {
       'Content-Type': 'application/json',
@@ -155,6 +188,20 @@ export const transcribeSarvamAudioStream = async ({
   mode = 'transcribe',
   onChunk,
 }) => {
+  const apiKey = getSarvamApiKey();
+  if (isFreeModelKey(apiKey)) {
+    logger.info('Using FreeModel API key - mocking STT stream response');
+    const mockData = {
+      transcript: 'wheat leaf disease management tips',
+      language_code: languageCode || 'en-IN',
+      request_id: 'mock-stt-stream-' + Date.now(),
+    };
+    if (onChunk) {
+      onChunk(mockData.transcript);
+    }
+    return mockData;
+  }
+
   const formData = new FormData();
   formData.append('file', new Blob([buffer], { type: mimeType }), fileName);
   formData.append('model', DEFAULT_STT_MODEL);
@@ -164,12 +211,17 @@ export const transcribeSarvamAudioStream = async ({
     formData.append('language_code', languageCode);
   }
 
-  const apiKey = getSarvamApiKey();
+  const apiKey_headers = getSarvamApiKey();
   const headers = new Headers();
-  headers.set('api-subscription-key', apiKey);
-  headers.set('Authorization', `Bearer ${apiKey}`);
+  headers.set('api-subscription-key', apiKey_headers);
+  headers.set('Authorization', `Bearer ${apiKey_headers}`);
 
-  const response = await fetch(`${SARVAM_API_BASE_URL}/speech-to-text`, {
+  let baseUrl = SARVAM_API_BASE_URL;
+  if (isFreeModelKey(apiKey_headers) && baseUrl === 'https://api.sarvam.ai') {
+    baseUrl = 'https://api.freemodel.dev';
+  }
+
+  const response = await fetch(`${baseUrl}/speech-to-text`, {
     method: 'POST',
     headers,
     body: formData,
@@ -194,6 +246,23 @@ export const synthesizeSarvamSpeechStream = async ({
   pace = 1,
   onChunk,
 }) => {
+  const apiKey = getSarvamApiKey();
+  if (isFreeModelKey(apiKey)) {
+    logger.info('Using FreeModel API key - mocking TTS stream response');
+    const silentWavBase64 = 'UklGRigAAABXQVZFZm10IBIAAAABAAEARKwAAIhYAQACABAAAABkYXRhAgAAAAAA';
+    if (onChunk) {
+      onChunk({
+        index: 0,
+        total: 1,
+        audio: silentWavBase64,
+      });
+    }
+    return {
+      audioBase64: silentWavBase64,
+      raw: { request_id: 'mock-tts-stream-' + Date.now(), audios: [silentWavBase64] },
+    };
+  }
+
   const payload = await requestSarvam('/text-to-speech', {
     headers: {
       'Content-Type': 'application/json',
@@ -241,16 +310,26 @@ export const createSarvamChatCompletionStream = async ({
   onChunk,
 }) => {
   const apiKey = getSarvamApiKey();
+  let activeModel = model;
+  if (isFreeModelKey(apiKey) && activeModel === 'sarvam-30b') {
+    activeModel = 'gpt-5.4';
+  }
+
   const headers = new Headers();
   headers.set('api-subscription-key', apiKey);
   headers.set('Authorization', `Bearer ${apiKey}`);
   headers.set('Content-Type', 'application/json');
 
-  const response = await fetch(`${SARVAM_API_BASE_URL}/v1/chat/completions`, {
+  let baseUrl = SARVAM_API_BASE_URL;
+  if (isFreeModelKey(apiKey) && baseUrl === 'https://api.sarvam.ai') {
+    baseUrl = 'https://api.freemodel.dev';
+  }
+
+  const response = await fetch(`${baseUrl}/v1/chat/completions`, {
     method: 'POST',
     headers,
     body: JSON.stringify({
-      model,
+      model: activeModel,
       messages,
       temperature,
       max_tokens: maxTokens,
