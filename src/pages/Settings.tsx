@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Header } from "@/components/layout/Header";
 import { Sidebar } from "@/components/layout/Sidebar";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -24,15 +24,78 @@ import {
   Upload,
   Trash2,
   Eye,
-  EyeOff
+  EyeOff,
+  Fingerprint,
+  ScanFace,
+  CheckCircle2,
+  XCircle
 } from "lucide-react";
+import {
+  isBiometricSupported,
+  registerBiometric,
+  removeBiometric,
+  hasRegistered,
+} from "@/lib/biometricAuth";
+import { useCurrentUser } from "@/hooks/useCurrentUser";
+import { useToast } from "@/hooks/use-toast";
 
 const Settings = () => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
-  
-  const user = {
-    name: "Admin User",
-    role: "admin",
+  const { user } = useCurrentUser();
+  const { toast } = useToast();
+
+  // Biometric state
+  const [bioSupported, setBioSupported] = useState(false);
+  const [bioFingerprintRegistered, setBioFingerprintRegistered] = useState(false);
+  const [bioFaceRegistered, setBioFaceRegistered] = useState(false);
+  const [bioLoading, setBioLoading] = useState<"fingerprint" | "face" | null>(null);
+
+  useEffect(() => {
+    isBiometricSupported().then(async (ok) => {
+      setBioSupported(ok);
+      if (ok) {
+        setBioFingerprintRegistered(await hasRegistered("fingerprint"));
+        setBioFaceRegistered(await hasRegistered("face"));
+      }
+    });
+  }, []);
+
+  const handleBioRegister = async (kind: "fingerprint" | "face") => {
+    setBioLoading(kind);
+    try {
+      await registerBiometric(kind, {
+        aadhaar: user.aadhaar || user.id || "unknown",
+        passkey: user.passkey || "",
+        label: user.name || "User",
+      });
+      if (kind === "fingerprint") setBioFingerprintRegistered(true);
+      else setBioFaceRegistered(true);
+      toast({
+        title: kind === "face" ? "Face ID registered ✓" : "Fingerprint registered ✓",
+        description: "You can now use this biometric to sign in quickly.",
+      });
+    } catch (err: any) {
+      toast({ title: "Registration failed", description: err.message, variant: "destructive" });
+    } finally {
+      setBioLoading(null);
+    }
+  };
+
+  const handleBioRemove = async (kind: "fingerprint" | "face") => {
+    setBioLoading(kind);
+    try {
+      await removeBiometric(kind);
+      if (kind === "fingerprint") setBioFingerprintRegistered(false);
+      else setBioFaceRegistered(false);
+      toast({
+        title: kind === "face" ? "Face ID removed" : "Fingerprint removed",
+        description: "Biometric login disabled for this device.",
+      });
+    } catch (err: any) {
+      toast({ title: "Remove failed", description: err.message, variant: "destructive" });
+    } finally {
+      setBioLoading(null);
+    }
   };
 
   const [settings, setSettings] = useState({
@@ -262,6 +325,116 @@ const Settings = () => {
             </TabsContent>
 
             <TabsContent value="security" className="space-y-6">
+              {/* Biometric Login Card */}
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <Fingerprint className="h-5 w-5 text-primary" />
+                    Biometric Login
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  {!bioSupported ? (
+                    <div className="flex items-center gap-3 p-4 rounded-lg bg-muted/50 border">
+                      <XCircle className="h-5 w-5 text-muted-foreground flex-shrink-0" />
+                      <div>
+                        <p className="font-medium text-sm">Not supported on this device</p>
+                        <p className="text-xs text-muted-foreground">Biometric login requires a device with a fingerprint sensor, Face ID, or Windows Hello.</p>
+                      </div>
+                    </div>
+                  ) : (
+                    <div className="space-y-4">
+                      <p className="text-sm text-muted-foreground">
+                        Manage biometric credentials stored on this device. Each device stores credentials independently.
+                      </p>
+                      {/* Fingerprint */}
+                      <div className="flex items-center justify-between p-4 border rounded-lg">
+                        <div className="flex items-center gap-3">
+                          <div className={`p-2 rounded-full ${bioFingerprintRegistered ? "bg-green-100 dark:bg-green-950" : "bg-muted"}`}>
+                            <Fingerprint className={`h-5 w-5 ${bioFingerprintRegistered ? "text-green-600" : "text-muted-foreground"}`} />
+                          </div>
+                          <div>
+                            <p className="font-medium text-sm">Fingerprint</p>
+                            <p className="text-xs text-muted-foreground">
+                              {bioFingerprintRegistered ? "Registered on this device" : "Not registered"}
+                            </p>
+                          </div>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          {bioFingerprintRegistered && (
+                            <Badge variant="outline" className="text-green-600 border-green-400 text-xs">
+                              <CheckCircle2 className="h-3 w-3 mr-1" /> Active
+                            </Badge>
+                          )}
+                          {bioFingerprintRegistered ? (
+                            <Button
+                              variant="destructive"
+                              size="sm"
+                              onClick={() => handleBioRemove("fingerprint")}
+                              disabled={bioLoading === "fingerprint"}
+                            >
+                              {bioLoading === "fingerprint" ? "Removing..." : "Remove"}
+                            </Button>
+                          ) : (
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              onClick={() => handleBioRegister("fingerprint")}
+                              disabled={bioLoading === "fingerprint"}
+                            >
+                              {bioLoading === "fingerprint" ? "Registering..." : "Register"}
+                            </Button>
+                          )}
+                        </div>
+                      </div>
+                      {/* Face ID */}
+                      <div className="flex items-center justify-between p-4 border rounded-lg">
+                        <div className="flex items-center gap-3">
+                          <div className={`p-2 rounded-full ${bioFaceRegistered ? "bg-blue-100 dark:bg-blue-950" : "bg-muted"}`}>
+                            <ScanFace className={`h-5 w-5 ${bioFaceRegistered ? "text-blue-600" : "text-muted-foreground"}`} />
+                          </div>
+                          <div>
+                            <p className="font-medium text-sm">Face ID / Face Login</p>
+                            <p className="text-xs text-muted-foreground">
+                              {bioFaceRegistered ? "Registered on this device" : "Not registered"}
+                            </p>
+                          </div>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          {bioFaceRegistered && (
+                            <Badge variant="outline" className="text-blue-600 border-blue-400 text-xs">
+                              <CheckCircle2 className="h-3 w-3 mr-1" /> Active
+                            </Badge>
+                          )}
+                          {bioFaceRegistered ? (
+                            <Button
+                              variant="destructive"
+                              size="sm"
+                              onClick={() => handleBioRemove("face")}
+                              disabled={bioLoading === "face"}
+                            >
+                              {bioLoading === "face" ? "Removing..." : "Remove"}
+                            </Button>
+                          ) : (
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              onClick={() => handleBioRegister("face")}
+                              disabled={bioLoading === "face"}
+                            >
+                              {bioLoading === "face" ? "Registering..." : "Register"}
+                            </Button>
+                          )}
+                        </div>
+                      </div>
+                      <p className="text-xs text-muted-foreground">
+                        🔒 Biometric data never leaves your device. Credentials are encrypted using AES-256-GCM and stored in your browser's secure IndexedDB.
+                      </p>
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
+
               <Card>
                 <CardHeader>
                   <CardTitle className="flex items-center gap-2">

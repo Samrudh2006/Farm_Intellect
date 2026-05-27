@@ -1110,62 +1110,119 @@ const Login = () => {
                   {t("auth.biometric_not_supported")}
                 </p>
               ) : isLogin ? (
-                <div className="grid grid-cols-2 gap-3">
-                  <Button
-                    variant="outline"
-                    type="button"
-                    className="h-14 py-0 flex-col gap-0.5"
-                    disabled={loading}
-                    onClick={() =>
-                      bioFingerprintRegistered
-                        ? handleBiometricLogin("fingerprint")
-                        : handleBiometricRegisterNow("fingerprint")
-                    }
-                  >
-                    <Fingerprint className="h-6 w-6 text-primary" />
-                    <span className="text-xs font-medium">
-
-                    </span>
-                  </Button>
-                  <Button
-                    variant="outline"
-                    type="button"
-                    className="h-14 py-0 flex-col gap-0.5"
-                    disabled={loading}
-                    onClick={() =>
-                      bioFaceRegistered
-                        ? handleBiometricLogin("face")
-                        : handleBiometricRegisterNow("face")
-                    }
-                  >
-                    <ScanFace className="h-6 w-6 text-secondary-foreground" />
-                    <span className="text-xs font-medium">
-
-                    </span>
-                  </Button>
+                <div className="space-y-2">
+                  <p className="text-xs text-muted-foreground text-center">
+                    {bioFingerprintRegistered || bioFaceRegistered
+                      ? "Quick sign-in with biometrics"
+                      : "Set up biometric login after entering your credentials"}
+                  </p>
+                  <div className="grid grid-cols-2 gap-3">
+                    <Button
+                      variant="outline"
+                      type="button"
+                      className={`h-16 py-0 flex-col gap-1 relative transition-all duration-200 ${
+                        bioFingerprintRegistered
+                          ? "border-primary/60 bg-primary/5 hover:bg-primary/10 shadow-sm"
+                          : "hover:border-primary/40"
+                      }`}
+                      disabled={loading}
+                      onClick={() =>
+                        bioFingerprintRegistered
+                          ? handleBiometricLogin("fingerprint")
+                          : handleBiometricRegisterNow("fingerprint")
+                      }
+                    >
+                      {bioFingerprintRegistered && (
+                        <span className="absolute top-1.5 right-1.5 h-4 w-4 rounded-full bg-green-500 flex items-center justify-center">
+                          <svg className="h-2.5 w-2.5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
+                            <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+                          </svg>
+                        </span>
+                      )}
+                      <Fingerprint className={`h-6 w-6 ${bioFingerprintRegistered ? "text-primary" : "text-muted-foreground"}`} />
+                      <span className="text-xs font-medium">
+                        {bioFingerprintRegistered ? "Fingerprint" : "Add Fingerprint"}
+                      </span>
+                    </Button>
+                    <Button
+                      variant="outline"
+                      type="button"
+                      className={`h-16 py-0 flex-col gap-1 relative transition-all duration-200 ${
+                        bioFaceRegistered
+                          ? "border-primary/60 bg-primary/5 hover:bg-primary/10 shadow-sm"
+                          : "hover:border-primary/40"
+                      }`}
+                      disabled={loading}
+                      onClick={() =>
+                        bioFaceRegistered
+                          ? handleBiometricLogin("face")
+                          : handleBiometricRegisterNow("face")
+                      }
+                    >
+                      {bioFaceRegistered && (
+                        <span className="absolute top-1.5 right-1.5 h-4 w-4 rounded-full bg-green-500 flex items-center justify-center">
+                          <svg className="h-2.5 w-2.5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
+                            <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+                          </svg>
+                        </span>
+                      )}
+                      <ScanFace className={`h-6 w-6 ${bioFaceRegistered ? "text-primary" : "text-muted-foreground"}`} />
+                      <span className="text-xs font-medium">
+                        {bioFaceRegistered ? "Face Login" : "Add Face ID"}
+                      </span>
+                    </Button>
+                  </div>
                 </div>
               ) : (
                 <div className="space-y-2">
                   <p className="text-xs text-muted-foreground text-center">
-
+                    Register your biometrics now for faster login next time
                   </p>
                   <div className="grid grid-cols-2 gap-3">
                     <Button
+                      variant="outline"
                       type="button"
-
+                      className={`h-16 py-0 flex-col gap-1 relative transition-all duration-200 ${
+                        bioFingerprintRegistered
+                          ? "border-green-500/60 bg-green-50 dark:bg-green-950/20"
+                          : "hover:border-primary/40"
+                      }`}
+                      onClick={() => handleSignupBiometricRegister("fingerprint")}
+                      disabled={loading}
                     >
-                      <Fingerprint className="h-6 w-6 text-primary" />
+                      {bioFingerprintRegistered && (
+                        <span className="absolute top-1.5 right-1.5 h-4 w-4 rounded-full bg-green-500 flex items-center justify-center">
+                          <svg className="h-2.5 w-2.5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
+                            <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+                          </svg>
+                        </span>
+                      )}
+                      <Fingerprint className={`h-6 w-6 ${bioFingerprintRegistered ? "text-green-600" : "text-primary"}`} />
                       <span className="text-xs font-medium">
-
+                        {bioFingerprintRegistered ? "Fingerprint ✓" : "Register Fingerprint"}
                       </span>
                     </Button>
                     <Button
+                      variant="outline"
                       type="button"
-
+                      className={`h-16 py-0 flex-col gap-1 relative transition-all duration-200 ${
+                        bioFaceRegistered
+                          ? "border-green-500/60 bg-green-50 dark:bg-green-950/20"
+                          : "hover:border-primary/40"
+                      }`}
+                      onClick={() => handleSignupBiometricRegister("face")}
+                      disabled={loading}
                     >
-                      <ScanFace className="h-6 w-6 text-secondary-foreground" />
+                      {bioFaceRegistered && (
+                        <span className="absolute top-1.5 right-1.5 h-4 w-4 rounded-full bg-green-500 flex items-center justify-center">
+                          <svg className="h-2.5 w-2.5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
+                            <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+                          </svg>
+                        </span>
+                      )}
+                      <ScanFace className={`h-6 w-6 ${bioFaceRegistered ? "text-green-600" : "text-muted-foreground"}`} />
                       <span className="text-xs font-medium">
-
+                        {bioFaceRegistered ? "Face ID ✓" : "Register Face ID"}
                       </span>
                     </Button>
                   </div>
