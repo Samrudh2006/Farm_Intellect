@@ -31,7 +31,7 @@ if (savedTheme === "dark" || (!savedTheme && window.matchMedia("(prefers-color-s
 // Register service worker
 if ("serviceWorker" in navigator) {
   window.addEventListener("load", () => {
-    navigator.serviceWorker.register("/service-worker.js").then((registration) => {
+    navigator.serviceWorker.register(`${import.meta.env.BASE_URL}service-worker.js`).then((registration) => {
       console.log("[v0] Service Worker registered successfully", registration);
       
       // Check for updates periodically

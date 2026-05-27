@@ -4,10 +4,10 @@
 
 const CACHE_NAME = 'farm-intellect-v1';
 const ASSETS_TO_CACHE = [
-  '/',
-  '/index.html',
-  '/manifest.json',
-  '/offline.html',
+  './',
+  './index.html',
+  './manifest.json',
+  './offline.html',
 ];
 
 // Install event - cache critical assets
@@ -75,7 +75,7 @@ self.addEventListener('fetch', (event) => {
           // Return cached response if available
           return caches.match(request).catch(() => {
             // Return offline page as last resort
-            return caches.match('/offline.html');
+            return caches.match('./offline.html');
           });
         })
     );
@@ -137,10 +137,10 @@ self.addEventListener('fetch', (event) => {
         return caches
           .match(request)
           .then((response) => {
-            return response || caches.match('/offline.html');
+            return response || caches.match('./offline.html');
           })
           .catch(() => {
-            return caches.match('/offline.html');
+            return caches.match('./offline.html');
           });
       })
   );
