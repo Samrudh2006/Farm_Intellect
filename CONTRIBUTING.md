@@ -2,7 +2,7 @@
 
 <div align="center">
 
-<img src="https://github.com/user-attachments/assets/cb527723-1fd8-4a86-9ef3-e6127e0a72cc" width="100%" alt="Contributing Banner"/>
+<img src="https://github.com/user-attachments/assets/cce3a328-9e85-483d-85d0-84d31328518b" width="100%" alt="Contributing Banner"/>
 
 <br/>
 
