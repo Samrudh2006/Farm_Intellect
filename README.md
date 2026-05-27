@@ -1095,7 +1095,7 @@ We follow the [Contributor Covenant](https://www.contributor-covenant.org/). Be 
 
 <div align="center">
 
-<img src="https://github.com/Samrudh2006.png" width="120" style="border-radius:50%" alt="Samrudh"/>
+<img src="https://github.com/user-attachments/assets/98bc52a0-dcad-40b1-b267-4e13b19b9639" width="120" style="border-radius:50%" alt="Samrudh"/>
 
 ### **Samrudh**
 *Building tech that reaches the last-mile farmer.*
