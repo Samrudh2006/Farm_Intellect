@@ -5,6 +5,7 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
+    "setup:db": "node scripts/setup-db.js",
     "build": "vite build",
     "build:dev": "vite build --mode development",
     "test": "vitest run",
