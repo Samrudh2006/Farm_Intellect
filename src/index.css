@@ -1,4 +1,5 @@
 /* Fonts loaded via index.html <link> for faster rendering */
+@import "leaflet/dist/leaflet.css";
 
 @tailwind base;
 @tailwind components;

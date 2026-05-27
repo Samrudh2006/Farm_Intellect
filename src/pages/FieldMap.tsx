@@ -201,40 +201,80 @@ const FieldMap = () => {
 
           {/* Map and Field Details */}
           <div className="grid gap-6 lg:grid-cols-3">
-            {/* Interactive Map Placeholder */}
+            {/* Interactive Map */}
             <div className="lg:col-span-2">
-              <Card className="h-[600px]">
-                <CardHeader>
+              <Card className="h-[600px] overflow-hidden flex flex-col">
+                <CardHeader className="pb-2">
                   <CardTitle className="flex items-center gap-2">
                     <Map className="h-5 w-5 text-primary" />
                     Interactive Field Map
                   </CardTitle>
                 </CardHeader>
-                <CardContent className="h-full">
-                  <div className="relative w-full h-full bg-earth/10 rounded-lg border-2 border-dashed border-earth/30 flex flex-col items-center justify-center">
-                    <Map className="h-16 w-16 text-earth/40 mb-4" />
-                    <h3 className="text-lg font-medium text-earth/60 mb-2">Interactive Map</h3>
-                    <p className="text-sm text-earth/50 text-center max-w-md">
-                      Integration with mapping services (Google Maps, Mapbox) would display your fields, 
-                      sensor locations, and real-time data overlays here.
-                    </p>
-                    <div className="mt-6 grid grid-cols-3 gap-4 text-center">
-                      {mockFields.map((field) => (
-                        <Button
-                          key={field.id}
-                          variant={selectedField === field.id ? "default" : "outline"}
-                          size="sm"
-                          onClick={() => setSelectedField(field.id)}
-                          className="h-auto p-3"
-                        >
-                          <div>
-                            <div className="font-medium">{field.name}</div>
-                            <div className="text-xs opacity-70">{field.crop}</div>
-                          </div>
-                        </Button>
-                      ))}
-                    </div>
-                  </div>
+                <CardContent className="flex-1 p-0 relative min-h-[480px]">
+                  {(() => {
+                    const activeField = fields.find((f) => f.id === selectedField) || fields[0];
+                    const centerLat = activeField?.coordinates[0]?.lat ?? 20.5937;
+                    const centerLng = activeField?.coordinates[0]?.lng ?? 78.9629;
+
+                    return (
+                      <div className="w-full h-full min-h-[480px] relative z-10">
+                        <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+                        <iframe
+                          srcDoc={`
+                            <!DOCTYPE html>
+                            <html>
+                            <head>
+                              <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+                              <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+                              <style>
+                                html, body, #map { margin: 0; padding: 0; width: 100%; height: 100%; }
+                              </style>
+                            </head>
+                            <body>
+                              <div id="map"></div>
+                              <script>
+                                const map = L.map('map').setView([${centerLat}, ${centerLng}], 17);
+                                
+                                const satellite = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
+                                  attribution: 'Tiles &copy; Esri &mdash; Source: Esri, i-cubed, USDA, USGS, AEX, GeoEye, Getmapping, Aerogrid, IGN, IGP, UPR-EGP, and the GIS User Community'
+                                });
+                                
+                                const terrain = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{y}/{x}.html' === '' ? '' : 'https://{s}.tile.openstreetmap.org/{z}/{y}/{x}.png', {
+                                  attribution: '&copy; OpenStreetMap contributors'
+                                });
+
+                                if ('${mapView}' === 'satellite') {
+                                  satellite.addTo(map);
+                                } else {
+                                  terrain.addTo(map);
+                                }
+
+                                const fields = ${JSON.stringify(fields)};
+                                fields.forEach(f => {
+                                  const coords = f.coordinates.map(c => [c.lat, c.lng]);
+                                  const poly = L.polygon(coords, {
+                                    color: f.id === ${selectedField} ? '#ff7800' : '#3388ff',
+                                    weight: f.id === ${selectedField} ? 4 : 2,
+                                    fillColor: f.id === ${selectedField} ? '#ff7800' : '#3388ff',
+                                    fillOpacity: 0.35
+                                  }).addTo(map);
+                                  
+                                  poly.bindPopup('<b>' + f.name + '</b><br>Crop: ' + f.crop + '<br>Area: ' + f.area);
+                                  
+                                  if (f.id === ${selectedField}) {
+                                    poly.openPopup();
+                                  }
+                                });
+                              </script>
+                            </body>
+                            </html>
+                          `}
+                          className="w-full h-full border-0 absolute inset-0"
+                          title="Interactive Field Map Layer"
+                        />
+                      </div>
+                    );
+                  })()}
                 </CardContent>
               </Card>
             </div>
