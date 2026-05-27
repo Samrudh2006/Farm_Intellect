@@ -44,7 +44,6 @@ const MerchantNotifications = lazy(() => import("@/pages/merchant/MerchantNotifi
 const MerchantChat = lazy(() => import("@/pages/merchant/MerchantChat"));
 const MerchantOrders = lazy(() => import("@/pages/merchant/MerchantOrders"));
 const FarmerKnowledgeHub = lazy(() => import("@/pages/farmer/FarmerKnowledgeHub"));
-const Call = lazy(() => import("@/pages/Call"));
 const ExpertAICropScanner = lazy(() => import("@/pages/expert/ExpertAICropScanner"));
 const ExpertAIAdvisory = lazy(() => import("@/pages/expert/ExpertAIAdvisory"));
 const ExpertChat = lazy(() => import("@/pages/expert/ExpertChat"));
@@ -88,7 +87,6 @@ export const protectedRoutes: ProtectedRouteConfig[] = [
   { path: "/farmer/notifications", component: Notifications, allowedRoles: ["farmer"] },
   { path: "/farmer/features", component: FarmFeatures, allowedRoles: ["farmer"] },
   { path: "/farmer/knowledge", component: FarmerKnowledgeHub, allowedRoles: ["farmer"] },
-  { path: "/farmer/call", component: Call, allowedRoles: ["farmer"] },
   { path: "/farmer/profile", component: Profile, allowedRoles: ["farmer"] },
 
   { path: "/merchant/dashboard", component: MerchantDashboardPage, allowedRoles: ["merchant"] },
@@ -107,7 +105,6 @@ export const protectedRoutes: ProtectedRouteConfig[] = [
   { path: "/expert/consultations", component: ExpertConsultations, allowedRoles: ["expert"] },
   { path: "/expert/knowledge", component: ExpertKnowledgeHub, allowedRoles: ["expert"] },
   { path: "/expert/notifications", component: ExpertNotifications, allowedRoles: ["expert"] },
-  { path: "/expert/call", component: Call, allowedRoles: ["expert"] },
   { path: "/expert/profile", component: Profile, allowedRoles: ["expert"] },
 
   { path: "/admin/dashboard", component: AdminDashboardPage, allowedRoles: ["admin"] },
