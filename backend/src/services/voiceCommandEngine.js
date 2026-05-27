@@ -134,6 +134,14 @@ class VoiceCommandEngine {
         keywords: ['notification', 'notifications', 'alert', 'message', 'सूचना', 'अलर्ट'],
         routes: ['/farmer/notifications', '/notifications'],
       },
+      login: {
+        keywords: ['login', 'sign in', 'log in', 'लॉगिन', 'साइन इन'],
+        routes: ['/login'],
+      },
+      register: {
+        keywords: ['register', 'sms', 'registration', 'रजिस्टर', 'पंजीकरण'],
+        routes: ['/sms-register'],
+      },
     };
 
     // Check for navigation patterns

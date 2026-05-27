@@ -162,6 +162,7 @@ export const FloatingAIAssistant = () => {
               content: `✨ ${result.feedback}`,
               type: "command",
             }]);
+            speakText(result.feedback);
           }
         } else {
           // Not a command - process as question

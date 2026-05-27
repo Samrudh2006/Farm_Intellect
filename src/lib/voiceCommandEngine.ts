@@ -99,6 +99,14 @@ export class VoiceCommandEngine {
         keywords: ['profile', 'account', 'setting', 'प्रोफाइल', 'खाता'],
         routes: ['/farmer/profile', '/profile'],
       },
+      login: {
+        keywords: ['login', 'sign in', 'log in', 'लॉगिन', 'साइन इन'],
+        routes: ['/login'],
+      },
+      register: {
+        keywords: ['register', 'sms', 'registration', 'रजिस्टर', 'पंजीकरण'],
+        routes: ['/sms-register'],
+      },
     };
 
     for (const [target, pattern] of Object.entries(navPatterns)) {

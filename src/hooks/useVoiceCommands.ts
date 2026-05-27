@@ -20,15 +20,13 @@ export const useVoiceCommands = () => {
 
   // Initialize command executor context
   useEffect(() => {
-    if (user && profile) {
-      const context: CommandExecutionContext = {
-        userId: user.id,
-        currentRoute: location.pathname,
-        language: localStorage.getItem('language') || 'en',
-        role: profile.role as any,
-      };
-      commandExecutor.setContext(context);
-    }
+    const context: CommandExecutionContext = {
+      userId: user?.id || 0,
+      currentRoute: location.pathname,
+      language: localStorage.getItem('language') || 'en',
+      role: (profile?.role as any) || 'guest',
+    };
+    commandExecutor.setContext(context);
   }, [user, profile, location.pathname]);
 
   /**
