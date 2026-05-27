@@ -67,6 +67,8 @@ export interface ExpertBooking {
   notes?: string;
 }
 
+import { getSecureItem, setSecureItem } from "./secure-storage";
+
 const CROP_PLANS_KEY = "phase1-crop-plans";
 const FIELD_HISTORY_KEY = "phase1-field-history";
 const SCHEME_WIZARD_KEY = "phase1-scheme-wizard";
@@ -75,23 +77,12 @@ const EXPERT_BOOKINGS_KEY = "phase1-expert-bookings";
 const DISMISSED_ALERTS_KEY = "phase1-dismissed-alerts";
 export const PHASE1_STORAGE_EVENT = "phase1-storage-updated";
 
-const isBrowser = () => typeof window !== "undefined" && typeof window.localStorage !== "undefined";
-
 const readFromStorage = <T,>(key: string, fallback: T): T => {
-  if (!isBrowser()) return fallback;
-
-  try {
-    const value = window.localStorage.getItem(key);
-    return value ? (JSON.parse(value) as T) : fallback;
-  } catch {
-    return fallback;
-  }
+  return getSecureItem<T>(key, fallback);
 };
 
 const writeToStorage = <T,>(key: string, value: T) => {
-  if (!isBrowser()) return;
-
-  window.localStorage.setItem(key, JSON.stringify(value));
+  setSecureItem(key, value);
   window.dispatchEvent(new Event(PHASE1_STORAGE_EVENT));
 };
 

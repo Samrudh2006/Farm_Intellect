@@ -1,6 +1,7 @@
 import { createContext, useContext, useEffect, useState, ReactNode } from "react";
 import { hasSupabaseEnv, supabase } from "@/integrations/supabase/client";
 import type { User as SupabaseUser, Session as SupabaseSession } from "@supabase/supabase-js";
+import { getSecureItem, setSecureItem, removeSecureItem } from "@/lib/secure-storage";
 
 interface UserProfile {
   id: string;
@@ -58,10 +59,10 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       console.debug("[v0] Fetching profile");
       if (!hasSupabaseEnv) {
         // Mock mode: retrieve from saved session or mock profiles
-        const savedSession = localStorage.getItem("mock_user_session");
-        if (savedSession) {
+        const savedProfileAndUser = getSecureItem<any>("mock_user_session", null);
+        if (savedProfileAndUser) {
           try {
-            const { profile: savedProfile } = JSON.parse(savedSession);
+            const { profile: savedProfile } = savedProfileAndUser;
             if (savedProfile && savedProfile.id === userId) {
               setProfile(savedProfile);
               return savedProfile;
@@ -71,7 +72,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
           }
         }
         // Check registered mock users
-        const mockUsers = JSON.parse(localStorage.getItem("mock_registered_users") || "{}");
+        const mockUsers = getSecureItem<any>("mock_registered_users", {});
         const matchedUser = Object.values(mockUsers).find((u: any) => u.profile?.id === userId) as any;
         if (matchedUser) {
           setProfile(matchedUser.profile);
@@ -160,10 +161,10 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
   useEffect(() => {
     if (!hasSupabaseEnv) {
-      const savedSession = localStorage.getItem("mock_user_session");
-      if (savedSession) {
+      const savedProfileAndUser = getSecureItem<any>("mock_user_session", null);
+      if (savedProfileAndUser) {
         try {
-          const { user: savedUser, profile: savedProfile } = JSON.parse(savedSession);
+          const { user: savedUser, profile: savedProfile } = savedProfileAndUser;
           setUser(savedUser);
           setProfile(savedProfile);
           setSession({
@@ -225,7 +226,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   ) => {
     if (!hasSupabaseEnv) {
       const cleanAadhaar = aadhaar.replace(/\s/g, "");
-      const mockUsers = JSON.parse(localStorage.getItem("mock_registered_users") || "{}");
+      const mockUsers = getSecureItem<any>("mock_registered_users", {});
       
       if (MOCK_PROFILES[cleanAadhaar] || mockUsers[cleanAadhaar]) {
         return { error: new Error("This Aadhaar is already registered. Please sign in instead.") };
@@ -251,7 +252,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
       // Save user registry
       mockUsers[cleanAadhaar] = { passkey, user: mockUser, profile: mockProfile };
-      localStorage.setItem("mock_registered_users", JSON.stringify(mockUsers));
+      setSecureItem("mock_registered_users", mockUsers);
 
       // Sign in automatically
       setUser(mockUser);
@@ -264,7 +265,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         user: mockUser,
       } as any;
       setSession(mockSession);
-      localStorage.setItem("mock_user_session", JSON.stringify({ user: mockUser, profile: mockProfile }));
+      setSecureItem("mock_user_session", { user: mockUser, profile: mockProfile });
 
       return { error: null };
     }
@@ -339,12 +340,12 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
           user: mockUser,
         } as any;
         setSession(mockSession);
-        localStorage.setItem("mock_user_session", JSON.stringify({ user: mockUser, profile: mockProfile }));
+        setSecureItem("mock_user_session", { user: mockUser, profile: mockProfile });
 
         return { error: null };
       }
 
-      const mockUsers = JSON.parse(localStorage.getItem("mock_registered_users") || "{}");
+      const mockUsers = getSecureItem<any>("mock_registered_users", {});
       if (mockUsers[cleanAadhaar]) {
         const record = mockUsers[cleanAadhaar];
         if (record.passkey !== passkey) {
@@ -361,7 +362,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
           user: record.user,
         } as any;
         setSession(mockSession);
-        localStorage.setItem("mock_user_session", JSON.stringify({ user: record.user, profile: record.profile }));
+        setSecureItem("mock_user_session", { user: record.user, profile: record.profile });
 
         return { error: null };
       }
@@ -457,7 +458,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         role: "farmer",
       };
 
-      const mockUsers = JSON.parse(localStorage.getItem("mock_registered_users") || "{}");
+      const mockUsers = getSecureItem<any>("mock_registered_users", {});
       const existingUser = Object.values(mockUsers).find((u: any) => u.profile?.phone_number === `+91${cleanPhone}`) as any;
       
       const finalProfile = existingUser ? existingUser.profile : mockProfile;
@@ -473,7 +474,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         user: finalUser,
       } as any;
       setSession(mockSession);
-      localStorage.setItem("mock_user_session", JSON.stringify({ user: finalUser, profile: finalProfile }));
+      setSecureItem("mock_user_session", { user: finalUser, profile: finalProfile });
 
       return { error: null };
     }
@@ -511,8 +512,8 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     setSession(null);
     setUser(null);
     setProfile(null);
-    localStorage.removeItem("mock_user_session");
-    localStorage.removeItem("farmer_user");
+    removeSecureItem("mock_user_session");
+    removeSecureItem("farmer_user");
   };
 
   return (

@@ -6,6 +6,6 @@ export const VALIDATION_PATTERNS = {
   ALPHABETIC: /^[a-zA-Z\s]+$/,
   ALPHANUMERIC: /^[a-zA-Z0-9\s]+$/,
   NUMERIC: /^[0-9]+$/,
-  URL: /^(https?:\/\/)?([\da-z.-]+)\.([ a-z.]{2,6})([/\w .-]*)*\/?$/,
+  URL: /^(https?:\/\/)?([\da-z.-]+)\.([a-z.]{2,6})([\/\w.-]*)\/?$/,
   PASSWORD: /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/,
 } as const;

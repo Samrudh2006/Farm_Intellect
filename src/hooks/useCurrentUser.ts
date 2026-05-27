@@ -1,3 +1,4 @@
+import { getSecureItem, setSecureItem } from "@/lib/secure-storage";
 import { useAuth } from "@/contexts/AuthContext";
 import { hasSupabaseEnv, supabase } from "@/integrations/supabase/client";
 
@@ -20,31 +21,40 @@ export const useCurrentUser = (): {
   const { profile, user: authUser, signOut, refreshProfile } = useAuth();
 
   const user: CurrentUser = {
-    name: profile ? `${profile.first_name || ""} ${profile.last_name || ""}`.trim() || "User" : "User",
+    name: profile ? `${profile.first_name || ""} ${profile.last_name || ""}`.trim() : (authUser?.email?.split("@")[0] || "User"),
     role: (profile?.role as CurrentUserRole) || "farmer",
-    email: profile?.email || "",
+    email: profile?.email || authUser?.email || "",
     phone: profile?.phone_number || "",
     location: profile ? `${profile.district || ""}${profile.district && profile.state ? ", " : ""}${profile.state || ""}` : "",
-    avatar: profile?.profile_picture_url || "",
   };
 
   const updateUser = async (updates: Partial<CurrentUser>) => {
-    if (!authUser) {
-      return;
+    const profileUpdates: any = {};
+    if (updates.name) {
+      const parts = updates.name.split(" ");
+      profileUpdates.first_name = parts[0] || "";
+      profileUpdates.last_name = parts.slice(1).join(" ") || "";
+    }
+    if (updates.email) profileUpdates.email = updates.email;
+    if (updates.phone) profileUpdates.phone_number = updates.phone;
+    if (updates.location) {
+      const parts = updates.location.split(",");
+      profileUpdates.district = parts[0]?.trim() || "";
+      profileUpdates.state = parts[1]?.trim() || "";
     }
 
-    const profileUpdates = {
-      display_name: updates.name ?? (profile ? `${profile.first_name || ""} ${profile.last_name || ""}`.trim() : "") ?? authUser.email?.split("@")[0] ?? "User",
+    const currentInfo = {
+      name: updates.name ?? user.name,
+      role: user.role,
       email: updates.email ?? profile?.email ?? authUser.email ?? "",
       phone: updates.phone ?? profile?.phone_number ?? "",
       location: updates.location ?? (profile ? `${profile.district || ""}${profile.district && profile.state ? ", " : ""}${profile.state || ""}` : "") ?? "",
     };
 
     if (!hasSupabaseEnv) {
-      const savedSession = localStorage.getItem("mock_user_session");
-      if (savedSession) {
+      const parsed = getSecureItem<any>("mock_user_session", null);
+      if (parsed) {
         try {
-          const parsed = JSON.parse(savedSession);
           const nameParts = (updates.name || "").split(" ");
           const firstName = nameParts[0] || parsed.profile.first_name;
           const lastName = nameParts.slice(1).join(" ") || parsed.profile.last_name;
@@ -58,10 +68,10 @@ export const useCurrentUser = (): {
             state: updates.location?.split(",")[1]?.trim() || parsed.profile.state,
             district: updates.location?.split(",")[0]?.trim() || parsed.profile.district,
           };
-          localStorage.setItem("mock_user_session", JSON.stringify({
+          setSecureItem("mock_user_session", {
             user: parsed.user,
             profile: newProfile,
-          }));
+          });
         } catch (e) {
           console.error("Failed to update mock session", e);
         }
