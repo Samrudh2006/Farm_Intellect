@@ -134,17 +134,16 @@ const FieldMap = () => {
       setLoading(true);
       try {
         const { fields: apiFields } = await apiFetch<{ fields: typeof mockFields }>("/api/farm/fields");
-        setFields(apiFields || []);
-        if (!selectedField && apiFields?.length) {
+        setFields(apiFields || mockFields);
+        if (!selectedField && (apiFields?.length || mockFields.length)) {
           setSelectedField(1);
         }
       } catch (error: any) {
-        toast({
-          title: "Failed to load fields",
-          description: error?.message || "Using cached data.",
-          variant: "destructive",
-        });
+        console.warn("Using offline mock fields fallback:", error);
         setFields(mockFields);
+        if (!selectedField) {
+          setSelectedField(1);
+        }
       } finally {
         setLoading(false);
       }

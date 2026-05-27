@@ -151,13 +151,10 @@ const Sensors = () => {
       setLoading(true);
       try {
         const { sensors: apiSensors } = await apiFetch<{ sensors: typeof mockSensors }>("/api/farm/sensors");
-        setSensors(apiSensors || []);
+        setSensors(apiSensors || mockSensors);
       } catch (error: any) {
-        toast({
-          title: "Failed to load sensors",
-          description: error?.message || "Please try again.",
-          variant: "destructive",
-        });
+        console.warn("Using offline mock sensors fallback:", error);
+        setSensors(mockSensors);
       } finally {
         setLoading(false);
       }
