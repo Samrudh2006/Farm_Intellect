@@ -213,9 +213,63 @@ const migrateLegacyPlaintext = async () => {
   localStorage.removeItem(LEGACY_STORAGE_KEY);
 };
 
+// ---------- platform detection ----------
+export type DevicePlatform = "ios" | "android" | "windows" | "mac" | "other";
+
+export const detectPlatform = (): DevicePlatform => {
+  if (typeof navigator === "undefined") return "other";
+  const ua = navigator.userAgent.toLowerCase();
+  if (/iphone|ipad|ipod/.test(ua)) return "ios";
+  if (/android/.test(ua)) return "android";
+  if (/windows/.test(ua)) return "windows";
+  if (/mac/.test(ua)) return "mac";
+  return "other";
+};
+
+/** Human-readable label for what biometric will be used on this device */
+export const getBiometricLabel = (kind: BiometricKind): string => {
+  const platform = detectPlatform();
+  if (kind === "face") {
+    if (platform === "ios") return "Face ID";
+    if (platform === "android") return "Face Unlock";
+    if (platform === "windows") return "Windows Hello Face";
+    if (platform === "mac") return "Face ID";
+    return "Face Login";
+  }
+  // fingerprint
+  if (platform === "ios") return "Touch ID";
+  if (platform === "android") return "Fingerprint";
+  if (platform === "windows") return "Windows Hello Fingerprint";
+  if (platform === "mac") return "Touch ID";
+  return "Fingerprint";
+};
+
+/** Setup instructions shown when biometric fails — device-specific */
+export const getBiometricSetupGuide = (): string => {
+  const platform = detectPlatform();
+  if (platform === "ios")
+    return "On iPhone/iPad: go to Settings → Face ID & Passcode (or Touch ID & Passcode) and make sure it's set up.";
+  if (platform === "android")
+    return "On Android: go to Settings → Biometrics and security → Fingerprint or Face recognition and enroll your biometric.";
+  if (platform === "windows")
+    return "On Windows: go to Settings → Accounts → Sign-in options and set up a Windows Hello PIN first, then optionally add Fingerprint or Face.";
+  if (platform === "mac")
+    return "On Mac: go to System Settings → Touch ID & Password and add a fingerprint.";
+  return "Make sure your device has a fingerprint sensor or face recognition set up in your device settings.";
+};
+
+/** Whether we're on a secure origin (localhost or https) — WebAuthn requires this */
+export const isSecureOrigin = (): boolean => {
+  if (typeof window === "undefined") return false;
+  return window.location.protocol === "https:" || window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1";
+};
+
 // ---------- public API ----------
 export const isBiometricSupported = async (): Promise<boolean> => {
-  if (typeof window === "undefined" || !window.PublicKeyCredential || !window.indexedDB || !window.crypto?.subtle) return false;
+  if (typeof window === "undefined") return false;
+  if (!window.PublicKeyCredential || !window.indexedDB || !window.crypto?.subtle) return false;
+  // WebAuthn requires HTTPS or localhost
+  if (!isSecureOrigin()) return false;
   try {
     return await PublicKeyCredential.isUserVerifyingPlatformAuthenticatorAvailable();
   } catch {
@@ -225,28 +279,49 @@ export const isBiometricSupported = async (): Promise<boolean> => {
 
 /** Returns a human-readable explanation for common WebAuthn DOMException errors */
 const explainWebAuthnError = (err: unknown, action: "register" | "authenticate"): string => {
-  if (!(err instanceof Error)) return "An unexpected error occurred.";
+  if (!(err instanceof Error)) return "An unexpected error occurred. Please try again.";
   const msg = err.message?.toLowerCase() ?? "";
   const name = (err as DOMException).name ?? "";
+  const platform = detectPlatform();
 
+  // User dismissed the prompt
   if (name === "NotAllowedError" || msg.includes("not allowed"))
     return action === "register"
-      ? "Registration was cancelled or timed out. Please try again and complete the biometric prompt."
-      : "Authentication was cancelled or timed out. Please try again.";
+      ? "Registration was cancelled. Please try again and complete the biometric prompt on your device."
+      : "Login was cancelled. Please try again and use your biometric when prompted.";
 
+  // Already registered on this device
   if (name === "InvalidStateError" || msg.includes("already registered"))
-    return "This device is already registered. Remove the existing biometric and try again.";
+    return "This biometric is already registered on this device. Go to Settings → Security to remove it and re-register.";
 
+  // Not supported
   if (name === "NotSupportedError" || msg.includes("not supported"))
-    return "Your browser or device does not support biometric login. Try Chrome or Edge on a device with a fingerprint sensor or Windows Hello.";
+    return `Your browser does not support biometric login. Try Chrome or Safari on a phone/tablet, or Chrome/Edge on a PC. ${getBiometricSetupGuide()}`;
 
+  // HTTPS error
   if (name === "SecurityError" || msg.includes("security"))
-    return "Security error: Make sure you are on https:// or localhost. Biometric login does not work over plain http://.";
+    return "Biometric login requires a secure connection (HTTPS). This works on localhost during development, or on your live HTTPS site.";
 
-  if (msg.includes("credential manager") || msg.includes("unknown error"))
-    return "Windows could not access the credential manager. Please make sure Windows Hello (PIN or fingerprint) is set up: go to Settings → Accounts → Sign-in options and set up a PIN first, then try again.";
+  // Windows credential manager error
+  if (msg.includes("credential manager") || msg.includes("unknown error")) {
+    if (platform === "windows")
+      return "Windows could not access biometrics. Please set up Windows Hello: Settings → Accounts → Sign-in options → add a PIN first, then try again.";
+    if (platform === "android")
+      return "Android could not access your biometric. Please make sure a fingerprint or face is enrolled: Settings → Biometrics and security.";
+    if (platform === "ios")
+      return "Could not access Face ID / Touch ID. Please check Settings → Face ID & Passcode (or Touch ID & Passcode).";
+    return `Biometric access failed. ${getBiometricSetupGuide()}`;
+  }
 
-  return err.message || "An unknown error occurred.";
+  // Timeout
+  if (name === "TimeoutError" || msg.includes("timeout"))
+    return "Biometric prompt timed out. Please try again and respond to the prompt quickly.";
+
+  // Abort
+  if (name === "AbortError" || msg.includes("abort"))
+    return "Biometric operation was aborted. Please try again.";
+
+  return err.message || "An unknown error occurred. Please try again.";
 };
 
 export const listRegistered = async (kind?: BiometricKind) => {
@@ -260,45 +335,68 @@ export const registerBiometric = async (
   kind: BiometricKind,
   user: { aadhaar: string; passkey: string; label: string },
 ): Promise<StoredBiometric> => {
+  if (!isSecureOrigin()) {
+    throw new Error(
+      "Biometric login requires HTTPS. During development use localhost. On mobile, make sure you are accessing the app via https://, not http:// or a plain IP address.",
+    );
+  }
   if (!(await isBiometricSupported())) {
-    throw new Error("Biometric login is not supported on this device or browser. Try Chrome/Edge on a device with Windows Hello, Touch ID, or a fingerprint sensor.");
+    throw new Error(
+      `Biometric login is not available on this device or browser. ${getBiometricSetupGuide()} Also make sure you are using Chrome, Edge, or Safari.`,
+    );
   }
   await migrateLegacyPlaintext();
 
-  // Use a 16-byte user handle (WebAuthn requires ArrayBuffer, not a string)
+  // Random 16-byte user handle — WebAuthn spec requires ArrayBuffer
   const userIdBytes = crypto.getRandomValues(new Uint8Array(16));
-
-  // rp.id must match the current hostname exactly
   const rpId = window.location.hostname;
 
-  let cred: PublicKeyCredential | null = null;
-  try {
-    cred = (await navigator.credentials.create({
-      publicKey: {
-        challenge: randomChallenge(),
-        rp: { name: "Smart Crop Advisory", id: rpId },
-        user: {
-          id: userIdBytes,
-          name: user.label || user.aadhaar,
-          displayName: user.label || user.aadhaar,
-        },
-        pubKeyCredParams: [
-          { type: "public-key", alg: -7 },   // ES256
-          { type: "public-key", alg: -257 },  // RS256
-        ],
-        authenticatorSelection: {
-          authenticatorAttachment: "platform",
-          // "preferred" instead of "required" — works on Windows Hello,
-          // Touch ID, and Android without needing full biometric enrollment
-          userVerification: "preferred",
-          residentKey: "preferred",
-        },
-        timeout: 60000,
-        attestation: "none",
+  const makeCredentialOptions = (withAttachment: boolean): CredentialCreationOptions => ({
+    publicKey: {
+      challenge: randomChallenge(),
+      rp: { name: "Smart Crop Advisory", id: rpId },
+      user: {
+        id: userIdBytes,
+        name: user.label || user.aadhaar,
+        displayName: user.label || user.aadhaar,
       },
-    })) as PublicKeyCredential | null;
-  } catch (err) {
-    throw new Error(explainWebAuthnError(err, "register"));
+      pubKeyCredParams: [
+        { type: "public-key", alg: -7 },   // ES256  — Android, iOS, Mac
+        { type: "public-key", alg: -257 },  // RS256  — Windows Hello
+        { type: "public-key", alg: -37 },   // PS256  — some Android TPMs
+      ],
+      authenticatorSelection: {
+        // "platform" = device's built-in sensor (fingerprint/face/Hello)
+        // only set if withAttachment=true; some older Android WebViews reject this field
+        ...(withAttachment ? { authenticatorAttachment: "platform" as AuthenticatorAttachment } : {}),
+        // "preferred" = use biometric if available, fall back to PIN/password
+        // "required" causes the "unknown error" on Windows when Hello isn't enrolled
+        userVerification: "preferred",
+        residentKey: "preferred",
+      },
+      timeout: 90000,   // 90 s — gives users on mobile enough time
+      attestation: "none",
+    },
+  });
+
+  let cred: PublicKeyCredential | null = null;
+
+  // First attempt: with platform attachment (preferred — uses device sensor)
+  try {
+    cred = (await navigator.credentials.create(makeCredentialOptions(true))) as PublicKeyCredential | null;
+  } catch (firstErr) {
+    const firstName = (firstErr as DOMException).name;
+    // NotAllowedError = user cancelled — don't retry, just report
+    if (firstName === "NotAllowedError") {
+      throw new Error(explainWebAuthnError(firstErr, "register"));
+    }
+    // For any other error (NotSupportedError, InvalidStateError on some Android/iOS)
+    // try again WITHOUT authenticatorAttachment — broader compatibility
+    try {
+      cred = (await navigator.credentials.create(makeCredentialOptions(false))) as PublicKeyCredential | null;
+    } catch (secondErr) {
+      throw new Error(explainWebAuthnError(secondErr, "register"));
+    }
   }
 
   if (!cred) throw new Error("Registration was cancelled. Please try again.");
@@ -320,13 +418,18 @@ export const registerBiometric = async (
 export const authenticateBiometric = async (
   kind: BiometricKind,
 ): Promise<{ aadhaar: string; passkey: string; label: string }> => {
+  if (!isSecureOrigin()) {
+    throw new Error(
+      "Biometric login requires a secure connection. Make sure you are on https:// or localhost.",
+    );
+  }
   if (!(await isBiometricSupported())) {
-    throw new Error("Biometric login is not supported on this device or browser.");
+    throw new Error(`Biometric login is not supported on this device. ${getBiometricSetupGuide()}`);
   }
   const candidates = await listRegistered(kind);
   if (candidates.length === 0) {
     throw new Error(
-      `No ${kind === "face" ? "Face ID" : "fingerprint"} registered on this device. Sign in once with Aadhaar + Passkey, then add your biometric from Settings → Security.`,
+      `No ${getBiometricLabel(kind)} registered on this device. Sign in with Aadhaar + Passkey first, then go to Settings → Security to register your biometric.`,
     );
   }
 
@@ -337,13 +440,13 @@ export const authenticateBiometric = async (
     assertion = (await navigator.credentials.get({
       publicKey: {
         challenge: randomChallenge(),
-        timeout: 60000,
+        timeout: 90000,
         rpId,
         userVerification: "preferred",
         allowCredentials: candidates.map((c) => ({
           type: "public-key",
           id: b64urlDecode(c.credentialId),
-          transports: ["internal"] as AuthenticatorTransport[],
+          transports: ["internal", "hybrid"] as AuthenticatorTransport[],
         })),
       },
     })) as PublicKeyCredential | null;
@@ -355,7 +458,10 @@ export const authenticateBiometric = async (
 
   const usedId = b64urlEncode(assertion.rawId);
   const match = candidates.find((c) => c.credentialId === usedId);
-  if (!match) throw new Error("Unknown credential — the biometric does not match any registered device. Please register again.");
+  if (!match)
+    throw new Error(
+      "The biometric credential was not recognised. This can happen if you re-enrolled your fingerprint/face on the device. Please register again from Settings → Security.",
+    );
 
   return { aadhaar: match.aadhaar, passkey: match.passkey, label: match.label };
 };
@@ -366,3 +472,4 @@ export const removeBiometric = async (kind: BiometricKind, aadhaar?: string) => 
   );
   await setStore(remaining);
 };
+
