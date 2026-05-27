@@ -53,7 +53,7 @@ const Index = () => {
   const features = [
     { 
       icon: null,
-      image: "/icons/ai-recommendations.jpg",
+      image: `${import.meta.env.BASE_URL}icons/ai-recommendations.jpg`,
       title: t('landing.feature.ai.title'),
       description: t('landing.feature.ai.description'),
       iconBg: "bg-orange-100 dark:bg-orange-900",
@@ -64,7 +64,7 @@ const Index = () => {
     },
     { 
       icon: null,
-      image: "/icons/weather-integration.jpg",
+      image: `${import.meta.env.BASE_URL}icons/weather-integration.jpg`,
       title: t('landing.feature.weather.title'),
       description: t('landing.feature.weather.description'),
       iconBg: "bg-blue-100 dark:bg-blue-900",
@@ -75,7 +75,7 @@ const Index = () => {
     },
     { 
       icon: null,
-      image: "/icons/yield-optimization.jpg",
+      image: `${import.meta.env.BASE_URL}icons/yield-optimization.jpg`,
       title: t('landing.feature.yield.title'),
       description: t('landing.feature.yield.description'),
       iconBg: "bg-green-100 dark:bg-green-900",
@@ -86,7 +86,7 @@ const Index = () => {
     },
     { 
       icon: null,
-      image: "/icons/pest-disease-control.jpg",
+      image: `${import.meta.env.BASE_URL}icons/pest-disease-control.jpg`,
       title: t('landing.feature.pest.title'),
       description: t('landing.feature.pest.description'),
       iconBg: "bg-orange-100 dark:bg-orange-900",
@@ -97,7 +97,7 @@ const Index = () => {
     },
     { 
       icon: null,
-      image: "/icons/smart-irrigation.jpg",
+      image: `${import.meta.env.BASE_URL}icons/smart-irrigation.jpg`,
       title: t('landing.feature.irrigation.title'),
       description: t('landing.feature.irrigation.description'),
       iconBg: "bg-blue-100 dark:bg-blue-900",
@@ -108,7 +108,7 @@ const Index = () => {
     },
     { 
       icon: null,
-      image: "/icons/market-analytics.jpg",
+      image: `${import.meta.env.BASE_URL}icons/market-analytics.jpg`,
       title: t('landing.feature.market.title'),
       description: t('landing.feature.market.description'),
       iconBg: "bg-green-100 dark:bg-green-900",
@@ -119,7 +119,7 @@ const Index = () => {
     },
     { 
       icon: null,
-      image: "/icons/organic-farming.jpg",
+      image: `${import.meta.env.BASE_URL}icons/organic-farming.jpg`,
       title: t('landing.feature.organic.title'),
       description: t('landing.feature.organic.description'),
       iconBg: "bg-orange-100 dark:bg-orange-900",
@@ -130,7 +130,7 @@ const Index = () => {
     },
     { 
       icon: null,
-      image: "/icons/crop-scanner.jpg",
+      image: `${import.meta.env.BASE_URL}icons/crop-scanner.jpg`,
       title: t('landing.feature.scanner.title'),
       description: t('landing.feature.scanner.description'),
       iconBg: "bg-purple-100 dark:bg-purple-900",
@@ -183,7 +183,7 @@ const Index = () => {
         {/* Background Image */}
         <div className="absolute inset-0 z-0">
           <img
-            src="/images/hero-farming.jpg"
+            src={`${import.meta.env.BASE_URL}images/hero-farming.jpg`}
             alt={t('landing.hero_image_alt')}
             className="w-full h-full object-cover"
             loading="eager"

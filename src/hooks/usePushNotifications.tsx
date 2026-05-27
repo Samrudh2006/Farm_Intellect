@@ -50,8 +50,8 @@ export function usePushNotifications() {
     try {
       const browserNotif = new Notification(n.title, {
         body: n.message,
-        icon: "/favicon.svg",
-        badge: "/favicon.svg",
+        icon: `${import.meta.env.BASE_URL}favicon.svg`,
+        badge: `${import.meta.env.BASE_URL}favicon.svg`,
         tag: n.id,
         data: { id: n.id, type: n.type },
       });
