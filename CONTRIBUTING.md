@@ -2,7 +2,7 @@
 
 <div align="center">
 
-<img src="https://github.com/user-attachments/assets/cce3a328-9e85-483d-85d0-84d31328518b" width="100%" alt="Contributing Banner"/>
+<img src="./public/hero-farming.jpg" width="100%" alt="Contributing Banner"/>
 
 <br/>
 
