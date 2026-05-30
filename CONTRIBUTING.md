@@ -250,7 +250,7 @@ VITE_BHASHINI_USER_ID=       # Your Bhashini user ID
 | 🐄 Livestock Module | Cattle/poultry/goat health tracking | Medium |
 | 🛰️ NDVI Maps | Satellite vegetation health overlay | Hard |
 | 🤝 Marketplace | Farmer-to-buyer direct selling | Hard |
-| 🎓 Krishi Academy | Gamified agronomy learning | Medium |
+| 🎓 Farm Intellect Academy | Gamified agronomy learning | Medium |
 | 🌡️ Pest Forecast | ML-based outbreak prediction (7-day) | Hard |
 | 📺 Video Tutorials | Embed vernacular how-to content | Easy |
 | 👥 Community Forum | Peer Q&A for farmers | Medium |

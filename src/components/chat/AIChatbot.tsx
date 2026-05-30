@@ -15,8 +15,7 @@ import {
   ThumbsUp,
   ThumbsDown
 } from "lucide-react";
-import krishiLogo from "@/assets/krishi-ai-logo.png";
-import krishiAvatar from "@/assets/krishi-ai-avatar.png";
+import farmIntellectAvatar from "@/assets/farm-intellect-ai-avatar.png";
 import { streamChat, type AiMessage } from "@/lib/aiStream";
 import { toast } from "sonner";
 import ReactMarkdown from "react-markdown";
@@ -148,7 +147,7 @@ export const AIChatbot = () => {
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 rounded-full bg-white flex items-center justify-center overflow-hidden border border-primary/20">
-              <img src={krishiAvatar} alt="Farm Intellect" className="h-10 w-10 object-cover scale-110" />
+              <img src={farmIntellectAvatar} alt="Farm Intellect" className="h-10 w-10 object-cover scale-110" />
             </div>
             <div>
               <CardTitle className="text-lg">{t('ai.title')}</CardTitle>
@@ -177,7 +176,7 @@ export const AIChatbot = () => {
               {message.type === "assistant" && (
                 <Avatar className="w-8 h-8 border border-primary/20">
                   <AvatarFallback className="p-0 overflow-hidden">
-                    <img src={krishiAvatar} alt="Farm Intellect" className="h-full w-full object-cover scale-110" />
+                    <img src={farmIntellectAvatar} alt="Farm Intellect" className="h-full w-full object-cover scale-110" />
                   </AvatarFallback>
                 </Avatar>
               )}

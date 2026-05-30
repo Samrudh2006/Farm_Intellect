@@ -3,7 +3,7 @@
  * Caches Supabase query results so dashboards can render while offline.
  */
 
-const DB_NAME = "krishi-offline";
+const DB_NAME = "farm-intellect-offline";
 const DB_VERSION = 1;
 const STORE_NAME = "cache";
 
