@@ -11,7 +11,7 @@ export const KnowledgeHub = () => {
   const podcasts = [
     {
       id: "podcast-1",
-      title: "Smart Crop Advisory Boosts Yields",
+      title: "Farm Intellect Boosts Yields",
       description: "Learn how AI-powered advisory systems help farmers increase crop yields through data-driven decisions",
       src: "/knowledge/podcasts/smart-crop-advisory-yields.m4a",
       duration: "~5 min",
@@ -30,7 +30,7 @@ export const KnowledgeHub = () => {
   const infographics = [
     {
       id: "infographic-1",
-      title: "Smart Crop Advisory: Revolutionizing Agriculture",
+      title: "Farm Intellect: Revolutionizing Agriculture",
       description: "Complete overview of AI-powered farming - from challenges to solutions, technology architecture, and future roadmap",
       src: "/knowledge/infographics/smart-crop-advisory.png",
       category: "Platform Overview"

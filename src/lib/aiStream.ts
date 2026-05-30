@@ -24,7 +24,7 @@ export async function streamChat({
                  import.meta.env.VITE_SUPABASE_URL.includes("mockproject");
 
   if (isMock) {
-    let responseText = "Welcome to Krishi AI local helper! I can assist with crop advisory, disease scanning, and weather guidance.";
+    let responseText = "Welcome to Farm Intellect local helper! I can assist with crop advisory, disease scanning, and weather guidance.";
     if (mode === "disease") {
       responseText = "Based on the leaf scan, we detected **Cercospora Leaf Spot**.\n\n**Remedy:**\n1. Remove infected leaves.\n2. Spray Neem oil or copper fungicide.\n3. Avoid overhead watering to reduce moisture on leaves.";
     } else if (mode === "recommendation") {

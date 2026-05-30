@@ -14,7 +14,7 @@ const MerchantChat = () => {
       <Sidebar isOpen={sidebarOpen} onClose={() => setSidebarOpen(false)} userRole="merchant" />
       <main className="md:ml-64 pt-16 p-6">
         <div className="max-w-4xl mx-auto">
-          <h1 className="text-2xl font-bold mb-4">🤖 Krishi AI Assistant</h1>
+          <h1 className="text-2xl font-bold mb-4">🤖 Farm Intellect Assistant</h1>
           <AIAssistantHub />
         </div>
       </main>

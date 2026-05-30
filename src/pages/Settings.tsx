@@ -136,7 +136,7 @@ const Settings = () => {
 
   const [settings, setSettings] = useState({
     // General Settings
-    siteName: "Smart Crop Advisory",
+    siteName: "Farm Intellect",
     siteDescription: "AI-powered farming assistance platform",
     timezone: "Asia/Kolkata",
     language: "en",

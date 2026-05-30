@@ -1,4 +1,4 @@
-# 🌾 Krishi AI — Farm Intellect
+# 🌾 Farm Intellect
 # AI-Powered Smart Agriculture Platform for Indian Farmers
 
 ## Topics

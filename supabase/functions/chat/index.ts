@@ -43,7 +43,7 @@ serve(async (req) => {
     }
 
     const systemPrompts: Record<string, string> = {
-      chat: `You are an expert Indian agricultural AI assistant called "Krishi AI". You provide real, actionable farming advice based on Indian agricultural practices, ICAR recommendations, and current best practices.
+      chat: `You are an expert Indian agricultural AI assistant called "Farm Intellect". You provide real, actionable farming advice based on Indian agricultural practices, ICAR recommendations, and current best practices.
 
 Key expertise areas:
 - Crop management (Kharif, Rabi, Zaid seasons)
@@ -214,7 +214,7 @@ Use Indian product names and brands (Tata Rallis, UPL, Bayer, Syngenta, etc.). R
     if (GEMINI_API_KEY) {
       const geminiMessages = [
         { role: "user", parts: [{ text: systemPrompt }] },
-        { role: "model", parts: [{ text: "Understood. I am Krishi AI, ready to help." }] },
+        { role: "model", parts: [{ text: "Understood. I am Farm Intellect, ready to help." }] },
         ...messages.map((m: { role: string; content: string }) => ({
           role: m.role === "assistant" ? "model" : "user",
           parts: [{ text: m.content }],

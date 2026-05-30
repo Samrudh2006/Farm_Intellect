@@ -1,4 +1,4 @@
-# Frontend Security Hardening - Smart Crop Advisory Platform
+# Frontend Security Hardening - Farm Intellect Platform
 
 ## Overview
 This document outlines all P0, P1, and P2 security improvements implemented in the frontend, including bot protection, rate limiting, input validation, and secure authentication flows.

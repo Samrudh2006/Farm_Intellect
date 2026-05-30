@@ -27,7 +27,7 @@
 
 ## 🌾 Our Pledge
 
-Farm Intellect 65 exists for **one reason**: to put the power of AI in the hands of every Indian farmer — regardless of language, caste, gender, religion, or income.
+Farm Intellect exists for **one reason**: to put the power of AI in the hands of every Indian farmer — regardless of language, caste, gender, religion, or income.
 
 This community reflects that mission. We, as members, contributors, and leaders, pledge to make participation in our project a **harassment-free, inclusive, and empowering experience** for everyone — whether you're a farmhand in Vidarbha or a developer in Bengaluru.
 
@@ -143,6 +143,6 @@ Community Impact Guidelines were inspired by [Mozilla's code of conduct enforcem
 
 [![Back to Top](https://img.shields.io/badge/⬆_BACK_TO_TOP-22c55e?style=for-the-badge&labelColor=15803d)](#coc-top)
 
-<sub>© 2026 Farm Intellect 65 · Adapted from Contributor Covenant v2.1 · MIT License</sub>
+<sub>© 2026 Farm Intellect · Adapted from Contributor Covenant v2.1 · MIT License</sub>
 
 </div>

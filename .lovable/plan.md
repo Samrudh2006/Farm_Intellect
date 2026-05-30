@@ -1,7 +1,7 @@
 
-# KrishiSarthi SMS Layer — Complete A2Z Plan
+# Farm Intellect SMS Layer — Complete A2Z Plan
 
-> Goal: A farmer with a ₹500 keypad phone in rural Maharashtra/UP benefits from KrishiSarthi **without touching a smartphone**, while keeping the existing web app untouched at its core.
+> Goal: A farmer with a ₹500 keypad phone in rural Maharashtra/UP benefits from Farm Intellect **without touching a smartphone**, while keeping the existing web app untouched at its core.
 
 ---
 
@@ -81,7 +81,7 @@
 
 | Day | Type | Example (Hindi, ~65 chars) |
 |---|---|---|
-| Mon | Weather 7-day | "नागपुर: मंगल-गुरु बारिश. छिड़काव टालें. KrishiSarthi" |
+| Mon | Weather 7-day | "नागपुर: मंगल-गुरु बारिश. छिड़काव टालें. Farm Intellect" |
 | Tue | Mandi price (top 2 crops) | "नागपुर मंडी सोयाबीन ₹4850/qtl ▲3%. कपास ₹7200 ▼1%" |
 | Wed | Pest/disease alert (geo + crop) | "कपास में गुलाबी सुंडी का खतरा. नीम तेल 5ml/L छिड़कें" |
 | Thu | Govt scheme deadline | "PM-Kisan 19वीं किस्त: 28 तारीख तक eKYC करें" |
@@ -199,7 +199,7 @@ Schedule `sms-dispatcher` daily at 06:30 IST per alert type.
 - **Today:** every Indian agri-app is smartphone-only. ~45% of rural farmers are excluded.
 - **You become:** "India's first truly inclusive agri-platform — works on a ₹500 phone, in your language, no internet."
 - **Distribution moat:** Sarpanch/Krishi Sevak/ADO partnerships. One sevak = 100–500 farmers onboarded in a day. Government and NABARD actively fund such initiatives.
-- **PR / pitch line:** *"From 4G dashboards to 2G SMS — KrishiSarthi reaches every Indian farmer."* This is investor + grant catnip (Bill & Melinda Gates Foundation, Omidyar, Bharat Inclusion Initiative all fund this exact thesis).
+- **PR / pitch line:** *"From 4G dashboards to 2G SMS — Farm Intellect reaches every Indian farmer."* This is investor + grant catnip (Bill & Melinda Gates Foundation, Omidyar, Bharat Inclusion Initiative all fund this exact thesis).
 
 ---
 

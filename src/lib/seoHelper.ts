@@ -24,7 +24,7 @@ export interface SocialMetaTags {
   twitterCreator?: string;
 }
 
-const SITE_NAME = "Farm-Intellect";
+const SITE_NAME = "Farm Intellect";
 const SITE_URL = typeof window !== "undefined" ? window.location.origin : "https://farm-intellect-65.lovable.app";
 const DEFAULT_IMAGE = `${SITE_URL}/og-image.png`;
 

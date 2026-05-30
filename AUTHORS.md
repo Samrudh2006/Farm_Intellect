@@ -5,7 +5,7 @@
 **Samrudh**
 
 - **Role**: Creator, Lead Developer, Architect
-- **Project**: Krishi AI — Farm Intellect
+- **Project**: Farm Intellect
 - **GitHub**: [@samrudh](https://github.com/samrudh)
 - **Year**: 2025
 
@@ -13,14 +13,14 @@
 
 ## 🏛️ Intellectual Property
 
-All intellectual property rights in and to **Krishi AI — Farm Intellect**, including but not limited to:
+All intellectual property rights in and to **Farm Intellect**, including but not limited to:
 
 - ✅ All source code and compiled binaries
 - ✅ User interface designs and visual assets
 - ✅ AI prompts, model configurations, and system architecture
 - ✅ Curated agricultural datasets and knowledge bases
 - ✅ Documentation, diagrams, and technical specifications
-- ✅ Branding, logos, and trademarks ("Krishi AI", "Farm Intellect", "KrishiSarthi")
+- ✅ Branding, logos, and trademarks ("Farm Intellect")
 
 ...are the **exclusive property of Samrudh**.
 
@@ -56,5 +56,5 @@ The specific compilation, curation, and integration of these datasets is proprie
 
 <p align="center">
   <strong>© 2025 Samrudh. All Rights Reserved.</strong><br/>
-  <em>Krishi AI — Farm Intellect | AI-Powered Smart Agriculture for India 🇮🇳🌾</em>
+  <em>Farm Intellect | AI-Powered Smart Agriculture for India 🇮🇳🌾</em>
 </p>

@@ -111,6 +111,6 @@ Report Received ──→ Triage & Verification (48h) ──→ Patch Dev ──
 
 [![Back to Top](https://img.shields.io/badge/⬆_BACK_TO_TOP-FF9933?style=for-the-badge&labelColor=138808)](#security-top)
 
-<sub>© 2026 Farm Intellect 65 · Secure Bharat · MIT License</sub>
+<sub>© 2026 Farm Intellect · Secure Bharat · MIT License</sub>
 
 </div>

@@ -32,7 +32,7 @@ export const internalLinkingMap: InternalLinkMap = {
     { url: '/farmer', title: 'Farmer Dashboard', keywords: ['farming', 'dashboard'], priority: 1 },
     { url: '/merchant', title: 'Merchant Platform', keywords: ['merchant', 'business'], priority: 1 },
     { url: '/expert', title: 'Expert Console', keywords: ['expert', 'analysis'], priority: 1 },
-    { url: '/about', title: 'About Farm-Intellect', keywords: ['about', 'company'], priority: 0.8 },
+    { url: '/about', title: 'About Farm Intellect', keywords: ['about', 'company'], priority: 0.8 },
   ],
 
   '/farmer': [

@@ -65,10 +65,10 @@ function truncateSmsBody(body: string): string {
 function fallbackBody(kind: Kind, sub: Subscriber): string {
   const crop = sub.crop ?? "फसल";
   const place = sub.district;
-  if (kind === "weather") return `${place}: अगले 2 दिन हल्की बारिश संभव। छिड़काव टालें। -KrishiSarthi`;
-  if (kind === "market") return `${place} मंडी ${crop} आज का भाव देखने हेतु ऐप खोलें या PRICE ${crop.toUpperCase()} reply करें। -KrishiSarthi`;
-  if (kind === "scheme") return `${place}: PM-Kisan, बीज अनुदान व सिंचाई योजनाओं की नई अपडेट उपलब्ध। सहायता हेतु ग्राम सेवक से मिलें। -KrishiSarthi`;
-  return `${crop} में रोग/कीट का खतरा। नीम तेल 5ml/L छिड़काव करें। विवरण ऐप में। -KrishiSarthi`;
+  if (kind === "weather") return `${place}: अगले 2 दिन हल्की बारिश संभव। छिड़काव टालें। -Farm Intellect`;
+  if (kind === "market") return `${place} मंडी ${crop} आज का भाव देखने हेतु ऐप खोलें या PRICE ${crop.toUpperCase()} reply करें। -Farm Intellect`;
+  if (kind === "scheme") return `${place}: PM-Kisan, बीज अनुदान व सिंचाई योजनाओं की नई अपडेट उपलब्ध। सहायता हेतु ग्राम सेवक से मिलें। -Farm Intellect`;
+  return `${crop} में रोग/कीट का खतरा। नीम तेल 5ml/L छिड़काव करें। विवरण ऐप में। -Farm Intellect`;
 }
 
 async function getTemplateBody(templateKey: string, language: string, kind: Kind, sub: Subscriber): Promise<string> {

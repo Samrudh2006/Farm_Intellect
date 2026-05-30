@@ -95,7 +95,7 @@ const ResetPassword = () => {
       <div className="w-full max-w-md space-y-4">
         <div className="text-center">
           <AshokaChakra size={40} />
-          <h1 className="text-2xl font-bold mt-3 text-gradient-tricolor">Smart Crop Advisory</h1>
+          <h1 className="text-2xl font-bold mt-3 text-gradient-tricolor">Farm Intellect</h1>
         </div>
         <Card>
           <CardHeader className="text-center">

@@ -80,8 +80,8 @@ Deno.serve(async (req) => {
     }
 
     const purposeMessages: Record<string, string> = {
-      "login": `Your Smart Crop Advisory login code is: ${code}. Valid for 10 minutes. Do not share this code.`,
-      "signup": `Welcome to Smart Crop Advisory! Your verification code is: ${code}. Valid for 10 minutes.`,
+      "login": `Your Farm Intellect login code is: ${code}. Valid for 10 minutes. Do not share this code.`,
+      "signup": `Welcome to Farm Intellect! Your verification code is: ${code}. Valid for 10 minutes.`,
       "reset-passkey": `Your passkey reset code is: ${code}. Valid for 10 minutes. If you didn't request this, ignore this message.`,
     };
 

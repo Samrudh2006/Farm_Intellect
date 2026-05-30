@@ -46,7 +46,7 @@
 
 ## 1. Definitions & Context
 
-- **"Software"** means the entirety of the Krishi AI — Farm Intellect project assets, including but not limited to source code files, database structures, UI/UX designs, localized translation sheets (covering 22 regional Indian languages), icons, vector models, configurations, and documentation.
+- **"Software"** means the entirety of the Farm Intellect project assets, including but not limited to source code files, database structures, UI/UX designs, localized translation sheets (covering 22 regional Indian languages), icons, vector models, configurations, and documentation.
 - **"Author"** means **Samrudh**, the original developer and sole copyright owner of the Software.
 - **"You"** (or **"User"**) means any individual, corporation, or entity accessing this repository.
 
@@ -86,7 +86,7 @@ All customized system instructions, system-design prompts, multimodal vision con
 
 ## 6. Trademarks & Brand Identity
 
-The names **"Krishi AI"**, **"Farm Intellect"**, **"KrishiSarthi"**, and their respective logo designs represent trademarks of the Author. No rights are granted for brand reuse under this visibility contract.
+The name **"Farm Intellect"** and its respective logo design represent trademarks of the Author. No rights are granted for brand reuse under this visibility contract.
 
 ---
 
@@ -110,6 +110,6 @@ This Proprietary License agreement is governed exclusively by the **Laws of the 
 
 [![Back to Top](https://img.shields.io/badge/⬆_BACK_TO_TOP-FF9933?style=for-the-badge&labelColor=138808)](#license-top)
 
-<sub>© 2026 Farm Intellect 65 · All Rights Reserved · MIT License</sub>
+<sub>© 2026 Farm Intellect · All Rights Reserved · MIT License</sub>
 
 </div>

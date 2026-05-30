@@ -59,7 +59,7 @@ version-resolver:
   default: patch
 
 template: |
-  # 🌾 Krishi AI — Farm Intellect $RESOLVED_VERSION
+  # 🌾 Farm Intellect $RESOLVED_VERSION
 
   ## What's Changed
 

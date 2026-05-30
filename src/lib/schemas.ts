@@ -23,7 +23,7 @@ export interface ArticleMetadata {
   keywords?: string[];
 }
 
-const SITE_NAME = "Farm-Intellect";
+const SITE_NAME = "Farm Intellect";
 const SITE_URL = typeof window !== "undefined" ? window.location.origin : "https://farm-intellect-65.lovable.app";
 
 /**
