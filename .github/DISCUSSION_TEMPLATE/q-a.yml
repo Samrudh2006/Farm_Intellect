@@ -5,7 +5,7 @@ body:
   - type: markdown
     attributes:
       value: |
-        ❓ **Ask anything about Krishi AI!**
+        ❓ **Ask anything about Farm Intellect!**
         No question is too simple — we're here to help.
 
   - type: textarea

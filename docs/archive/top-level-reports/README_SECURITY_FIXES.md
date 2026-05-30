@@ -1,4 +1,4 @@
-# Farm-Intellect Security Implementation - Quick Reference
+# Farm Intellect Security Implementation - Quick Reference
 
 ## What Was Done
 
@@ -64,7 +64,7 @@ package.json - Added 4 new dependencies
 ### Step 2: Create Site
 ```bash
 1. Click "Create Site"
-2. Name: "Farm-Intellect-65"
+2. Name: "Farm Intellect"
 3. Domain: your-domain.com
 4. Mode: Managed Challenge (recommended)
 5. Click Create

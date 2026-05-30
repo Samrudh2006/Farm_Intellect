@@ -56,7 +56,7 @@ export const Header = ({ user, onMenuClick, notificationCount = 0 }: HeaderProps
               <Menu className="h-5 w-5" />
             </Button>
             <div className="flex items-center gap-3">
-              <img src={appLogo} alt="Krishi AI" className="h-9 w-9 object-contain" />
+              <img src={appLogo} alt="Farm Intellect" className="h-9 w-9 object-contain" />
               <h1 className="text-xl font-bold text-foreground">{t('header.app_title')}</h1>
             </div>
           </div>

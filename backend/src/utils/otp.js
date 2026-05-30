@@ -113,7 +113,7 @@ const sendSMSOTP = async (phone, code, purpose) => {
 
 const getEmailSubject = (purpose) => {
   const subjects = {
-    'signup': 'Verify your Smart Crop Advisory account',
+    'signup': 'Verify your Farm Intellect account',
     'login': 'Your login verification code',
     'reset-password': 'Password reset verification',
     'critical-action': 'Security verification required'
@@ -123,7 +123,7 @@ const getEmailSubject = (purpose) => {
 
 const getEmailText = (code, purpose) => {
   const messages = {
-    'signup': `Welcome to Smart Crop Advisory! Your verification code is: ${code}`,
+    'signup': `Welcome to Farm Intellect! Your verification code is: ${code}`,
     'login': `Your login verification code is: ${code}`,
     'reset-password': `Your password reset code is: ${code}`,
     'critical-action': `Your security verification code is: ${code}`
@@ -147,7 +147,7 @@ const getEmailHTML = (code, purpose) => {
     <body>
       <div class="container">
         <div class="header">
-          <h1>Smart Crop Advisory</h1>
+          <h1>Farm Intellect</h1>
         </div>
         <div class="content">
           <h2>${getEmailSubject(purpose)}</h2>
@@ -157,7 +157,7 @@ const getEmailHTML = (code, purpose) => {
           <p>If you didn't request this code, please ignore this email.</p>
         </div>
         <div class="footer">
-          <p>© 2024 Smart Crop Advisory. All rights reserved.</p>
+          <p>© 2024 Farm Intellect. All rights reserved.</p>
         </div>
       </div>
     </body>
@@ -167,10 +167,10 @@ const getEmailHTML = (code, purpose) => {
 
 const getSMSMessage = (code, purpose) => {
   const messages = {
-    'signup': `Smart Crop Advisory: Your verification code is ${code}`,
-    'login': `Smart Crop Advisory: Your login code is ${code}`,
-    'reset-password': `Smart Crop Advisory: Your password reset code is ${code}`,
-    'critical-action': `Smart Crop Advisory: Your security code is ${code}`
+    'signup': `Farm Intellect: Your verification code is ${code}`,
+    'login': `Farm Intellect: Your login code is ${code}`,
+    'reset-password': `Farm Intellect: Your password reset code is ${code}`,
+    'critical-action': `Farm Intellect: Your security code is ${code}`
   };
-  return messages[purpose] || `Smart Crop Advisory: Your verification code is ${code}`;
+  return messages[purpose] || `Farm Intellect: Your verification code is ${code}`;
 };

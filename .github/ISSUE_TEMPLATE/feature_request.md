@@ -1,6 +1,6 @@
 ---
 name: ✨ Feature Request
-about: Suggest a new feature for Krishi AI
+about: Suggest a new feature for Farm Intellect
 title: "[Feature]: "
 labels: enhancement
 assignees: ''

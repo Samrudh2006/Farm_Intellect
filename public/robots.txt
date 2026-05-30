@@ -1,4 +1,4 @@
-# Smart Crop Advisory Platform - robots.txt
+# Farm Intellect Platform - robots.txt
 # Last updated: 2026-05-15
 
 # Search engines - allow public pages only

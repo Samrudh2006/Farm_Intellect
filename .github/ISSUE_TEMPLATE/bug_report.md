@@ -1,6 +1,6 @@
 ---
 name: 🐛 Bug Report
-about: Report a bug to help us improve Krishi AI
+about: Report a bug to help us improve Farm Intellect
 title: "[Bug]: "
 labels: bug, triage
 assignees: ''

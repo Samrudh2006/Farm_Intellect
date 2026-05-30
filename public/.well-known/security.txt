@@ -1,4 +1,4 @@
-# Smart Crop Advisory Platform - Security Policy
+# Farm Intellect Platform - Security Policy
 # RFC 9116 Compliant - Updated 2026-05-15
 
 # Primary security contact

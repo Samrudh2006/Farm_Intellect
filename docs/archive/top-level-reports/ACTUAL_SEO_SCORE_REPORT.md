@@ -61,7 +61,7 @@
 | - og:image | ✓ Dynamic | with DEFAULT_IMAGE fallback |
 | - og:type | ✓ Dynamic | per route type |
 | - og:url | ✓ Dynamic | window.location.href |
-| - og:site_name | ✓ Dynamic | Farm-Intellect |
+| - og:site_name | ✓ Dynamic | Farm Intellect |
 | - og:locale | ✓ Static | en_IN |
 | **Twitter Cards** | ✓ Full | 13 Twitter functions | +8 |
 | - twitter:card | ✓ summary_large_image | |

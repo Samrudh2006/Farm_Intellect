@@ -5,7 +5,7 @@ body:
   - type: markdown
     attributes:
       value: |
-        🌾 **Share your idea for Krishi AI!**
+        🌾 **Share your idea for Farm Intellect!**
         We love hearing from the community — especially ideas that help Indian farmers.
 
   - type: textarea
@@ -13,7 +13,7 @@ body:
     attributes:
       label: 💡 Your Idea
       description: Describe your idea clearly
-      placeholder: "I think Krishi AI should..."
+      placeholder: "I think Farm Intellect should..."
     validations:
       required: true
 

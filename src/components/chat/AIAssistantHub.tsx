@@ -62,7 +62,7 @@ export const AIAssistantHub = () => {
   useEffect(() => {
     setMessages([{
       id: "welcome",
-      content: t('ai.greeting') || "Namaste! I am Krishi AI, your agricultural assistant. Ask me anything about farming.",
+      content: t('ai.greeting') || "Namaste! I am Farm Intellect, your agricultural assistant. Ask me anything about farming.",
       type: "assistant",
       timestamp: new Date(),
     }]);
@@ -166,7 +166,7 @@ export const AIAssistantHub = () => {
 
   const clearChat = () => {
     stopSpeaking();
-    setMessages([{ id: "welcome", content: t('ai.greeting') || "Namaste! I am Krishi AI, your agricultural assistant.", type: "assistant", timestamp: new Date() }]);
+    setMessages([{ id: "welcome", content: t('ai.greeting') || "Namaste! I am Farm Intellect, your agricultural assistant.", type: "assistant", timestamp: new Date() }]);
   };
 
   const copyMessage = (content: string) => {
@@ -325,7 +325,7 @@ export const AIAssistantHub = () => {
             value={inputMessage}
             onChange={e => setInputMessage(e.target.value)}
             onKeyDown={handleKeyDown}
-            placeholder={uploadedImage ? "Describe the crop issue..." : t('ai.placeholder') || "Ask Krishi AI..."}
+            placeholder={uploadedImage ? "Describe the crop issue..." : t('ai.placeholder') || "Ask Farm Intellect..."}
             disabled={isLoading}
             className="pr-12"
           />
@@ -359,7 +359,7 @@ export const AIAssistantHub = () => {
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 rounded-full bg-white flex items-center justify-center overflow-hidden border border-primary/20">
-              <img src={krishiAvatar} alt="Krishi AI" className="h-10 w-10 object-cover scale-110" />
+              <img src={krishiAvatar} alt="Farm Intellect" className="h-10 w-10 object-cover scale-110" />
             </div>
             <div>
               <CardTitle className="text-lg">{t('ai.title') || "AI Assistant"}</CardTitle>

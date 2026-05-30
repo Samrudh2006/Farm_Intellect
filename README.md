@@ -136,7 +136,7 @@
 
 <br/>
 
-**Farm Intellect 65** is a production-grade, AI-first agriculture super-app designed for **the next billion users** — farmers in rural India who own ₹4,000 phones, deal with patchy 2G, speak Bhojpuri instead of English, and lose **30% of their crop** every year to preventable disease, weather, or middleman exploitation.
+**Farm Intellect** is a production-grade, AI-first agriculture super-app designed for **the next billion users** — farmers in rural India who own ₹4,000 phones, deal with patchy 2G, speak Bhojpuri instead of English, and lose **30% of their crop** every year to preventable disease, weather, or middleman exploitation.
 
 We compress decades of agronomy expertise, the entire central + state government scheme database, real-time mandi prices from 3,000+ markets, hyperlocal IMD forecasts, and a multimodal AI assistant — into a single, install-free, offline-capable Progressive Web App that **speaks 22 Indian languages**.
 
@@ -190,7 +190,7 @@ We believe technology earns its right to exist only when it reaches the **last m
 - ❌ 78% of agri-apps are English/Hindi only
 - ❌ Weather surprises destroy entire harvests overnight
 - ❌ Soil testing requires a 200km trip to the district lab
-+ ✅ Farm Intellect 65 fixes ALL of these — in your pocket.
++ ✅ Farm Intellect fixes ALL of these — in your pocket.
 ```
 
 </div>
@@ -292,7 +292,7 @@ mindmap
 </td>
 <td align="center" width="33%">
 <img src="public/icons/ai-recommendations.jpg" width="60"/>
-<h3>🤖 Krishi AI Assistant</h3>
+<h3>🤖 Farm Intellect Assistant</h3>
 <sub>Conversational agronomist powered by <b>Gemini + RAG</b>. Ask anything — sowing dates, fertilizer dosage, pest control.</sub>
 </td>
 </tr>
@@ -1001,7 +1001,7 @@ bun run ci
 - [x] 🗣️ 22-language voice support
 - [x] 📱 PWA with offline mode
 - [x] 🏛️ Govt scheme matcher
-- [x] 🤖 Krishi AI assistant
+- [x] 🤖 Farm Intellect assistant
 
 ### 🚧 Phase 2 — Expansion (Q1-Q2 2026)
 - [ ] 🛰️ Satellite NDVI for farm-level health
@@ -1177,7 +1177,7 @@ Massive gratitude to:
 
 ## 💚 Support the Project
 
-If Farm Intellect 65 helps even one farmer feed our nation, please:
+If Farm Intellect helps even one farmer feed our nation, please:
 
 <div align="center">
 
@@ -1223,7 +1223,7 @@ If Farm Intellect 65 helps even one farmer feed our nation, please:
 
 <sub>
   Made with ❤️, 🍵 chai, and 🌾 grit by <b>Samrudh</b> & contributors. <br/>
-  © 2026 Farm Intellect 65 — Released under the MIT License.
+  © 2026 Farm Intellect — Released under the MIT License.
 </sub>
 
 </div>

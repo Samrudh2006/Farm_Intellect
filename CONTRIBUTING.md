@@ -40,7 +40,7 @@
 
 ## 🌟 Why Contribute?
 
-> *"When you fix a bug in Farm Intellect 65, you're not just closing an issue — you're helping a farmer in Telangana diagnose her tomato crop, or a smallholder in Punjab get his fair market price."*
+> *"When you fix a bug in Farm Intellect, you're not just closing an issue — you're helping a farmer in Telangana diagnose her tomato crop, or a smallholder in Punjab get his fair market price."*
 
 Your contribution — however small — directly impacts:
 
@@ -542,6 +542,6 @@ Don't hesitate to ask — **there are no stupid questions when you're helping fa
 
 [![Back to Top](https://img.shields.io/badge/⬆_BACK_TO_TOP-3b82f6?style=for-the-badge&labelColor=1e40af)](#contributing-top)
 
-<sub>© 2026 Farm Intellect 65 · MIT License · Built with ❤️ for Indian farmers</sub>
+<sub>© 2026 Farm Intellect · MIT License · Built with ❤️ for Indian farmers</sub>
 
 </div>

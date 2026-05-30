@@ -1,7 +1,7 @@
 {
   "name": "farm-intellect-backend",
   "version": "1.0.0",
-  "description": "Backend for Smart Crop Advisory application",
+  "description": "Backend for Farm Intellect application",
   "main": "src/server.js",
   "type": "module",
   "scripts": {

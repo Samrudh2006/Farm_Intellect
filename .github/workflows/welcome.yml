@@ -18,7 +18,7 @@ jobs:
         with:
           repo-token: ${{ secrets.GITHUB_TOKEN }}
           issue-message: |
-            🌾 **Welcome to Krishi AI — Farm Intellect!** 🇮🇳
+            🌾 **Welcome to Farm Intellect!** 🇮🇳
 
             Thank you for opening your first issue! We appreciate your interest in helping Indian farmers through technology.
 
@@ -36,7 +36,7 @@ jobs:
           pr-message: |
             🎉 **Thank you for your first Pull Request!** 🌾
 
-            Welcome to the Krishi AI community! A maintainer will review your PR soon.
+            Welcome to the Farm Intellect community! A maintainer will review your PR soon.
 
             **PR Checklist Reminder:**
             - ✅ Code follows our style guide (TypeScript strict, Tailwind tokens)

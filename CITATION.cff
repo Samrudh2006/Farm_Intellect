@@ -1,5 +1,5 @@
 cff-version: 1.2.0
-title: "Krishi AI — Farm Intellect"
+title: "Farm Intellect"
 message: >-
   If you use or reference this software in academic work,
   please cite it using the metadata below.
@@ -27,7 +27,7 @@ keywords:
   - government-schemes
   - kisan
 abstract: >-
-  Krishi AI — Farm Intellect is an AI-powered smart agriculture platform
+  Farm Intellect is an AI-powered smart agriculture platform
   designed for Indian farmers. It provides crop disease scanning via image
   recognition, AI-driven crop recommendations based on soil, season, and
   region, real-time weather intelligence with farming advisories, mandi

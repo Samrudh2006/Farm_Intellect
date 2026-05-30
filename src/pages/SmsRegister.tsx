@@ -204,7 +204,7 @@ const SmsRegister = () => {
                   <label className="flex items-start gap-3 rounded-md border border-border bg-muted/40 p-3 text-sm">
                     <Checkbox checked={form.consent} onCheckedChange={(v) => setForm({ ...form, consent: !!v })} className="mt-0.5" />
                     <span className="text-muted-foreground">
-                      I agree to receive SMS from KrishiSarthi (free tier and future paid plans) about weather, mandi prices, pest alerts and government schemes.
+                      I agree to receive SMS from Farm Intellect (free tier and future paid plans) about weather, mandi prices, pest alerts and government schemes.
                       Reply <strong>STOP</strong> to opt out anytime. Standard SMS rates do not apply (we pay for the SMS).
                     </span>
                   </label>
@@ -217,7 +217,7 @@ const SmsRegister = () => {
                     <div className="flex items-center gap-2 font-semibold text-foreground">
                       <PhoneCall className="h-4 w-4 text-primary" /> Or give a missed call
                     </div>
-                    <p className="mt-1">Once our toll-free number goes live, farmers can give a missed call to subscribe. By calling, they consent to receive KrishiSarthi SMS alerts. Coming soon.</p>
+                    <p className="mt-1">Once our toll-free number goes live, farmers can give a missed call to subscribe. By calling, they consent to receive Farm Intellect SMS alerts. Coming soon.</p>
                   </div>
                 </form>
               )}

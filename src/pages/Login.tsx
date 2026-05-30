@@ -585,7 +585,7 @@ const Login = () => {
             <div className="flex items-center justify-center gap-3 mb-3">
               <AshokaChakra size={44} />
             </div>
-            <h1 className="text-3xl font-bold text-gradient-tricolor mb-2">Smart Crop Advisory</h1>
+            <h1 className="text-3xl font-bold text-gradient-tricolor mb-2">Farm Intellect</h1>
             <p className="text-muted-foreground max-w-xl mx-auto">{t("auth.welcome")}</p>
           </div>
 
@@ -877,7 +877,7 @@ const Login = () => {
           </div>
           <div className="flex items-center justify-center gap-3 mb-6">
             <AshokaChakra size={32} />
-            <h1 className="text-xl font-bold text-gradient-tricolor">Smart Crop Advisory</h1>
+            <h1 className="text-xl font-bold text-gradient-tricolor">Farm Intellect</h1>
           </div>
           <Card className="tricolor-card overflow-hidden">
             <div className="relative h-40 overflow-hidden">

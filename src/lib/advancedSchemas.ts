@@ -1,5 +1,5 @@
 /**
- * Advanced Schema Markup Generators for Farm-Intellect
+ * Advanced Schema Markup Generators for Farm Intellect
  * Includes FAQ, HowTo, Article, Video, Offer, AggregateRating schemas
  */
 
@@ -64,11 +64,11 @@ export function generateArticleSchema(metadata: PageMetadata & { content?: strin
     dateModified: metadata.modifiedDate || metadata.publishedDate,
     author: {
       "@type": "Person",
-      name: metadata.author || "Farm-Intellect Team",
+      name: metadata.author || "Farm Intellect Team",
     },
     publisher: {
       "@type": "Organization",
-      name: "Farm-Intellect",
+      name: "Farm Intellect",
       logo: {
         "@type": "ImageObject",
         url: "https://farm-intellect-65.lovable.app/logo.png",

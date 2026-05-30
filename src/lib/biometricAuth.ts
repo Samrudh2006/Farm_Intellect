@@ -354,7 +354,7 @@ export const registerBiometric = async (
   const makeCredentialOptions = (withAttachment: boolean): CredentialCreationOptions => ({
     publicKey: {
       challenge: randomChallenge(),
-      rp: { name: "Smart Crop Advisory", id: rpId },
+      rp: { name: "Farm Intellect", id: rpId },
       user: {
         id: userIdBytes,
         name: user.label || user.aadhaar,

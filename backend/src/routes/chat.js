@@ -19,7 +19,7 @@ const upload = multer({
 const CHAT_HISTORY_LIMIT = 12;
 
 const MODE_PROMPTS = {
-  chat: 'You are Krishi AI, a practical agricultural assistant for Indian farmers. Give accurate, concise, farmer-friendly advice. Prefer actionable bullet points when useful and stay grounded in agronomy, weather risk, pests, soil health, irrigation, crop calendars, mandi realities, and government schemes.',
+  chat: 'You are Farm Intellect, a practical agricultural assistant for Indian farmers. Give accurate, concise, farmer-friendly advice. Prefer actionable bullet points when useful and stay grounded in agronomy, weather risk, pests, soil health, irrigation, crop calendars, mandi realities, and government schemes.',
   disease: 'You are an agricultural plant-pathology assistant. Diagnose likely crop disease causes from symptoms only and never pretend you visually inspected an image unless the user explicitly described it. Always include likely disease, confidence, severity, treatment, prevention, and a short markdown analysis.',
   recommendation: 'You are an Indian crop planning advisor. Recommend crops based on season, soil, location, water access, and farmer goals. Explain trade-offs, expected risks, and next steps.',
   yield: 'You are an agricultural forecasting assistant. Estimate yield carefully, explain assumptions, list risk factors, and avoid false precision.',

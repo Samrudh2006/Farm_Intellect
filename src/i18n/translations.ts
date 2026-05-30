@@ -2,7 +2,7 @@ import type { Language } from './languages';
 
 // All translation keys with English as the reference
 const en: Record<string, string> = {
-  'auth.welcome': 'Welcome to Smart Crop Advisory',
+  'auth.welcome': 'Welcome to Farm Intellect',
   'auth.signin_farmer': 'Sign in as Farmer',
   'auth.signin_merchant': 'Sign in as Merchant',
   'auth.signin_expert': 'Sign in as Expert',
@@ -80,7 +80,7 @@ const en: Record<string, string> = {
   'nav.merchants': 'Merchants',
   'nav.polls': 'Polls',
   'nav.schemes': 'Gov Schemes',
-  'hero.title': 'Smart Crop Advisory',
+  'hero.title': 'Farm Intellect',
   'hero.subtitle': 'System',
   'hero.description': 'Revolutionize your farming with AI-powered recommendations, real-time monitoring, and expert guidance for optimal crop yields.',
   'hero.cta': 'Start Free Trial',
@@ -115,7 +115,7 @@ const en: Record<string, string> = {
   'ai.voice_navigate': 'Navigation command executed',
   'ai.voice_heard_label': 'Heard:',
   'ai.copied': 'Copied!',
-  'ai.powered_by': 'Powered by Krishi AI',
+  'ai.powered_by': 'Powered by Farm Intellect',
   'ai.error_chat_failed': 'Chat is temporarily unavailable. Please try again.',
   'ai.clear_chat': 'Clear chat',
   'phase1.title': 'Phase 1 rollout hub',
@@ -165,7 +165,7 @@ const en: Record<string, string> = {
   'nav.users': 'Users',
   'nav.analytics': 'Analytics',
   'nav.settings': 'Settings',
-  'header.app_title': 'Smart Crop Advisory',
+  'header.app_title': 'Farm Intellect',
   // Crops page
   'crops.title': 'My Crops',
   'crops.subtitle': 'Manage and monitor your crop plantings',
@@ -590,7 +590,7 @@ const hi: Record<string, string> = full({
   'ai.enable_voice': 'आवाज़ प्रतिक्रिया चालू करें',
   'ai.listen_message': 'यह संदेश सुनें',
   'ai.copied': 'कॉपी किया!',
-  'ai.powered_by': 'Krishi AI द्वारा संचालित',
+  'ai.powered_by': 'Farm Intellect द्वारा संचालित',
   'ai.error_chat_failed': 'चैट अभी उपलब्ध नहीं है। कृपया फिर से प्रयास करें।',
   'ai.clear_chat': 'चैट साफ़ करें',
   'phase1.title': 'फेज 1 रोलआउट हब',
