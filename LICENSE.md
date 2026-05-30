@@ -86,7 +86,7 @@ All customized system instructions, system-design prompts, multimodal vision con
 
 ## 6. Trademarks & Brand Identity
 
-The names **"Farm Intellect"**, **"Farm Intellect"**, **"Farm Intellect"**, and their respective logo designs represent trademarks of the Author. No rights are granted for brand reuse under this visibility contract.
+The name **"Farm Intellect"** and its respective logo design represent trademarks of the Author. No rights are granted for brand reuse under this visibility contract.
 
 ---
 

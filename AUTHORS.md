@@ -20,7 +20,7 @@ All intellectual property rights in and to **Farm Intellect**, including but not
 - ✅ AI prompts, model configurations, and system architecture
 - ✅ Curated agricultural datasets and knowledge bases
 - ✅ Documentation, diagrams, and technical specifications
-- ✅ Branding, logos, and trademarks ("Farm Intellect", "Farm Intellect", "Farm Intellect")
+- ✅ Branding, logos, and trademarks ("Farm Intellect")
 
 ...are the **exclusive property of Samrudh**.
 

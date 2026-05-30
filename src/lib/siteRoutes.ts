@@ -18,7 +18,7 @@ export interface RouteConfig extends PageMetadata {
 export const siteRoutes: RouteConfig[] = [
   {
     path: "/",
-    title: "Farm Intellect - AI-Powered Agricultural Platform",
+    title: "Farm Intellect — AI-Powered Agricultural Platform",
     description: "Transform farming with AI-powered insights. Get crop recommendations, weather forecasts, market prices, and expert guidance all in one platform.",
     keywords: ["agriculture", "farming", "AI", "crop prediction", "farm management"],
     priority: 1.0,
