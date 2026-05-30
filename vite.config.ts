@@ -23,9 +23,20 @@ const vendorChunkGroups: Array<[string, string[]]> = [
 // Safe default for local/preview builds; set VITE_ROBOTS_POLICY="index, follow" for production indexing.
 const robotsPolicy = process.env.VITE_ROBOTS_POLICY || "noindex, nofollow";
 
+const basePath = (() => {
+  const value = process.env.VITE_BASE_PATH?.trim();
+
+  if (!value) {
+    return "/";
+  }
+
+  const normalized = value.startsWith("/") ? value : `/${value}`;
+  return normalized.endsWith("/") ? normalized : `${normalized}/`;
+})();
+
 // https://vitejs.dev/config/
 export default defineConfig(({ mode }) => ({
-  base: "/farm-intellect-65/",
+  base: basePath,
   define: {
     'import.meta.env.VITE_SUPABASE_URL': JSON.stringify(SUPABASE_URL),
     'import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY': JSON.stringify(SUPABASE_ANON_KEY),
