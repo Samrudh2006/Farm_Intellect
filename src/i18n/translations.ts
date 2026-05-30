@@ -109,7 +109,7 @@ const en: Record<string, string> = {
   'ai.disable_voice': 'Disable voice responses',
   'ai.enable_voice': 'Enable voice responses',
   'ai.listen_message': 'Listen to this message',
-  'ai.voice_listen': 'Tap and speak to Krishi Voice Agent',
+  'ai.voice_listen': 'Tap and speak to Farm Intellect Voice Agent',
   'ai.voice_stop_listening': 'Stop listening',
   'ai.voice_nav_hint': 'Say: open login, open SMS register, or go home.',
   'ai.voice_navigate': 'Navigation command executed',
@@ -640,7 +640,7 @@ const hi: Record<string, string> = full({
   'nav.users': '👥 उपयोगकर्ता',
   'nav.analytics': '📊 विश्लेषण',
   'nav.settings': '⚙️ सेटिंग्स',
-  'header.app_title': 'स्मार्ट क्रॉप एडवाइजरी',
+  'header.app_title': 'Farm Intellect',
   // Crops page - Hindi
   'crops.title': 'मेरी फसलें',
   'crops.subtitle': 'अपनी फसल रोपण का प्रबंधन और निगरानी करें',
@@ -839,7 +839,7 @@ const bn: Record<string, string> = full({
   'nav.users': '👥 ব্যবহারকারী',
   'nav.analytics': '📊 বিশ্লেষণ',
   'nav.settings': '⚙️ সেটিংস',
-  'header.app_title': 'স্মার্ট ক্রপ অ্যাডভাইজরি',
+  'header.app_title': 'Farm Intellect',
   // Crops page - Bengali
   'crops.title': 'আমার ফসল',
   'crops.subtitle': 'আপনার ফসল রোপণ পরিচালনা ও পর্যবেক্ষণ করুন',
@@ -1122,7 +1122,7 @@ const te: Record<string, string> = full({
   'nav.users': '👥 వినియోగదారులు',
   'nav.analytics': '📊 విశ్లేషణ',
   'nav.settings': '⚙️ సెట్టింగ్‌లు',
-  'header.app_title': 'స్మార్ట్ క్రాప్ అడ్వైజరీ',
+  'header.app_title': 'Farm Intellect',
 });
 
 const ta: Record<string, string> = full({
@@ -1258,7 +1258,7 @@ const ta: Record<string, string> = full({
   'nav.users': '👥 பயனர்கள்',
   'nav.analytics': '📊 பகுப்பாய்வு',
   'nav.settings': '⚙️ அமைப்புகள்',
-  'header.app_title': 'ஸ்மார்ட் க்ராப் அட்வைசரி',
+  'header.app_title': 'Farm Intellect',
   // Crops page - Tamil
   'crops.title': 'எனது பயிர்கள்',
   'crops.subtitle': 'உங்கள் பயிர் நடவுகளை நிர்வகித்து கண்காணிக்கவும்',
@@ -1457,7 +1457,7 @@ const mr: Record<string, string> = full({
   'nav.users': '👥 वापरकर्ते',
   'nav.analytics': '📊 विश्लेषण',
   'nav.settings': '⚙️ सेटिंग्ज',
-  'header.app_title': 'स्मार्ट क्रॉप अॅडव्हायझरी',
+  'header.app_title': 'Farm Intellect',
 });
 
 const gu: Record<string, string> = full({
@@ -1593,7 +1593,7 @@ const gu: Record<string, string> = full({
   'nav.users': '👥 વપરાશકર્તાઓ',
   'nav.analytics': '📊 વિશ્લેષણ',
   'nav.settings': '⚙️ સેટિંગ્સ',
-  'header.app_title': 'સ્માર્ટ ક્રોપ એડવાઈઝરી',
+  'header.app_title': 'Farm Intellect',
 });
 
 const kn: Record<string, string> = full({
@@ -1719,7 +1719,7 @@ const kn: Record<string, string> = full({
   'nav.users': '👥 ಬಳಕೆದಾರರು',
   'nav.analytics': '📊 ವಿಶ್ಲೇಷಣೆ',
   'nav.settings': '⚙️ ಸೆಟ್ಟಿಂಗ್‌ಗಳು',
-  'header.app_title': 'ಸ್ಮಾರ್ಟ್ ಕ್ರಾಪ್ ಅಡ್ವೈಸರಿ',
+  'header.app_title': 'Farm Intellect',
 });
 
 
@@ -1846,7 +1846,7 @@ const ml: Record<string, string> = full({
   'nav.users': '👥 ഉപയോക്താക്കൾ',
   'nav.analytics': '📊 വിശകലനം',
   'nav.settings': '⚙️ ക്രമീകരണങ്ങൾ',
-  'header.app_title': 'സ്മാർട്ട് ക്രോപ്പ് അഡ്വൈസറി',
+  'header.app_title': 'Farm Intellect',
 });
 
 const pa: Record<string, string> = full({
@@ -1972,7 +1972,7 @@ const pa: Record<string, string> = full({
   'nav.users': '👥 ਉਪਭੋਗਤਾ',
   'nav.analytics': '📊 ਵਿਸ਼ਲੇਸ਼ਣ',
   'nav.settings': '⚙️ ਸੈਟਿੰਗਾਂ',
-  'header.app_title': 'ਸਮਾਰਟ ਕ੍ਰਾਪ ਐਡਵਾਈਜ਼ਰੀ',
+  'header.app_title': 'Farm Intellect',
 });
 
 const or_: Record<string, string> = full({
@@ -2098,7 +2098,7 @@ const or_: Record<string, string> = full({
   'nav.users': '👥 ଉପଭୋକ୍ତା',
   'nav.analytics': '📊 ବିଶ୍ଳେଷଣ',
   'nav.settings': '⚙️ ସେଟିଂସ',
-  'header.app_title': 'ସ୍ମାର୍ଟ କ୍ରପ ଆଡଭାଇଜରୀ',
+  'header.app_title': 'Farm Intellect',
 });
 
 const as_: Record<string, string> = full({
@@ -2224,7 +2224,7 @@ const as_: Record<string, string> = full({
   'nav.users': '👥 ব্যৱহাৰকাৰী',
   'nav.analytics': '📊 বিশ্লেষণ',
   'nav.settings': '⚙️ ছেটিংছ',
-  'header.app_title': 'স্মাৰ্ট ক্ৰপ এডভাইজৰী',
+  'header.app_title': 'Farm Intellect',
 });
 
 const ur: Record<string, string> = full({
@@ -2350,7 +2350,7 @@ const ur: Record<string, string> = full({
   'nav.users': '👥 صارفین',
   'nav.analytics': '📊 تجزیات',
   'nav.settings': '⚙️ ترتیبات',
-  'header.app_title': 'سمارٹ کراپ ایڈوائزری',
+  'header.app_title': 'Farm Intellect',
 });
 
 const sa: Record<string, string> = full({
@@ -2476,7 +2476,7 @@ const sa: Record<string, string> = full({
   'nav.users': '👥 उपयोक्तारः',
   'nav.analytics': '📊 विश्लेषणम्',
   'nav.settings': '⚙️ विन्यासाः',
-  'header.app_title': 'स्मार्ट-सस्य-सलाहकारम्',
+  'header.app_title': 'Farm Intellect',
 });
 
 const ne: Record<string, string> = full({
@@ -2602,7 +2602,7 @@ const ne: Record<string, string> = full({
   'nav.users': '👥 प्रयोगकर्ता',
   'nav.analytics': '📊 विश्लेषण',
   'nav.settings': '⚙️ सेटिङहरू',
-  'header.app_title': 'स्मार्ट क्रप एडभाइजरी',
+  'header.app_title': 'Farm Intellect',
 });
 
 const sd: Record<string, string> = full({
@@ -2717,7 +2717,7 @@ const sd: Record<string, string> = full({
   'nav.users': '👥 صارفين',
   'nav.analytics': '📊 تجزيا',
   'nav.settings': '⚙️ سيٽنگون',
-  'header.app_title': 'سمارٽ ڪراپ ايڊوائزري',
+  'header.app_title': 'Farm Intellect',
 });
 
 const ks: Record<string, string> = full({
@@ -2801,7 +2801,7 @@ const ks: Record<string, string> = full({
   'nav.users': '👥 صارِفین',
   'nav.analytics': '📊 تَجزِیات',
   'nav.settings': '⚙️ سیٹِنگز',
-  'header.app_title': 'سمارٹ کراپ ایڈوائزری',
+  'header.app_title': 'Farm Intellect',
 });
 
 const kok: Record<string, string> = full({
@@ -2917,7 +2917,7 @@ const kok: Record<string, string> = full({
   'nav.users': '👥 वापरकर्ते',
   'nav.analytics': '📊 विश्लेषण',
   'nav.settings': '⚙️ सेटिंग्ज',
-  'header.app_title': 'स्मार्ट क्रॉप अॅडव्हायझरी',
+  'header.app_title': 'Farm Intellect',
 });
 
 const doi: Record<string, string> = full({
@@ -3033,7 +3033,7 @@ const doi: Record<string, string> = full({
   'nav.users': '👥 उपभोगता',
   'nav.analytics': '📊 विश्लेषण',
   'nav.settings': '⚙️ सेटिंग्स',
-  'header.app_title': 'स्मार्ट क्रॉप एडवाइजरी',
+  'header.app_title': 'Farm Intellect',
 });
 
 const mai: Record<string, string> = full({
@@ -3159,7 +3159,7 @@ const mai: Record<string, string> = full({
   'nav.users': '👥 उपयोगकर्ता',
   'nav.analytics': '📊 विश्लेषण',
   'nav.settings': '⚙️ सेटिंग्स',
-  'header.app_title': 'स्मार्ट क्रॉप एडवाइजरी',
+  'header.app_title': 'Farm Intellect',
 });
 
 const mni: Record<string, string> = full({
@@ -3248,7 +3248,7 @@ const mni: Record<string, string> = full({
   'nav.users': '👥 শিজিন্নরিবশিং',
   'nav.analytics': '📊 এনালিটিক্স',
   'nav.settings': '⚙️ সেটিংস',
-  'header.app_title': 'স্মার্ট ক্রপ এডভাইজরী',
+  'header.app_title': 'Farm Intellect',
 });
 
 const sat: Record<string, string> = full({
@@ -3333,7 +3333,7 @@ const sat: Record<string, string> = full({
   'nav.users': '👥 ᱵᱮᱵᱷᱟᱨᱤᱭᱟᱹ',
   'nav.analytics': '📊 ᱵᱤᱥᱞᱮᱥᱚᱱ',
   'nav.settings': '⚙️ ᱥᱮᱴᱤᱝ',
-  'header.app_title': 'ᱥᱢᱟᱨᱴ ᱠᱨᱚᱯ ᱮᱰᱵᱟᱭᱡᱚᱨᱤ',
+  'header.app_title': 'Farm Intellect',
 });
 
 const brx: Record<string, string> = full({
@@ -3422,7 +3422,7 @@ const brx: Record<string, string> = full({
   'nav.users': '👥 बाहागोशिनि',
   'nav.analytics': '📊 बिसलेसन',
   'nav.settings': '⚙️ सेटिं',
-  'header.app_title': 'स्मार्ट क्रप एडभाइजरी',
+  'header.app_title': 'Farm Intellect',
 });
 
 export const translations: Record<Language, Record<string, string>> = {

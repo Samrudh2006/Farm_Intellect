@@ -91,7 +91,7 @@ const SmsRegister = () => {
     setDone(true);
     toast({
       title: "✅ Registered",
-      description: "Free tier is active. For paid upgrades, contact your local Krishi Sevak/Sarpanch or platform support.",
+      description: "Free tier is active. For paid upgrades, contact your local Farm Intellect support team or platform support.",
     });
   };
 

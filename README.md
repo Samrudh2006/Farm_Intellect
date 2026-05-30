@@ -327,7 +327,7 @@ mindmap
 - 🏦 **Loan & Insurance Finder** — KCC, PMFBY, micro-loans
 - 📺 **Video Tutorials** — 500+ vernacular how-to videos
 - 👥 **Community Forum** — ask peers, share success stories
-- 🎓 **Krishi Academy** — bite-sized agronomy courses
+- 🎓 **Farm Intellect Academy** — bite-sized agronomy courses
 - 🌡️ **Pest Risk Forecaster** — predicts outbreaks 7 days ahead
 
 <br/>
@@ -789,7 +789,7 @@ POST /api/schemes/match
 }
 ```
 
-### 🤖 Krishi Assistant
+### 🤖 Farm Intellect Assistant
 
 ```http
 POST /api/assistant/chat
@@ -1013,7 +1013,7 @@ bun run ci
 
 ### 🔮 Phase 3 — Scale (Q3-Q4 2026)
 - [ ] 🌐 Expansion to Bangladesh, Nepal, Sri Lanka
-- [ ] 🎓 Krishi Academy (gamified learning)
+- [ ] 🎓 Farm Intellect Academy (gamified learning)
 - [ ] 🌡️ AI pest outbreak prediction
 - [ ] 🤖 WhatsApp bot integration
 - [ ] 📞 IVR for feature-phone users
