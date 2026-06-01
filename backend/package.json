@@ -27,7 +27,7 @@
     "bcryptjs": "^2.4.3",
     "cors": "^2.8.5",
     "dotenv": "^16.3.1",
-    "express": "^4.18.2",
+    "express": "^4.22.2",
     "express-rate-limit": "^7.1.5",
     "express-validator": "^7.0.1",
     "firebase-admin": "^12.5.0",
@@ -54,5 +54,15 @@
     "supertest": "^7.2.2",
     "vite": "^8.0.15",
     "vitest": "^4.0.18"
+  },
+  "overrides": {
+    "engine.io": "6.6.8",
+    "socket.io-adapter": "2.5.7",
+    "socket.io-parser": "4.2.6",
+    "qs": "$qs",
+    "picomatch": "4.0.4",
+    "protobufjs": "7.5.8",
+    "ws": "$ws",
+    "uuid": "$uuid"
   }
 }
