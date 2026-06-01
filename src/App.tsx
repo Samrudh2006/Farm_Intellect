@@ -126,7 +126,7 @@ const App = () => {
               <Toaster />
               <Sonner />
               <BrowserRouter basename={import.meta.env.BASE_URL}>
-                <SeoHead schema="website" />
+                <SeoHead />
                 <PushNotificationProvider />
                 <AnimatedRoutes />
                 <AmbientMusic />
