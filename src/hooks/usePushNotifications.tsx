@@ -1,6 +1,6 @@
 import { useEffect, useRef, useCallback, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { useAuth } from "@/contexts/AuthContext";
+import { useAuthSafe } from "@/contexts/AuthContext";
 import { useToast } from "@/hooks/use-toast";
 
 interface NotificationRow {
@@ -24,7 +24,8 @@ const PRIORITY_TYPES = new Set(["warning", "error", "alert", "weather", "market"
  * Also exposes a requestPermission() helper for UI to call from a user gesture.
  */
 export function usePushNotifications() {
-  const { user } = useAuth();
+  const auth = useAuthSafe();
+  const user = auth?.user ?? null;
   const { toast } = useToast();
   const [permission, setPermission] = useState<NotificationPermission>(
     typeof window !== "undefined" && "Notification" in window ? Notification.permission : "default"
