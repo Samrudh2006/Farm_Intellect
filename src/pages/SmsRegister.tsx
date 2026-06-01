@@ -57,12 +57,11 @@ const SmsRegister = () => {
     setSubmitting(true);
 
     if (!hasSupabaseEnv) {
-      // Mock registration behavior
       setSubmitting(false);
-      setDone(true);
       toast({
-        title: "✅ Registered (Local Demo Mode)",
-        description: "Local Demo Mode: Subscription registered in simulated local registry.",
+        title: "Registration Failed",
+        description: "System environment is not configured correctly. Missing Supabase credentials.",
+        variant: "destructive"
       });
       return;
     }

@@ -52,31 +52,7 @@ export const useCurrentUser = (): {
     };
 
     if (!hasSupabaseEnv) {
-      const parsed = getSecureItem<any>("mock_user_session", null);
-      if (parsed) {
-        try {
-          const nameParts = (updates.name || "").split(" ");
-          const firstName = nameParts[0] || parsed.profile.first_name;
-          const lastName = nameParts.slice(1).join(" ") || parsed.profile.last_name;
-          
-          const newProfile = {
-            ...parsed.profile,
-            first_name: firstName,
-            last_name: lastName,
-            email: updates.email || parsed.profile.email,
-            phone_number: updates.phone || parsed.profile.phone_number,
-            state: updates.location?.split(",")[1]?.trim() || parsed.profile.state,
-            district: updates.location?.split(",")[0]?.trim() || parsed.profile.district,
-          };
-          setSecureItem("mock_user_session", {
-            user: parsed.user,
-            profile: newProfile,
-          });
-        } catch (e) {
-          console.error("Failed to update mock session", e);
-        }
-      }
-      await refreshProfile();
+      console.warn("Supabase environment is missing. Profile updates will not be persisted.");
       return;
     }
 
