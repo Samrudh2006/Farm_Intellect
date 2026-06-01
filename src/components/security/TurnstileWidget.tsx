@@ -36,9 +36,6 @@ export const TurnstileWidget = ({
         onExpire={onExpire}
         theme={theme}
         size={size}
-        language="auto"
-        appearanceObserver={true}
-        hideWidget={false}
       />
     </div>
   );
