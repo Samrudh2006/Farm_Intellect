@@ -102,9 +102,54 @@ const Weather = () => {
     try {
       // First try live API if deployed
       const { data: edgeData, error: edgeError } = await supabase.functions.invoke("weather", { body: { city } });
+      
       if (!edgeError && edgeData?.current) {
-        // ... live api logic 
-        throw new Error("Live API not fully active yet");
+        // LIVE API DATA!
+        const cur = edgeData.current;
+        setCurrentWeather({
+          temp: Math.round(cur.temp),
+          feelsLike: Math.round(cur.feelsLike),
+          humidity: Math.round(cur.humidity),
+          wind: Math.round(cur.wind),
+          visibility: 10,
+          pressure: 1012,
+          condition: cur.condition,
+          description: cur.description,
+          icon: "01d",
+          location: edgeData.location
+        });
+
+        const today = new Date();
+        const liveForecast: ForecastDay[] = edgeData.forecast.slice(0, 5).map((day: any, idx: number) => {
+          const d = new Date(day.date);
+          return {
+            date: day.date,
+            dayName: idx === 0 ? t('calendar.today') : d.toLocaleDateString("en-IN", { weekday: "short" }),
+            tempMax: Math.round(day.tempMax),
+            tempMin: Math.round(day.tempMin),
+            condition: day.condition,
+            description: day.description,
+            rain: day.rain || 0,
+            wind: Math.round(day.wind),
+            humidity: Math.round(cur.humidity) // fallback to current humidity since Open-Meteo daily doesn't give avg humidity easily
+          };
+        });
+        
+        setForecast(liveForecast);
+        
+        const smartAlerts: { title: string; description: string; severity: string }[] = [];
+        for (const day of liveForecast.slice(0, 3)) {
+          if (day.rain > 20) smartAlerts.push({ title: `Heavy Rain Expected (${day.dayName})`, description: `${day.rain}mm rainfall expected.`, severity: "high" });
+          else if (day.rain > 5) smartAlerts.push({ title: `Light Rain Expected (${day.dayName})`, description: `${day.rain}mm rainfall expected.`, severity: "medium" });
+          if (day.tempMax > 42) smartAlerts.push({ title: `Heat Wave Alert (${day.dayName})`, description: `Temperature up to ${day.tempMax}°C.`, severity: "high" });
+          if (day.wind > 30) smartAlerts.push({ title: `Strong Winds (${day.dayName})`, description: `Wind speeds up to ${day.wind} km/h.`, severity: "medium" });
+        }
+        
+        if (smartAlerts.length === 0) {
+          setAlerts([{ title: "Live Weather Active", description: "Connected to real Supabase Edge Functions with Open-Meteo.", severity: "low" }]);
+        } else {
+          setAlerts(smartAlerts);
+        }
       } else {
         throw new Error("Fallback to DB logs");
       }
@@ -113,7 +158,7 @@ const Weather = () => {
       const { data: dbLogs, error: dbError } = await supabase.from('weather_logs').select('*');
       
       if (dbError || !dbLogs || dbLogs.length === 0) {
-        toast({ title: "No weather data found", description: "Database weather_logs is empty.", variant: "destructive" });
+        toast({ title: "No weather data found", description: "Database weather_logs is empty and Edge Function failed.", variant: "destructive" });
         setLoading(false);
         return;
       }
@@ -148,7 +193,7 @@ const Weather = () => {
         };
       });
       setForecast(dbForecast);
-      setAlerts([{ title: "Weather Active", description: "Connected to real Supabase weather_logs database.", severity: "low" }]);
+      setAlerts([{ title: "Database Fallback Active", description: "Edge function failed. Using historical weather logs.", severity: "medium" }]);
     }
     setLoading(false);
   };
