@@ -21,7 +21,8 @@ import {
   Building,
   Landmark,
   Video,
-  Smartphone
+  Smartphone,
+  ClipboardList
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
@@ -43,6 +44,7 @@ const getNavigationItems = (t: (key: string) => string) => ({
     { icon: Gauge, label: `📡 ${t('nav.sensors')}`, href: "/farmer/sensors" },
     { icon: Map, label: `🗺 ${t('nav.fieldmap')}`, href: "/farmer/field-map" },
     { icon: Building, label: `🏪 ${t('nav.merchants')}`, href: "/farmer/merchants" },
+    { icon: ClipboardList, label: "Market Demands", href: "/farmer/requirements" },
     { icon: Vote, label: `🗳 ${t('nav.polls')}`, href: "/farmer/polls" },
     { icon: Landmark, label: `🏛 ${t('nav.schemes')}`, href: "/farmer/schemes" },
     { icon: Activity, label: t('nav.smart_features'), href: "/farmer/features" },
@@ -57,19 +59,9 @@ const getNavigationItems = (t: (key: string) => string) => ({
     { icon: LayoutDashboard, label: `🏢 ${t('sidebar.business_hub')}`, href: "/merchant/dashboard" },
     { icon: Users, label: t('nav.partner_farmers'), href: "/merchant/farmers" },
     { icon: TrendingUp, label: t('nav.market_prices'), href: "/merchant/market-prices" },
+    { icon: ClipboardList, label: "Requirements", href: "/merchant/requirements" },
     { icon: Building, label: "📦 Orders", href: "/merchant/orders" },
-    { icon: Bot, label: t('nav.ai_assistant'), href: "/merchant/chat" },
-    { icon: FileText, label: t('nav.documents'), href: "/merchant/documents" },
     { icon: Bell, label: t('nav.notifications'), href: "/merchant/notifications" },
-  ],
-  expert: [
-    { icon: LayoutDashboard, label: `🎓 ${t('sidebar.expert_center')}`, href: "/expert/dashboard" },
-    { icon: Activity, label: t('nav.ai_crop_scanner'), href: "/expert/ai-crop-scanner" },
-    { icon: Brain, label: t('nav.ai_advisory'), href: "/expert/ai-advisory" },
-    { icon: MessageSquare, label: "Consultations", href: "/expert/consultations" },
-    { icon: BookOpen, label: "📚 Knowledge Hub", href: "/expert/knowledge" },
-    { icon: Bot, label: t('nav.ai_assistant'), href: "/expert/chat" },
-    { icon: Bell, label: t('nav.notifications'), href: "/expert/notifications" },
   ],
   admin: [
     { icon: LayoutDashboard, label: t('sidebar.admin_control'), href: "/admin/dashboard" },
@@ -91,14 +83,12 @@ export const Sidebar = ({ isOpen, onClose, userRole = "farmer" }: SidebarProps) 
   const portalTitle = {
     farmer: t('sidebar.farmer_portal'),
     merchant: t('sidebar.business_hub'),
-    expert: t('sidebar.expert_center'),
     admin: t('sidebar.admin_control'),
   }[userRole] || t('sidebar.farmer_portal');
 
   const portalDesc = {
     farmer: t('sidebar.farmer_desc'),
     merchant: t('sidebar.business_desc'),
-    expert: t('sidebar.expert_desc'),
     admin: t('sidebar.admin_desc'),
   }[userRole] || t('sidebar.farmer_desc');
 

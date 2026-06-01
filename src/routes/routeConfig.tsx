@@ -10,7 +10,6 @@ const Index = lazy(() => import("@/pages/Index"));
 const Dashboard = lazy(() => import("@/pages/Dashboard"));
 const FarmerDashboard = lazy(() => import("@/pages/FarmerDashboard"));
 const MerchantDashboardPage = lazy(() => import("@/pages/MerchantDashboardPage"));
-const ExpertDashboardPage = lazy(() => import("@/pages/ExpertDashboardPage"));
 const AdminDashboardPage = lazy(() => import("@/pages/AdminDashboardPage"));
 const Login = lazy(() => import("@/pages/Login"));
 const Crops = lazy(() => import("@/pages/Crops"));
@@ -39,17 +38,11 @@ const ResetPassword = lazy(() => import("@/pages/ResetPassword"));
 const AppLauncher = lazy(() => import("@/pages/AppLauncher"));
 const MerchantFarmers = lazy(() => import("@/pages/merchant/MerchantFarmers"));
 const MerchantMarketPrices = lazy(() => import("@/pages/merchant/MerchantMarketPrices"));
-const MerchantDocuments = lazy(() => import("@/pages/merchant/MerchantDocuments"));
+const MerchantRequirements = lazy(() => import("@/pages/merchant/MerchantRequirements"));
 const MerchantNotifications = lazy(() => import("@/pages/merchant/MerchantNotifications"));
-const MerchantChat = lazy(() => import("@/pages/merchant/MerchantChat"));
 const MerchantOrders = lazy(() => import("@/pages/merchant/MerchantOrders"));
 const FarmerKnowledgeHub = lazy(() => import("@/pages/farmer/FarmerKnowledgeHub"));
-const ExpertAICropScanner = lazy(() => import("@/pages/expert/ExpertAICropScanner"));
-const ExpertAIAdvisory = lazy(() => import("@/pages/expert/ExpertAIAdvisory"));
-const ExpertChat = lazy(() => import("@/pages/expert/ExpertChat"));
-const ExpertNotifications = lazy(() => import("@/pages/expert/ExpertNotifications"));
-const ExpertConsultations = lazy(() => import("@/pages/expert/ExpertConsultations"));
-const ExpertKnowledgeHub = lazy(() => import("@/pages/expert/ExpertKnowledgeHub"));
+const FarmerRequirements = lazy(() => import("@/pages/farmer/FarmerRequirements"));
 const AdminUsers = lazy(() => import("@/pages/admin/AdminUsers"));
 const AdminAnalytics = lazy(() => import("@/pages/admin/AdminAnalytics"));
 const AdminSettings = lazy(() => import("@/pages/admin/AdminSettings"));
@@ -76,6 +69,7 @@ export const protectedRoutes: ProtectedRouteConfig[] = [
   { path: "/farmer/sensors", component: Sensors, allowedRoles: ["farmer"] },
   { path: "/farmer/field-map", component: FieldMap, allowedRoles: ["farmer"] },
   { path: "/farmer/merchants", component: Merchants, allowedRoles: ["farmer"] },
+  { path: "/farmer/requirements", component: FarmerRequirements, allowedRoles: ["farmer"] },
   { path: "/farmer/polls", component: Polls, allowedRoles: ["farmer"] },
   { path: "/farmer/schemes", component: Schemes, allowedRoles: ["farmer"] },
   { path: "/farmer/ai-advisory", component: AIAdvisory, allowedRoles: ["farmer"] },
@@ -92,20 +86,10 @@ export const protectedRoutes: ProtectedRouteConfig[] = [
   { path: "/merchant/dashboard", component: MerchantDashboardPage, allowedRoles: ["merchant"] },
   { path: "/merchant/farmers", component: MerchantFarmers, allowedRoles: ["merchant"] },
   { path: "/merchant/market-prices", component: MerchantMarketPrices, allowedRoles: ["merchant"] },
-  { path: "/merchant/documents", component: MerchantDocuments, allowedRoles: ["merchant"] },
+  { path: "/merchant/requirements", component: MerchantRequirements, allowedRoles: ["merchant"] },
   { path: "/merchant/notifications", component: MerchantNotifications, allowedRoles: ["merchant"] },
-  { path: "/merchant/chat", component: MerchantChat, allowedRoles: ["merchant"] },
   { path: "/merchant/orders", component: MerchantOrders, allowedRoles: ["merchant"] },
   { path: "/merchant/profile", component: Profile, allowedRoles: ["merchant"] },
-
-  { path: "/expert/dashboard", component: ExpertDashboardPage, allowedRoles: ["expert"] },
-  { path: "/expert/ai-crop-scanner", component: ExpertAICropScanner, allowedRoles: ["expert"] },
-  { path: "/expert/ai-advisory", component: ExpertAIAdvisory, allowedRoles: ["expert"] },
-  { path: "/expert/chat", component: ExpertChat, allowedRoles: ["expert"] },
-  { path: "/expert/consultations", component: ExpertConsultations, allowedRoles: ["expert"] },
-  { path: "/expert/knowledge", component: ExpertKnowledgeHub, allowedRoles: ["expert"] },
-  { path: "/expert/notifications", component: ExpertNotifications, allowedRoles: ["expert"] },
-  { path: "/expert/profile", component: Profile, allowedRoles: ["expert"] },
 
   { path: "/admin/dashboard", component: AdminDashboardPage, allowedRoles: ["admin"] },
   { path: "/admin/users", component: AdminUsers, allowedRoles: ["admin"] },

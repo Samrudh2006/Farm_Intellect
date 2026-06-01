@@ -2,7 +2,7 @@ import { getSecureItem, setSecureItem } from "@/lib/secure-storage";
 import { useAuth } from "@/contexts/AuthContext";
 import { hasSupabaseEnv, supabase } from "@/integrations/supabase/client";
 
-export type CurrentUserRole = "farmer" | "merchant" | "expert" | "admin";
+export type CurrentUserRole = "farmer" | "merchant" | "admin";
 
 export interface CurrentUser {
   name: string;

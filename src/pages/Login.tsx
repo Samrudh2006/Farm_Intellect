@@ -23,7 +23,6 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { logSecurityEvent } from "@/lib/securityMonitoring";
 import farmerImg from "@/assets/roles/farmer-role.jpg";
 import merchantImg from "@/assets/roles/merchant-role.jpg";
-import expertImg from "@/assets/roles/expert-role.jpg";
 import adminImg from "@/assets/roles/admin-role.jpg";
 
 const Login = () => {
@@ -85,7 +84,6 @@ const Login = () => {
       const routes: Record<string, string> = {
         farmer: "/farmer/dashboard",
         merchant: "/merchant/dashboard",
-        expert: "/expert/dashboard",
         admin: "/admin/dashboard",
       };
       const targetRoute = routes[profile.role] || "/farmer/dashboard";
@@ -187,7 +185,7 @@ const Login = () => {
       setLoading(true);
       const { error } = await signUpWithAadhaar(cleanAadhaar, formData.passkey, {
         first_name: formData.name,
-        role: (selectedRole || "farmer") as 'farmer' | 'merchant' | 'expert' | 'admin',
+        role: (selectedRole || "farmer") as 'farmer' | 'merchant' | 'admin',
         phone_number: formData.phone ? `+91${formData.phone}` : undefined,
         state: formData.location || undefined,
       });
@@ -561,7 +559,6 @@ const Login = () => {
   const roleCards = [
     { role: "farmer", title: t("auth.signin_farmer"), image: farmerImg, description: t("auth.farmer_desc") },
     { role: "merchant", title: t("auth.signin_merchant"), image: merchantImg, description: t("auth.merchant_desc") },
-    { role: "expert", title: t("auth.signin_expert"), image: expertImg, description: t("auth.expert_desc") },
     { role: "admin", title: t("auth.signin_admin"), image: adminImg, description: t("auth.admin_desc") },
   ];
 
@@ -589,7 +586,7 @@ const Login = () => {
             <p className="text-muted-foreground max-w-xl mx-auto">{t("auth.welcome")}</p>
           </div>
 
-          <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6 max-w-6xl mx-auto">
+          <div className="grid sm:grid-cols-1 md:grid-cols-3 gap-6 max-w-5xl mx-auto">
             {roleCards.map((card) => (
               <Card key={card.role} className="group cursor-pointer overflow-hidden border-2 border-transparent hover:border-primary/40 transition-all duration-300 hover:shadow-xl hover:-translate-y-1" onClick={() => handleRoleSelect(card.role)}>
                 <div className="relative h-48 overflow-hidden">
