@@ -1,4 +1,4 @@
-import { useState, useCallback, useMemo } from "react";
+import { useState, useCallback, useMemo, useEffect } from "react";
 import { Header } from "@/components/layout/Header";
 import { Sidebar } from "@/components/layout/Sidebar";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -24,7 +24,7 @@ import {
 } from "lucide-react";
 import { useCurrentUser } from "@/hooks/useCurrentUser";
 import { useToast } from "@/hooks/use-toast";
-import { apiFetch } from "@/lib/api";
+import { supabase } from "@/integrations/supabase/client";
 
 interface ScanMedicine {
   name: string;
@@ -75,42 +75,56 @@ const AICropScanner = () => {
   const { toast } = useToast();
   const { user } = useCurrentUser();
 
-  const aiStats = {
-    totalScans: 1247,
-    diseasesDetected: 89,
+  const [aiStats, setAiStats] = useState({
+    totalScans: 0,
+    diseasesDetected: 0,
     accuracy: 94.2,
     preventionTips: 156
+  });
+
+  const [recentScans, setRecentScans] = useState<any[]>([]);
+
+  const loadStatsAndScans = async () => {
+    // Fetch total scans
+    const { count: totalScans } = await supabase
+      .from('crop_scans')
+      .select('*', { count: 'exact', head: true });
+      
+    // Fetch scans where disease was actually found (severity not low/none)
+    const { count: diseases } = await supabase
+      .from('crop_scans')
+      .select('*', { count: 'exact', head: true })
+      .not('severity', 'eq', 'low');
+
+    // Fetch recent scans
+    const { data: recent } = await supabase
+      .from('crop_scans')
+      .select('*, profiles:user_id(first_name, last_name)')
+      .order('created_at', { ascending: false })
+      .limit(3);
+
+    setAiStats(prev => ({
+      ...prev,
+      totalScans: totalScans || 0,
+      diseasesDetected: diseases || 0
+    }));
+
+    if (recent) {
+      setRecentScans(recent.map(r => ({
+        id: r.id,
+        farmer: r.profiles ? `${r.profiles.first_name} ${r.profiles.last_name}` : "Unknown Farmer",
+        crop: r.crop_type,
+        disease: r.disease_detected,
+        confidence: Math.round(r.confidence),
+        status: r.status,
+        timestamp: new Date(r.created_at).toLocaleDateString()
+      })));
+    }
   };
 
-  const recentScans = [
-    {
-      id: "SC001",
-      farmer: "Rajesh Kumar", 
-      crop: "Wheat",
-      disease: "Leaf Rust",
-      confidence: 92,
-      status: "treated",
-      timestamp: "2 hours ago"
-    },
-    {
-      id: "SC002", 
-      farmer: "Priya Singh",
-      crop: "Rice", 
-      disease: "Blast Disease",
-      confidence: 87,
-      status: "pending",
-      timestamp: "4 hours ago"
-    },
-    {
-      id: "SC003",
-      farmer: "Mohan Patel",
-      crop: "Cotton",
-      disease: "Bollworm",
-      confidence: 95,
-      status: "treated", 
-      timestamp: "1 day ago"
-    }
-  ];
+  useEffect(() => {
+    loadStatsAndScans();
+  }, []);
 
   const localMlCandidates = useMemo(() => {
     if (!scanResults) return [];
@@ -155,22 +169,17 @@ const AICropScanner = () => {
       formData.append("image", selectedImage);
       formData.append("cropType", cropType);
 
-      const { detection } = await apiFetch<{ detection: {
-        disease: string;
-        confidence: number;
-        severity: string;
-        category: string;
-        description: string;
-        symptomsDetected?: string[];
-        treatment?: { chemical?: string[]; organic?: string[]; cultural?: string[] };
-        prevention?: string[];
-        yieldLossEstimate?: string;
-        urgency?: string;
-        alternativeDiagnoses?: Array<{ disease: string; confidence: number }>;
-      } }>("/api/ai/detect-disease", {
-        method: "POST",
+      const { data: { session } } = await supabase.auth.getSession();
+
+      // Call Edge Function
+      const { data, error } = await supabase.functions.invoke("detect-disease", {
         body: formData,
       });
+
+      if (error) throw error;
+      if (data?.error) throw new Error(data.error);
+
+      const detection = data.detection;
 
       const chemicalTreatments = detection.treatment?.chemical ?? [];
       const organicTreatments = detection.treatment?.organic ?? [];
@@ -217,6 +226,19 @@ const AICropScanner = () => {
         title: "Scan completed",
         description: `${scanResult.disease} detected with ${scanResult.confidence}% confidence`,
       });
+
+      // Save to Database
+      if (session?.user?.id) {
+        await supabase.from('crop_scans').insert({
+          user_id: session.user.id,
+          crop_type: cropType,
+          disease_detected: detection.disease,
+          confidence: detection.confidence,
+          severity: detection.severity,
+          status: 'pending'
+        });
+        loadStatsAndScans();
+      }
     } catch (err: any) {
       toast({
         title: "Scan failed",
