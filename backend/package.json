@@ -54,5 +54,12 @@
     "supertest": "^7.2.2",
     "vite": "^8.0.15",
     "vitest": "^4.0.18"
+  },
+  "overrides": {
+    "socket.io-parser": "4.2.6",
+    "qs": "$qs",
+    "protobufjs": "7.5.8",
+    "ws": "$ws",
+    "uuid": "$uuid"
   }
 }
