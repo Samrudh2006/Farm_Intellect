@@ -205,8 +205,7 @@ class VoiceService {
     const hasMediaRecorder = typeof MediaRecorder !== 'undefined';
     const hasAudioContext =
       typeof AudioContext !== 'undefined' || typeof (window as any).webkitAudioContext !== 'undefined';
-    const hasGetUserMedia =
-      navigator.mediaDevices && navigator.mediaDevices.getUserMedia;
+    const hasGetUserMedia = !!(navigator.mediaDevices && navigator.mediaDevices.getUserMedia);
 
     return hasMediaRecorder && hasAudioContext && hasGetUserMedia;
   }

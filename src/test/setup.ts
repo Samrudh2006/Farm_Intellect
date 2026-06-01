@@ -58,5 +58,5 @@ global.fetch = vi.fn(() =>
     ok: true,
     status: 200,
   })
-);
+) as any;
 

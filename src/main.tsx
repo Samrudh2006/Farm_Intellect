@@ -83,7 +83,7 @@ try {
     <Sentry.ErrorBoundary fallback={({ error, resetError }) => (
       <div style={{ padding: '20px', color: 'red' }}>
         <h1>Application Error</h1>
-        <p>An error occurred: {error?.message}</p>
+        <p>An error occurred: {(error as Error)?.message}</p>
         <button onClick={resetError}>Try again</button>
       </div>
     )} showDialog>
