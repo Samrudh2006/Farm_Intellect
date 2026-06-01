@@ -60,8 +60,11 @@ export function SeoHead({ metadata, schema, customSchema, breadcrumbs }: SeoHead
           }
           break;
       }
+    } else if (location.pathname === "/") {
+      // Homepage: emit Organization schema to establish the brand entity
+      schemaToInject = generateOrganizationSchema();
     } else {
-      // Default: add breadcrumb schema on all pages
+      // Default: add breadcrumb schema on subpages
       const generatedBreadcrumbs = breadcrumbs || generateBreadcrumbs(location.pathname);
       if (generatedBreadcrumbs.length > 1) {
         schemaToInject = generateBreadcrumbSchema(generatedBreadcrumbs);

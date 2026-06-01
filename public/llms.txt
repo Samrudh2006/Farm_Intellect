@@ -1,0 +1,17 @@
+# Farm Intellect
+
+> AI-powered smart agriculture platform for Indian farmers, available in 22 Indian languages. Provides crop advisory, weather forecasts, pest and disease detection, mandi prices, expert consultations, and government scheme matching.
+
+Farm Intellect connects farmers, agri-merchants, and agricultural experts through dedicated hubs. It runs offline-first (PWA), supports Aadhaar and OTP authentication, and surfaces data sourced from Indian government APIs and AI models (Google Gemini Vision, Sarvam AI).
+
+## Pages
+
+- [Home](/): Overview of Farm Intellect's AI-powered agriculture platform for Indian farmers.
+- [Login](/login): Sign in with Aadhaar, passkey, phone OTP, or email.
+- [SMS Register](/sms-register): Register a farmer account using only SMS — no smartphone required.
+- [Reset Password](/reset-password): Reset the password for a Farm Intellect account.
+- [Install App](/app): Install Farm Intellect as a native-feeling mobile PWA.
+
+## Optional
+
+- [Open App Shortcut](/launch): Direct shortcut to launch the installed Farm Intellect PWA.
