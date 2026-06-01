@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { ExpertConsultationWorkflow } from "@/components/features/ExpertConsultationWorkflow";
 import { Header } from "@/components/layout/Header";
 import { Sidebar } from "@/components/layout/Sidebar";
@@ -6,6 +6,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { useCurrentUser } from "@/hooks/useCurrentUser";
+import { supabase } from "@/integrations/supabase/client";
 import { 
   Brain, 
   Calendar, 
@@ -16,107 +17,77 @@ import {
   Zap,
   CheckCircle,
   Clock,
-  AlertTriangle
+  Loader2
 } from "lucide-react";
 import { cropRecommendationsMetadata } from "@/data/cropRecommendations";
 import { pestDataMetadata } from "@/data/pestData";
 import { soilHealthMetadata } from "@/data/soilHealth";
 
-const mockAdvisory = [
-  {
-    id: 1,
-    title: "Optimal Irrigation Schedule",
-    type: "irrigation",
-    priority: "high",
-    crop: "Winter Wheat",
-    field: "Field A",
-    description: "Based on soil moisture sensors and weather forecast, increase irrigation frequency for the next 5 days.",
-    recommendation: "Apply 25mm of water every 2 days. Monitor soil moisture levels at 20cm depth.",
-    confidence: 94,
-    createdDate: "2024-09-17",
-    status: "pending",
-    aiGenerated: true
-  },
-  {
-    id: 2,
-    title: "Nitrogen Fertilizer Application",
-    type: "fertilizer", 
-    priority: "medium",
-    crop: "Corn",
-    field: "Field B",
-    description: "Corn is entering rapid growth phase. Additional nitrogen will optimize yield potential.",
-    recommendation: "Apply 45kg N/hectare using urea fertilizer. Best applied before next rainfall.",
-    confidence: 87,
-    createdDate: "2024-09-16",
-    status: "pending",
-    aiGenerated: true
-  },
-  {
-    id: 3,
-    title: "Pest Monitoring Alert",
-    type: "pest",
-    priority: "high",
-    crop: "Soybeans",
-    field: "Field C", 
-    description: "Weather conditions favorable for aphid development. Implement preventive scouting.",
-    recommendation: "Scout fields daily for 7 days. Look for aphid colonies on leaf undersides. Consider beneficial insects.",
-    confidence: 78,
-    createdDate: "2024-09-15",
-    status: "in-progress",
-    aiGenerated: true
-  },
-  {
-    id: 4,
-    title: "Harvest Timing Optimization",
-    type: "harvest",
-    priority: "medium",
-    crop: "Soybeans",
-    field: "Field C",
-    description: "Based on moisture content and weather forecast, optimal harvest window identified.",
-    recommendation: "Harvest when moisture content reaches 13-15%. Expected optimal window: Sept 28 - Oct 5.",
-    confidence: 91,
-    createdDate: "2024-09-14",
-    status: "completed",
-    aiGenerated: false
-  }
-];
+interface AdvisoryItem {
+  id: string;
+  title: string;
+  type: string;
+  priority: string;
+  description: string;
+  created_at: string;
+}
 
-const typeIcons = {
+const typeIcons: Record<string, any> = {
   irrigation: Droplets,
   fertilizer: Zap,
   pest: Bug,
   harvest: Wheat,
   planting: Calendar,
+  alert: AlertTriangle,
+  warning: Bug
 };
 
-const typeColors = {
-  irrigation: "text-water",
-  fertilizer: "text-harvest", 
-  pest: "text-destructive",
-  harvest: "text-primary",
-  planting: "text-earth",
+import { AlertTriangle } from "lucide-react";
+
+const typeColors: Record<string, string> = {
+  irrigation: "text-blue-500",
+  fertilizer: "text-amber-500", 
+  pest: "text-red-500",
+  harvest: "text-green-500",
+  planting: "text-emerald-500",
+  alert: "text-red-500",
+  warning: "text-orange-500"
 };
 
-const priorityColors = {
+const priorityColors: Record<string, any> = {
   high: "destructive",
   medium: "secondary", 
   low: "outline",
-};
-
-const statusColors = {
-  pending: "secondary",
-  "in-progress": "default",
-  completed: "outline",
 };
 
 const Advisory = () => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [filter, setFilter] = useState("all");
   const { user } = useCurrentUser();
+  const [advisoryItems, setAdvisoryItems] = useState<AdvisoryItem[]>([]);
+  const [loading, setLoading] = useState(true);
 
-  const filteredAdvisory = filter === "all" 
-    ? mockAdvisory 
-    : mockAdvisory.filter(item => item.status === filter);
+  useEffect(() => {
+    fetchAdvisory();
+  }, []);
+
+  const fetchAdvisory = async () => {
+    setLoading(true);
+    try {
+      const { data, error } = await supabase
+        .from('ai_recommendations')
+        .select('*')
+        .order('created_at', { ascending: false });
+      
+      if (!error && data) {
+        setAdvisoryItems(data);
+      }
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const advisorySources = [
     { label: "Crop recommendations", meta: cropRecommendationsMetadata },
@@ -142,12 +113,11 @@ const Advisory = () => {
 
       <main className="md:ml-64 p-6">
         <div className="space-y-6">
-          {/* Page Header */}
           <div className="flex items-center justify-between">
             <div>
               <h2 className="text-3xl font-bold text-foreground">Advisory Center</h2>
               <p className="text-muted-foreground">
-                AI-powered recommendations, irrigation guidance, and bookable expert support for your crops
+                Live AI-powered recommendations from Supabase
               </p>
             </div>
             <div className="flex items-center gap-2">
@@ -157,26 +127,6 @@ const Advisory = () => {
           </div>
 
           <ExpertConsultationWorkflow />
-
-          {/* Filter Tabs */}
-          <div className="flex gap-2 border-b">
-            {[
-              { key: "all", label: "All" },
-              { key: "pending", label: "Pending" },
-              { key: "in-progress", label: "In Progress" }, 
-              { key: "completed", label: "Completed" }
-            ].map((tab) => (
-              <Button
-                key={tab.key}
-                variant={filter === tab.key ? "default" : "ghost"}
-                size="sm"
-                onClick={() => setFilter(tab.key)}
-                className="mb-2"
-              >
-                {tab.label}
-              </Button>
-            ))}
-          </div>
 
           <Card className="border-primary/20 bg-primary/5">
             <CardHeader className="flex flex-row items-center justify-between space-y-0">
@@ -197,109 +147,76 @@ const Advisory = () => {
             </CardContent>
           </Card>
 
-          {/* Advisory Cards */}
           <div className="space-y-4">
-            {filteredAdvisory.map((advisory) => {
-              const TypeIcon = typeIcons[advisory.type as keyof typeof typeIcons];
-              
-              return (
-                <Card key={advisory.id} className="hover:shadow-lg transition-shadow">
-                  <CardHeader>
-                    <div className="flex items-start justify-between">
-                      <div className="flex items-center gap-3">
-                        <TypeIcon className={`h-6 w-6 ${typeColors[advisory.type as keyof typeof typeColors]}`} />
-                        <div>
-                          <div className="flex items-center gap-2 mb-1">
-                            <CardTitle className="text-lg">{advisory.title}</CardTitle>
-                            {advisory.aiGenerated && (
+            {loading ? (
+              <div className="flex justify-center py-12"><Loader2 className="h-8 w-8 animate-spin text-primary" /></div>
+            ) : advisoryItems.length === 0 ? (
+              <div className="text-center py-12">
+                <Brain className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
+                <h3 className="text-lg font-medium">No advisory items found</h3>
+                <p className="text-muted-foreground">Recommendations will appear here.</p>
+              </div>
+            ) : (
+              advisoryItems.map((advisory) => {
+                const TypeIcon = typeIcons[advisory.type] || Brain;
+                const iconColor = typeColors[advisory.type] || "text-primary";
+                
+                return (
+                  <Card key={advisory.id} className="hover:shadow-lg transition-shadow">
+                    <CardHeader>
+                      <div className="flex items-start justify-between">
+                        <div className="flex items-center gap-3">
+                          <TypeIcon className={`h-6 w-6 ${iconColor}`} />
+                          <div>
+                            <div className="flex items-center gap-2 mb-1">
+                              <CardTitle className="text-lg">{advisory.title}</CardTitle>
                               <Badge variant="outline" className="text-xs">
-                                <Brain className="h-3 w-3 mr-1" />
-                                AI
+                                <Brain className="h-3 w-3 mr-1" /> AI
                               </Badge>
-                            )}
+                            </div>
+                            <CardDescription>Generated Recommendation</CardDescription>
                           </div>
-                          <CardDescription>
-                            {advisory.crop} • {advisory.field}
-                          </CardDescription>
+                        </div>
+                        <div className="flex flex-col items-end gap-2">
+                          <Badge variant={priorityColors[advisory.priority] as any || "outline"}>
+                            {advisory.priority} priority
+                          </Badge>
                         </div>
                       </div>
-                      <div className="flex flex-col items-end gap-2">
-                        <Badge variant={priorityColors[advisory.priority as keyof typeof priorityColors] as any}>
-                          {advisory.priority} priority
-                        </Badge>
-                        <Badge variant={statusColors[advisory.status as keyof typeof statusColors] as any}>
-                          {advisory.status === "in-progress" ? "In Progress" : advisory.status}
-                        </Badge>
+                    </CardHeader>
+                    <CardContent className="space-y-4">
+                      <div>
+                        <h4 className="font-medium mb-2">Analysis & Recommendation</h4>
+                        <p className="text-sm text-muted-foreground">{advisory.description}</p>
                       </div>
-                    </div>
-                  </CardHeader>
-                  <CardContent className="space-y-4">
-                    <div>
-                      <h4 className="font-medium mb-2">Analysis</h4>
-                      <p className="text-sm text-muted-foreground">{advisory.description}</p>
-                    </div>
-                    
-                    <div>
-                      <h4 className="font-medium mb-2">Recommendation</h4>
-                      <p className="text-sm">{advisory.recommendation}</p>
-                    </div>
 
-                    <div className="flex items-center justify-between pt-4 border-t">
-                      <div className="flex items-center gap-4 text-sm text-muted-foreground">
-                        <div className="flex items-center gap-1">
-                          <Calendar className="h-4 w-4" />
-                          {new Date(advisory.createdDate).toLocaleDateString()}
-                        </div>
-                        {advisory.aiGenerated && (
+                      <div className="flex items-center justify-between pt-4 border-t">
+                        <div className="flex items-center gap-4 text-sm text-muted-foreground">
+                          <div className="flex items-center gap-1">
+                            <Calendar className="h-4 w-4" />
+                            {new Date(advisory.created_at).toLocaleDateString()}
+                          </div>
                           <div className="flex items-center gap-1">
                             <TrendingUp className="h-4 w-4" />
-                            {advisory.confidence}% confidence
+                            95% confidence
                           </div>
-                        )}
-                      </div>
-                      
-                      <div className="flex gap-2">
-                        {advisory.status === "pending" && (
-                          <>
-                            <Button size="sm" variant="outline">
-                              <Clock className="h-4 w-4 mr-1" />
-                              Schedule
-                            </Button>
-                            <Button size="sm">
-                              <CheckCircle className="h-4 w-4 mr-1" />
-                              Apply
-                            </Button>
-                          </>
-                        )}
-                        {advisory.status === "in-progress" && (
+                        </div>
+                        
+                        <div className="flex gap-2">
                           <Button size="sm" variant="outline">
-                            <CheckCircle className="h-4 w-4 mr-1" />
-                            Mark Complete
+                            <Clock className="h-4 w-4 mr-1" /> Schedule
                           </Button>
-                        )}
-                        <Button size="sm" variant="ghost">
-                          View Details
-                        </Button>
+                          <Button size="sm">
+                            <CheckCircle className="h-4 w-4 mr-1" /> Apply
+                          </Button>
+                        </div>
                       </div>
-                    </div>
-                  </CardContent>
-                </Card>
-              );
-            })}
+                    </CardContent>
+                  </Card>
+                );
+              })
+            )}
           </div>
-
-          {filteredAdvisory.length === 0 && (
-            <div className="text-center py-12">
-              <Brain className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
-              <h3 className="text-lg font-medium">No advisory items found</h3>
-              <p className="text-muted-foreground">
-                {filter === "all" 
-                  ? "Advisory recommendations will appear here as they become available"
-                  : `No ${filter} advisory items at the moment`
-                }
-              </p>
-            </div>
-          )}
         </div>
       </main>
     </div>

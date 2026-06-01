@@ -1,73 +1,68 @@
-import { Brain, Droplets, Bug, Zap, Calendar } from "lucide-react";
+import { useState, useEffect } from "react";
+import { Brain, Droplets, Bug, Zap, Calendar, Loader2 } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { supabase } from "@/integrations/supabase/client";
 
 interface Recommendation {
   id: string;
-  type: "irrigation" | "fertilizer" | "pest" | "planting";
-  priority: "high" | "medium" | "low";
+  type: string;
+  priority: string;
   title: string;
   description: string;
-  action: string;
-  dueDate?: string;
-  confidence: number;
 }
 
-const mockRecommendations: Recommendation[] = [
-  {
-    id: "1",
-    type: "irrigation",
-    priority: "high",
-    title: "Increase Irrigation",
-    description: "Soil moisture levels are below optimal for wheat growth. Recommend increasing irrigation by 15%.",
-    action: "Apply 2.5L per square meter",
-    dueDate: "Next 2 days",
-    confidence: 92
-  },
-  {
-    id: "2", 
-    type: "fertilizer",
-    priority: "medium",
-    title: "Nitrogen Boost",
-    description: "Corn crops would benefit from additional nitrogen during vegetative stage.",
-    action: "Apply 45kg N/hectare",
-    dueDate: "Within 1 week",
-    confidence: 87
-  },
-  {
-    id: "3",
-    type: "pest",
-    priority: "high", 
-    title: "Monitor for Aphids",
-    description: "Weather conditions favor aphid development. Implement preventive measures.",
-    action: "Scout fields daily",
-    dueDate: "Immediate",
-    confidence: 78
-  }
-];
-
-const typeIcons = {
+const typeIcons: Record<string, any> = {
   irrigation: Droplets,
   fertilizer: Zap,
   pest: Bug,
   planting: Calendar,
+  alert: Droplets,
+  warning: Bug
 };
 
-const typeColors = {
-  irrigation: "text-water",
-  fertilizer: "text-harvest",
-  pest: "text-destructive",
-  planting: "text-primary",
+const typeColors: Record<string, string> = {
+  irrigation: "text-blue-500",
+  fertilizer: "text-amber-500",
+  pest: "text-red-500",
+  planting: "text-green-500",
+  alert: "text-blue-500",
+  warning: "text-orange-500"
 };
 
-const priorityColors = {
+const priorityColors: Record<string, any> = {
   high: "destructive",
   medium: "secondary",
   low: "outline",
 };
 
 export const AIRecommendations = () => {
+  const [recommendations, setRecommendations] = useState<Recommendation[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchRecommendations = async () => {
+      setLoading(true);
+      try {
+        const { data, error } = await supabase
+          .from('ai_recommendations')
+          .select('*')
+          .order('created_at', { ascending: false });
+        
+        if (!error && data) {
+          setRecommendations(data);
+        }
+      } catch (err) {
+        console.error("Failed to fetch recommendations", err);
+      } finally {
+        setLoading(false);
+      }
+    };
+    
+    fetchRecommendations();
+  }, []);
+
   return (
     <Card>
       <CardHeader>
@@ -77,47 +72,42 @@ export const AIRecommendations = () => {
         </CardTitle>
       </CardHeader>
       <CardContent className="space-y-4">
-        {mockRecommendations.map((rec) => {
-          const TypeIcon = typeIcons[rec.type];
-          
-          return (
-            <div key={rec.id} className="space-y-3 p-4 rounded-lg border border-border bg-card/50">
-              <div className="flex items-start justify-between">
-                <div className="flex items-center gap-3">
-                  <TypeIcon className={`h-5 w-5 ${typeColors[rec.type]}`} />
-                  <div>
-                    <h4 className="font-medium">{rec.title}</h4>
-                    <p className="text-sm text-muted-foreground">{rec.description}</p>
+        {loading ? (
+          <div className="flex justify-center py-6"><Loader2 className="h-6 w-6 animate-spin text-primary" /></div>
+        ) : recommendations.length === 0 ? (
+          <p className="text-sm text-muted-foreground text-center py-4">No AI recommendations currently available.</p>
+        ) : (
+          recommendations.map((rec) => {
+            const TypeIcon = typeIcons[rec.type] || Brain;
+            const iconColor = typeColors[rec.type] || "text-primary";
+            const badgeVariant = priorityColors[rec.priority] || "outline";
+            
+            return (
+              <div key={rec.id} className="space-y-3 p-4 rounded-lg border border-border bg-card/50">
+                <div className="flex items-start justify-between">
+                  <div className="flex items-center gap-3">
+                    <TypeIcon className={`h-5 w-5 ${iconColor}`} />
+                    <div>
+                      <h4 className="font-medium">{rec.title}</h4>
+                      <p className="text-sm text-muted-foreground">{rec.description}</p>
+                    </div>
+                  </div>
+                  <div className="flex flex-col items-end gap-2">
+                    <Badge variant={badgeVariant as any}>
+                      {rec.priority} priority
+                    </Badge>
                   </div>
                 </div>
-                <div className="flex flex-col items-end gap-2">
-                  <Badge variant={priorityColors[rec.priority] as any}>
-                    {rec.priority} priority
-                  </Badge>
-                  <div className="text-xs text-muted-foreground">
-                    {rec.confidence}% confidence
-                  </div>
+                
+                <div className="flex items-center justify-between pt-2 border-t">
+                  <Button size="sm" variant={rec.priority === "high" ? "default" : "outline"} className="ml-auto">
+                    Acknowledge
+                  </Button>
                 </div>
               </div>
-              
-              <div className="flex items-center justify-between pt-2 border-t">
-                <div>
-                  <div className="font-medium text-sm">{rec.action}</div>
-                  {rec.dueDate && (
-                    <div className="text-xs text-muted-foreground">Due: {rec.dueDate}</div>
-                  )}
-                </div>
-                <Button size="sm" variant={rec.priority === "high" ? "default" : "outline"}>
-                  Apply
-                </Button>
-              </div>
-            </div>
-          );
-        })}
-        
-        <Button variant="outline" className="w-full">
-          View All Recommendations
-        </Button>
+            );
+          })
+        )}
       </CardContent>
     </Card>
   );

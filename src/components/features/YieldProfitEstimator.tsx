@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -6,6 +6,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Calculator, TrendingUp, IndianRupee } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { supabase } from "@/integrations/supabase/client";
 
 export const YieldProfitEstimator = () => {
   const { toast } = useToast();
@@ -19,15 +20,30 @@ export const YieldProfitEstimator = () => {
   });
   const [result, setResult] = useState<any>(null);
   const [loading, setLoading] = useState(false);
+  const [marketPrices, setMarketPrices] = useState<Record<string, number>>({});
 
-  const cropPrices = {
-    wheat: { price: 2500, yield: 4.5 },
-    rice: { price: 2800, yield: 5.2 },
-    cotton: { price: 6500, yield: 2.1 },
-    sugarcane: { price: 380, yield: 65 },
-    mustard: { price: 6200, yield: 1.8 },
-    potato: { price: 2200, yield: 25 },
-    tomato: { price: 3500, yield: 35 }
+  useEffect(() => {
+    const fetchPrices = async () => {
+      const { data, error } = await supabase.from('market_prices').select('commodity, modal_price');
+      if (!error && data) {
+        const prices: Record<string, number> = {};
+        data.forEach((item: any) => {
+          prices[item.commodity.toLowerCase()] = item.modal_price;
+        });
+        setMarketPrices(prices);
+      }
+    };
+    fetchPrices();
+  }, []);
+
+  const cropYields: Record<string, number> = {
+    wheat: 4.5,
+    rice: 5.2,
+    cotton: 2.1,
+    sugarcane: 65,
+    mustard: 1.8,
+    soybeans: 2.8,
+    corn: 4.2
   };
 
   const calculateEstimate = async () => {
@@ -42,11 +58,14 @@ export const YieldProfitEstimator = () => {
 
     setLoading(true);
     
-    // Mock AI calculation with realistic farming data
+    // AI calculation simulation with live market data
     setTimeout(() => {
-      const crop = cropPrices[formData.crop as keyof typeof cropPrices];
+      const cropKey = formData.crop.toLowerCase();
+      const baseYield = cropYields[cropKey] || 3.0;
+      const livePrice = marketPrices[cropKey] || 2500; // fallback if not in DB
+      
       const area = parseFloat(formData.area);
-      const customPrice = parseFloat(formData.mandiPrice) || crop.price;
+      const customPrice = parseFloat(formData.mandiPrice) || livePrice;
       
       // Apply multipliers based on conditions
       let yieldMultiplier = 1;
@@ -54,7 +73,7 @@ export const YieldProfitEstimator = () => {
       if (formData.irrigation === "drip") yieldMultiplier *= 1.15;
       if (formData.season === "optimal") yieldMultiplier *= 1.1;
       
-      const estimatedYield = crop.yield * area * yieldMultiplier;
+      const estimatedYield = baseYield * area * yieldMultiplier;
       const grossIncome = estimatedYield * customPrice;
       const estimatedCosts = area * 15000; // ₹15,000 per acre average
       const netProfit = grossIncome - estimatedCosts;
@@ -70,7 +89,7 @@ export const YieldProfitEstimator = () => {
       });
       
       setLoading(false);
-    }, 2000);
+    }, 1000);
   };
 
   return (
@@ -79,7 +98,7 @@ export const YieldProfitEstimator = () => {
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <Calculator className="h-5 w-5" />
-            AI Yield & Profit Estimator
+            AI Yield & Profit Estimator (Live Prices)
           </CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
@@ -91,13 +110,11 @@ export const YieldProfitEstimator = () => {
                   <SelectValue placeholder="Choose crop" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="wheat">Wheat (गेहूं)</SelectItem>
-                  <SelectItem value="rice">Rice (धान)</SelectItem>
-                  <SelectItem value="cotton">Cotton (कपास)</SelectItem>
-                  <SelectItem value="sugarcane">Sugarcane (गन्ना)</SelectItem>
-                  <SelectItem value="mustard">Mustard (सरसों)</SelectItem>
-                  <SelectItem value="potato">Potato (आलू)</SelectItem>
-                  <SelectItem value="tomato">Tomato (टमाटर)</SelectItem>
+                  <SelectItem value="Wheat">Wheat</SelectItem>
+                  <SelectItem value="Corn">Corn</SelectItem>
+                  <SelectItem value="Soybeans">Soybeans</SelectItem>
+                  <SelectItem value="Rice">Rice</SelectItem>
+                  <SelectItem value="Cotton">Cotton</SelectItem>
                 </SelectContent>
               </Select>
             </div>
@@ -114,7 +131,7 @@ export const YieldProfitEstimator = () => {
             <div className="space-y-2">
               <Label>Current Mandi Price (₹/quintal)</Label>
               <Input
-                placeholder="Optional - will use market rate"
+                placeholder="Optional - will use live market rate from DB"
                 value={formData.mandiPrice}
                 onChange={(e) => setFormData(prev => ({ ...prev, mandiPrice: e.target.value }))}
               />
@@ -127,9 +144,9 @@ export const YieldProfitEstimator = () => {
                   <SelectValue placeholder="Select soil type" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="fertile">Fertile (उपजाऊ)</SelectItem>
-                  <SelectItem value="average">Average (सामान्य)</SelectItem>
-                  <SelectItem value="poor">Poor (गरीब)</SelectItem>
+                  <SelectItem value="fertile">Fertile</SelectItem>
+                  <SelectItem value="average">Average</SelectItem>
+                  <SelectItem value="poor">Poor</SelectItem>
                 </SelectContent>
               </Select>
             </div>
@@ -141,9 +158,9 @@ export const YieldProfitEstimator = () => {
                   <SelectValue placeholder="Select irrigation" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="drip">Drip Irrigation (ड्रिप)</SelectItem>
-                  <SelectItem value="sprinkler">Sprinkler (छिड़काव)</SelectItem>
-                  <SelectItem value="flood">Flood (बाढ़)</SelectItem>
+                  <SelectItem value="drip">Drip Irrigation</SelectItem>
+                  <SelectItem value="sprinkler">Sprinkler</SelectItem>
+                  <SelectItem value="flood">Flood</SelectItem>
                 </SelectContent>
               </Select>
             </div>
@@ -155,9 +172,9 @@ export const YieldProfitEstimator = () => {
                   <SelectValue placeholder="Select season" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="optimal">Optimal (इष्टतम)</SelectItem>
-                  <SelectItem value="average">Average (सामान्य)</SelectItem>
-                  <SelectItem value="poor">Off-season (गैर-मौसमी)</SelectItem>
+                  <SelectItem value="optimal">Optimal</SelectItem>
+                  <SelectItem value="average">Average</SelectItem>
+                  <SelectItem value="poor">Off-season</SelectItem>
                 </SelectContent>
               </Select>
             </div>
@@ -207,7 +224,7 @@ export const YieldProfitEstimator = () => {
             </div>
             <div className="mt-4 p-4 bg-gray-50 rounded-lg">
               <div className="text-sm text-muted-foreground">
-                Profit per acre: ₹{result.profitPerAcre} | Based on current market conditions and AI analysis
+                Profit per acre: ₹{result.profitPerAcre} | Based on live market prices
               </div>
             </div>
           </CardContent>
