@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -67,27 +68,6 @@ export const MultiLanguageVoiceAssistant = () => {
     ]
   };
 
-  const mockResponses = {
-    english: {
-      "plant wheat": "The best time to plant wheat is between October and December. Ensure soil temperature is between 10-25°C for optimal germination.",
-      "water rice": "Rice requires 1200-1500mm of water throughout its growing season. Maintain 2-5cm standing water during active growth phases.",
-      "blight disease": "Blight symptoms include brown spots on leaves, yellowing, and wilting. Apply copper-based fungicides and ensure proper air circulation.",
-      "harvest cotton": "Cotton is ready for harvest when bolls are fully opened and fibers are dry. This typically occurs 160-180 days after planting."
-    },
-    hindi: {
-      "गेहूं बोने": "गेहूं बोने का सबसे अच्छा समय अक्टूबर से दिसंबर तक है। मिट्टी का तापमान 10-25°C होना चाहिए।",
-      "धान पानी": "धान को पूरे बढ़ने के दौरान 1200-1500मिमी पानी चाहिए। सक्रिय वृद्धि के दौरान 2-5सेमी पानी बनाए रखें।",
-      "झुलसा रोग": "झुलसा रोग के लक्षण - पत्तियों पर भूरे धब्बे, पीलापन, और मुरझाना। कॉपर आधारित फंगीसाइड का प्रयोग करें।",
-      "कपास काटना": "कपास की कटाई तब करें जब गोले पूरी तरह खुल जाएं और रेशे सूख जाएं। यह बुआई के 160-180 दिन बाद होता है।"
-    },
-    punjabi: {
-      "ਕਣਕ ਬੀਜਣ": "ਕਣਕ ਬੀਜਣ ਦਾ ਸਭ ਤੋਂ ਵਧੀਆ ਸਮਾਂ ਅਕਤੂਬਰ ਤੋਂ ਦਸੰਬਰ ਤੱਕ ਹੈ। ਮਿੱਟੀ ਦਾ ਤਾਪਮਾਨ 10-25°C ਹੋਣਾ ਚਾਹੀਦਾ ਹੈ।",
-      "ਚਾਵਲ ਪਾਣੀ": "ਚਾਵਲ ਨੂੰ ਪੂਰੇ ਉਗਣ ਦੌਰਾਨ 1200-1500ਮਿਮੀ ਪਾਣੀ ਚਾਹੀਦਾ ਹੈ। ਸਰਗਰਮ ਵਾਧੇ ਦੌਰਾਨ 2-5ਸੈਮੀ ਪਾਣੀ ਰੱਖੋ।",
-      "ਝੁਲਸਾ ਰੋਗ": "ਝੁਲਸਾ ਰੋਗ ਦੇ ਲੱਛਣ - ਪੱਤਿਆਂ ਤੇ ਭੂਰੇ ਧੱਬੇ, ਪੀਲਾਪਨ, ਅਤੇ ਮੁਰਝਾਉਣਾ। ਤਾਂਬਾ ਆਧਾਰਿਤ ਫੰਗੀਸਾਈਡ ਵਰਤੋ।",
-      "ਕਪਾਹ ਵੱਢਣਾ": "ਕਪਾਹ ਦੀ ਵਾਢੀ ਉਦੋਂ ਕਰੋ ਜਦੋਂ ਗੋਲੇ ਪੂਰੀ ਤਰ੍ਹਾਂ ਖੁੱਲ ਜਾਣ ਅਤੇ ਰੇਸ਼ੇ ਸੁੱਕ ਜਾਣ। ਇਹ ਬੀਜਾਈ ਦੇ 160-180 ਦਿਨ ਬਾਅਦ ਹੁੰਦਾ ਹੈ।"
-    }
-  };
-
   const simulateVoiceRecognition = () => {
     setIsListening(true);
     setProcessingLevel(0);
@@ -105,40 +85,52 @@ export const MultiLanguageVoiceAssistant = () => {
     }, 200);
   };
 
-  const processVoiceCommand = () => {
+  const processVoiceCommand = async () => {
     const language = selectedLanguage as keyof typeof sampleQueries;
     const queries = sampleQueries[language] || sampleQueries.english;
     const randomQuery = queries[Math.floor(Math.random() * queries.length)];
+    const langName = supportedLanguages[language as keyof typeof supportedLanguages].name;
     
     setCurrentQuery(randomQuery);
+    setIsListening(false);
     
-    setTimeout(() => {
-      setIsListening(false);
-      setProcessingLevel(0);
-      
-      // Generate response
-      const responses = mockResponses[language] || mockResponses.english;
-      const matchedResponse = Object.entries(responses).find(([key]) => 
-        randomQuery.toLowerCase().includes(key.toLowerCase())
-      );
-      
-      const response = matchedResponse ? matchedResponse[1] : "I understand your question. Let me provide you with the best agricultural advice.";
+    try {
+      const { data, error } = await supabase.functions.invoke("voice-assistant", {
+        body: { prompt: randomQuery, language: langName }
+      });
+
+      if (error) throw error;
+      if (data?.error) throw new Error(data.error);
+
+      const responseText = data.response || "I could not generate a response right now.";
       
       const newCommand: VoiceCommand = {
         text: randomQuery,
-        language: supportedLanguages[language as keyof typeof supportedLanguages].name,
+        language: langName,
         confidence: Math.round(85 + Math.random() * 10),
-        response,
+        response: responseText,
         timestamp: new Date()
       };
       
       setCommands(prev => [newCommand, ...prev.slice(0, 4)]);
       setCurrentQuery("");
+      speakResponse(responseText);
+      toast("Voice command processed by AI!");
       
-      // Simulate speaking response
-      speakResponse(response);
-      toast("Voice command processed successfully!");
-    }, 1000);
+    } catch (err: any) {
+      console.error(err);
+      toast("AI Voice Assistant is currently disconnected. Falling back to local logic.");
+      const newCommand: VoiceCommand = {
+        text: randomQuery,
+        language: langName,
+        confidence: Math.round(85 + Math.random() * 10),
+        response: "Sorry, I am having trouble reaching the AI server. Please ensure the voice-assistant Edge Function is deployed.",
+        timestamp: new Date()
+      };
+      setCommands(prev => [newCommand, ...prev.slice(0, 4)]);
+      setCurrentQuery("");
+      setProcessingLevel(0);
+    }
   };
 
   const speakResponse = (text: string) => {
