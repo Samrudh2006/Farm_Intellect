@@ -60,6 +60,7 @@
     "qs": "$qs",
     "protobufjs": "7.5.8",
     "ws": "$ws",
-    "uuid": "$uuid"
+    "uuid": "$uuid",
+    "picomatch": "^4.0.4"
   }
 }
