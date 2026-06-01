@@ -6,6 +6,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { useCurrentUser } from "@/hooks/useCurrentUser";
+import { useAdvisory } from "@/hooks/useAdvisory";
 import { 
   Brain, 
   Calendar, 
@@ -21,65 +22,6 @@ import {
 import { cropRecommendationsMetadata } from "@/data/cropRecommendations";
 import { pestDataMetadata } from "@/data/pestData";
 import { soilHealthMetadata } from "@/data/soilHealth";
-
-const mockAdvisory = [
-  {
-    id: 1,
-    title: "Optimal Irrigation Schedule",
-    type: "irrigation",
-    priority: "high",
-    crop: "Winter Wheat",
-    field: "Field A",
-    description: "Based on soil moisture sensors and weather forecast, increase irrigation frequency for the next 5 days.",
-    recommendation: "Apply 25mm of water every 2 days. Monitor soil moisture levels at 20cm depth.",
-    confidence: 94,
-    createdDate: "2024-09-17",
-    status: "pending",
-    aiGenerated: true
-  },
-  {
-    id: 2,
-    title: "Nitrogen Fertilizer Application",
-    type: "fertilizer", 
-    priority: "medium",
-    crop: "Corn",
-    field: "Field B",
-    description: "Corn is entering rapid growth phase. Additional nitrogen will optimize yield potential.",
-    recommendation: "Apply 45kg N/hectare using urea fertilizer. Best applied before next rainfall.",
-    confidence: 87,
-    createdDate: "2024-09-16",
-    status: "pending",
-    aiGenerated: true
-  },
-  {
-    id: 3,
-    title: "Pest Monitoring Alert",
-    type: "pest",
-    priority: "high",
-    crop: "Soybeans",
-    field: "Field C", 
-    description: "Weather conditions favorable for aphid development. Implement preventive scouting.",
-    recommendation: "Scout fields daily for 7 days. Look for aphid colonies on leaf undersides. Consider beneficial insects.",
-    confidence: 78,
-    createdDate: "2024-09-15",
-    status: "in-progress",
-    aiGenerated: true
-  },
-  {
-    id: 4,
-    title: "Harvest Timing Optimization",
-    type: "harvest",
-    priority: "medium",
-    crop: "Soybeans",
-    field: "Field C",
-    description: "Based on moisture content and weather forecast, optimal harvest window identified.",
-    recommendation: "Harvest when moisture content reaches 13-15%. Expected optimal window: Sept 28 - Oct 5.",
-    confidence: 91,
-    createdDate: "2024-09-14",
-    status: "completed",
-    aiGenerated: false
-  }
-];
 
 const typeIcons = {
   irrigation: Droplets,
@@ -113,10 +55,24 @@ const Advisory = () => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [filter, setFilter] = useState("all");
   const { user } = useCurrentUser();
+  const { articles, loading, error } = useAdvisory();
 
   const filteredAdvisory = filter === "all" 
-    ? mockAdvisory 
-    : mockAdvisory.filter(item => item.status === filter);
+    ? articles.map(article => ({
+        id: parseInt(article.id),
+        title: article.title,
+        type: "general",
+        priority: "medium",
+        crop: article.crop_type || "General",
+        field: "Advisory",
+        description: article.content.substring(0, 100),
+        recommendation: article.content,
+        confidence: 85,
+        createdDate: article.created_at,
+        status: "pending",
+        aiGenerated: false
+      }))
+    : [];
 
   const advisorySources = [
     { label: "Crop recommendations", meta: cropRecommendationsMetadata },
@@ -198,8 +154,22 @@ const Advisory = () => {
           </Card>
 
           {/* Advisory Cards */}
-          <div className="space-y-4">
-            {filteredAdvisory.map((advisory) => {
+          {loading && (
+            <div className="text-center py-12">
+              <div className="inline-block p-4">
+                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+              </div>
+              <p className="text-muted-foreground mt-4">Loading advisory articles...</p>
+            </div>
+          )}
+          {error && (
+            <div className="p-4 bg-destructive/10 border border-destructive rounded-lg text-destructive">
+              Error loading articles: {error}
+            </div>
+          )}
+          {!loading && !error && (
+            <div className="space-y-4">
+              {filteredAdvisory.map((advisory) => {
               const TypeIcon = typeIcons[advisory.type as keyof typeof typeIcons];
               
               return (
@@ -285,21 +255,22 @@ const Advisory = () => {
                   </CardContent>
                 </Card>
               );
-            })}
-          </div>
-
-          {filteredAdvisory.length === 0 && (
-            <div className="text-center py-12">
-              <Brain className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
-              <h3 className="text-lg font-medium">No advisory items found</h3>
-              <p className="text-muted-foreground">
-                {filter === "all" 
-                  ? "Advisory recommendations will appear here as they become available"
-                  : `No ${filter} advisory items at the moment`
-                }
-              </p>
+              })}
             </div>
-          )}
+
+              {filteredAdvisory.length === 0 && (
+              <div className="text-center py-12">
+                <Brain className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
+                <h3 className="text-lg font-medium">No advisory items found</h3>
+                <p className="text-muted-foreground">
+                  {filter === "all" 
+                    ? "Advisory recommendations will appear here as they become available"
+                    : `No ${filter} advisory items at the moment`
+                  }
+                </p>
+              </div>
+              )}
+            )}
         </div>
       </main>
     </div>

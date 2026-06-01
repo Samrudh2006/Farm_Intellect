@@ -10,6 +10,7 @@ import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { useCurrentUser } from "@/hooks/useCurrentUser";
+import { useCrops } from "@/hooks/useCrops";
 import { 
   Wheat, 
   Plus, 
@@ -21,53 +22,29 @@ import {
   AlertTriangle,
 } from "lucide-react";
 
-const mockCrops = [
-  {
-    id: 1,
-    name: "Winter Wheat",
-    variety: "Hard Red Winter",
-    field: "Field A",
-    area: "12.5 hectares",
-    plantedDate: "2024-10-15",
-    expectedHarvest: "2025-06-20",
-    stage: "Flowering",
-    health: 85,
-    status: "healthy"
-  },
-  {
-    id: 2,
-    name: "Corn",
-    variety: "Sweet Corn",
-    field: "Field B", 
-    area: "8.2 hectares",
-    plantedDate: "2024-05-20",
-    expectedHarvest: "2024-09-15",
-    stage: "Vegetative",
-    health: 92,
-    status: "healthy"
-  },
-  {
-    id: 3,
-    name: "Soybeans",
-    variety: "Early Maturity",
-    field: "Field C",
-    area: "6.8 hectares", 
-    plantedDate: "2024-05-10",
-    expectedHarvest: "2024-10-05",
-    stage: "Germination",
-    health: 67,
-    status: "warning"
-  }
-];
-
 const Crops = () => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
   const [filterStatus, setFilterStatus] = useState("all");
   const { t } = useLanguage();
   const { user } = useCurrentUser();
+  const { crops, loading, error } = useCrops();
 
-  const filteredCrops = mockCrops.filter(crop => {
+  // Transform crops data to match display format
+  const transformedCrops = crops.map((crop) => ({
+    id: crop.id,
+    name: crop.name,
+    variety: crop.variety || "Unknown",
+    field: "Field A",
+    area: `${crop.quantity} ${crop.unit}`,
+    plantedDate: crop.planting_date || new Date().toISOString(),
+    expectedHarvest: crop.expected_harvest_date || new Date().toISOString(),
+    stage: crop.health_status || "Growing",
+    health: crop.health_status === "Healthy" ? 85 : crop.health_status === "Warning" ? 67 : 45,
+    status: crop.health_status === "Healthy" ? "healthy" : crop.health_status === "Warning" ? "warning" : "critical"
+  }));
+
+  const filteredCrops = transformedCrops.filter(crop => {
     const matchesSearch = crop.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
                          crop.variety.toLowerCase().includes(searchTerm.toLowerCase());
     const matchesStatus = filterStatus === "all" || crop.status === filterStatus;
@@ -154,8 +131,22 @@ const Crops = () => {
             </TabsList>
 
             <TabsContent value="my-crops" className="space-y-6">
-              <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-                {filteredCrops.map((crop, index) => (
+              {loading && (
+                <div className="text-center py-12 animate-fade-in">
+                  <div className="inline-block p-4">
+                    <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+                  </div>
+                  <p className="text-muted-foreground mt-4">{t('common.loading')}</p>
+                </div>
+              )}
+              {error && (
+                <div className="p-4 bg-destructive/10 border border-destructive rounded-lg text-destructive">
+                  {t('common.error')}: {error}
+                </div>
+              )}
+              {!loading && !error && (
+                <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+                  {filteredCrops.map((crop, index) => (
                   <Card 
                     key={crop.id} 
                     className="cursor-pointer tricolor-card transition-all duration-300 hover:shadow-lg"
@@ -220,15 +211,16 @@ const Crops = () => {
                       </div>
                     </CardContent>
                   </Card>
-                ))}
-              </div>
-
-              {filteredCrops.length === 0 && (
-                <div className="text-center py-12 animate-fade-in">
-                  <Wheat className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
-                  <h3 className="text-lg font-medium">{t('crops.no_crops')}</h3>
-                  <p className="text-muted-foreground">{t('crops.adjust_filters')}</p>
+                  ))}
                 </div>
+
+                {filteredCrops.length === 0 && (
+                  <div className="text-center py-12 animate-fade-in">
+                    <Wheat className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
+                    <h3 className="text-lg font-medium">{t('crops.no_crops')}</h3>
+                    <p className="text-muted-foreground">{t('crops.adjust_filters')}</p>
+                  </div>
+                )}
               )}
             </TabsContent>
 

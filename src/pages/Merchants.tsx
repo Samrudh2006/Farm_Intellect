@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useLanguage } from "@/contexts/LanguageContext";
+import { useMerchants } from "@/hooks/useMerchants";
 import {
   DollarSign,
   MapPin,
@@ -19,138 +20,20 @@ import {
   Wheat
 } from "lucide-react";
 
-interface Merchant {
-  id: string;
-  name: string;
-  company: string;
-  location: string;
-  distance: string;
-  rating: number;
-  phone: string;
-  specialties: string[];
-  crops: {
-    name: string;
-    price: number;
-    unit: string;
-    demand: 'high' | 'medium' | 'low';
-  }[];
-  verified: boolean;
-}
-
-interface CropDemand {
-  crop: string;
-  avgPrice: number;
-  merchants: number;
-  trend: 'up' | 'down' | 'stable';
-  recommendation: string;
-}
-
-const mockMerchants: Merchant[] = [
-  {
-    id: '1',
-    name: 'Raj Agro Trading',
-    company: 'Raj Agro Pvt Ltd',
-    location: 'Pune, Maharashtra',
-    distance: '12 km',
-    rating: 4.5,
-    phone: '+91 98765 43210',
-    specialties: ['Wheat', 'Rice', 'Pulses'],
-    crops: [
-      { name: 'Wheat', price: 2150, unit: 'quintal', demand: 'high' },
-      { name: 'Rice', price: 3200, unit: 'quintal', demand: 'medium' },
-      { name: 'Chickpea', price: 5800, unit: 'quintal', demand: 'high' }
-    ],
-    verified: true
-  },
-  {
-    id: '2',
-    name: 'Green Valley Foods',
-    company: 'Green Valley Processing',
-    location: 'Nashik, Maharashtra', 
-    distance: '25 km',
-    rating: 4.2,
-    phone: '+91 98765 43211',
-    specialties: ['Vegetables', 'Fruits', 'Organic'],
-    crops: [
-      { name: 'Tomato', price: 25, unit: 'kg', demand: 'high' },
-      { name: 'Onion', price: 18, unit: 'kg', demand: 'medium' },
-      { name: 'Potato', price: 15, unit: 'kg', demand: 'low' }
-    ],
-    verified: true
-  },
-  {
-    id: '3',
-    name: 'Maharashtra Cotton Corp',
-    company: 'Cotton Corporation of India',
-    location: 'Aurangabad, Maharashtra',
-    distance: '45 km',
-    rating: 4.8,
-    phone: '+91 98765 43212',
-    specialties: ['Cotton', 'Sugarcane'],
-    crops: [
-      { name: 'Cotton', price: 6200, unit: 'quintal', demand: 'high' },
-      { name: 'Sugarcane', price: 350, unit: 'quintal', demand: 'medium' }
-    ],
-    verified: true
-  }
-];
-
-const mockCropDemands: CropDemand[] = [
-  {
-    crop: 'Wheat',
-    avgPrice: 2180,
-    merchants: 8,
-    trend: 'up',
-    recommendation: 'High demand due to festival season. Best time to sell.'
-  },
-  {
-    crop: 'Rice',
-    avgPrice: 3150,
-    merchants: 6,
-    trend: 'stable',
-    recommendation: 'Stable prices. Good time for bulk sales.'
-  },
-  {
-    crop: 'Cotton',
-    avgPrice: 6350,
-    merchants: 4,
-    trend: 'up',
-    recommendation: 'Export demand increasing. Premium prices available.'
-  },
-  {
-    crop: 'Tomato',
-    avgPrice: 28,
-    merchants: 12,
-    trend: 'down',
-    recommendation: 'Oversupply in market. Consider processed sales.'
-  }
-];
-
 const Merchants = () => {
   const { t } = useLanguage();
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
+  const { merchants, loading, error } = useMerchants();
 
   const user = {
     name: "John Farmer",
     role: "farmer",
   };
 
-  const demandColors = {
-    high: "text-green-600 bg-green-50",
-    medium: "text-orange-600 bg-orange-50", 
-    low: "text-red-600 bg-red-50",
-  };
-
-  const trendIcons = {
-    up: "↗️",
-    down: "↘️", 
-    stable: "➡️",
-  };
-
-  const filteredMerchants = mockMerchants.filter(merchant =>
+  const filteredMerchants = merchants.filter(merchant =>
     merchant.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    merchant.specialties.some(s => s.toLowerCase().includes(searchQuery.toLowerCase()))
+    merchant.category.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
   return (
@@ -196,92 +79,95 @@ const Merchants = () => {
                 </CardContent>
               </Card>
 
+              {/* Loading State */}
+              {loading && (
+                <div className="text-center py-12">
+                  <div className="inline-block p-4">
+                    <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+                  </div>
+                  <p className="text-muted-foreground mt-4">Loading merchants...</p>
+                </div>
+              )}
+              
+              {error && (
+                <div className="p-4 bg-destructive/10 border border-destructive rounded-lg text-destructive">
+                  Error loading merchants: {error}
+                </div>
+              )}
+
               {/* Merchants List */}
-              <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-                {filteredMerchants.map((merchant) => (
-                  <Card key={merchant.id} className="hover:shadow-lg transition-shadow">
-                    <CardHeader>
-                      <div className="flex items-start justify-between">
-                        <div className="flex items-center gap-3">
-                          <div className="w-12 h-12 bg-primary/10 rounded-lg flex items-center justify-center">
-                            <Store className="h-6 w-6 text-primary" />
-                          </div>
-                          <div>
-                            <CardTitle className="text-lg">{merchant.name}</CardTitle>
-                            <CardDescription>{merchant.company}</CardDescription>
-                          </div>
-                        </div>
-                        {merchant.verified && (
-                          <Badge className="bg-green-100 text-green-700">
-                            Verified
-                          </Badge>
-                        )}
-                      </div>
-                    </CardHeader>
-                    
-                    <CardContent className="space-y-4">
-                      <div className="space-y-2">
-                        <div className="flex items-center gap-2 text-sm">
-                          <MapPin className="h-4 w-4 text-muted-foreground" />
-                          <span>{merchant.location} • {merchant.distance}</span>
-                        </div>
-                        
-                        <div className="flex items-center gap-2 text-sm">
-                          <Star className="h-4 w-4 fill-yellow-400 text-yellow-400" />
-                          <span>{merchant.rating} Rating</span>
-                        </div>
-
-                        <div className="flex items-center gap-2 text-sm">
-                          <Phone className="h-4 w-4 text-muted-foreground" />
-                          <span>{merchant.phone}</span>
-                        </div>
-                      </div>
-
-                      <div className="space-y-2">
-                        <h4 className="font-medium text-sm">Specialties:</h4>
-                        <div className="flex flex-wrap gap-1">
-                          {merchant.specialties.map((specialty, index) => (
-                            <Badge key={index} variant="outline">
-                              {specialty}
-                            </Badge>
-                          ))}
-                        </div>
-                      </div>
-
-                      <div className="space-y-2">
-                        <h4 className="font-medium text-sm">Current Prices:</h4>
-                        <div className="space-y-1">
-                          {merchant.crops.slice(0, 2).map((crop, index) => (
-                            <div key={index} className="flex justify-between items-center text-sm">
-                              <span>{crop.name}</span>
-                              <div className="flex items-center gap-2">
-                                <span className="font-medium">₹{crop.price}/{crop.unit}</span>
-                                <Badge className={`${demandColors[crop.demand]} text-xs`}>
-                                  {crop.demand}
-                                </Badge>
-                              </div>
+              {!loading && !error && (
+                <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+                  {filteredMerchants.map((merchant) => (
+                    <Card key={merchant.id} className="hover:shadow-lg transition-shadow">
+                      <CardHeader>
+                        <div className="flex items-start justify-between">
+                          <div className="flex items-center gap-3">
+                            <div className="w-12 h-12 bg-primary/10 rounded-lg flex items-center justify-center">
+                              <Store className="h-6 w-6 text-primary" />
                             </div>
-                          ))}
+                            <div>
+                              <CardTitle className="text-lg">{merchant.name}</CardTitle>
+                              <CardDescription>{merchant.category}</CardDescription>
+                            </div>
+                          </div>
+                          {merchant.verified && (
+                            <Badge className="bg-green-100 text-green-700">
+                              Verified
+                            </Badge>
+                          )}
                         </div>
-                      </div>
+                      </CardHeader>
+                      
+                      <CardContent className="space-y-4">
+                        <div className="space-y-2">
+                          <div className="flex items-center gap-2 text-sm">
+                            <MapPin className="h-4 w-4 text-muted-foreground" />
+                            <span>{merchant.location}</span>
+                          </div>
+                          
+                          <div className="flex items-center gap-2 text-sm">
+                            <Star className="h-4 w-4 fill-yellow-400 text-yellow-400" />
+                            <span>{merchant.rating} Rating ({merchant.reviews_count} reviews)</span>
+                          </div>
 
-                      <div className="flex gap-2 pt-4">
-                        <Button className="flex-1" size="sm">
-                          Contact
-                        </Button>
-                        <Button variant="outline" size="sm">
-                          View All Prices
-                        </Button>
-                      </div>
-                    </CardContent>
-                  </Card>
-                ))}
+                          {merchant.contact_phone && (
+                            <div className="flex items-center gap-2 text-sm">
+                              <Phone className="h-4 w-4 text-muted-foreground" />
+                              <span>{merchant.contact_phone}</span>
+                            </div>
+                          )}
+                        </div>
+
+                        {merchant.description && (
+                          <div>
+                            <p className="text-sm text-muted-foreground">{merchant.description}</p>
+                          </div>
+                        )}
+
+                        <div className="flex gap-2 pt-4">
+                          <Button className="flex-1" size="sm">
+                            Contact
+                          </Button>
+                          <Button variant="outline" size="sm">
+                            View Profile
+                          </Button>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  ))}
+                </div>
+              )}
               </div>
             </TabsContent>
 
             <TabsContent value="prices" className="space-y-6">
+              <div className="text-center py-12">
+                <p className="text-muted-foreground">Market prices data coming soon</p>
+              </div>
+              {/* Removed: mockCropDemands was undefined. Use useMarketPrices hook instead
               <div className="grid gap-6 md:grid-cols-2">
-                {mockCropDemands.map((demand, index) => (
+                {/* Data removed */}
                   <Card key={index}>
                     <CardHeader>
                       <div className="flex items-center justify-between">

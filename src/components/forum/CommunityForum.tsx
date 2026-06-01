@@ -7,6 +7,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { useForumPosts } from "@/hooks/useForumPosts";
 import { 
   MessageSquare, 
   Plus, 
@@ -21,49 +22,17 @@ import {
   Reply
 } from "lucide-react";
 
-interface Post {
-  id: string;
-  title: string;
-  content: string;
-  category: string;
-  author: {
-    id: string;
-    name: string;
-    role: string;
-  };
-  likes: number;
-  views: number;
-  comments: number;
-  createdAt: string;
-  tags: string[];
-}
-
-interface Comment {
-  id: string;
-  content: string;
-  author: {
-    id: string;
-    name: string;
-    role: string;
-  };
-  likes: number;
-  createdAt: string;
-}
-
 export const CommunityForum = () => {
-  const [posts, setPosts] = useState<Post[]>([]);
-  const [selectedPost, setSelectedPost] = useState<Post | null>(null);
-  const [comments, setComments] = useState<Comment[]>([]);
   const [showCreatePost, setShowCreatePost] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("");
+  const { posts, loading, error, addPost } = useForumPosts(selectedCategory);
   
   // Create post form state
   const [newPost, setNewPost] = useState({
     title: "",
     content: "",
-    category: "",
-    tags: ""
+    category: ""
   });
 
   const categories = [
@@ -77,90 +46,21 @@ export const CommunityForum = () => {
     { value: "general-discussion", label: "General Discussion" }
   ];
 
-  const mockPosts: Post[] = [
-    {
-      id: "1",
-      title: "Best practices for wheat cultivation in winter season",
-      content: "I'm planning to grow wheat this winter season. Can anyone share their experiences with different varieties and best practices?",
-      category: "crop-management",
-      author: {
-        id: "1",
-        name: "Rajesh Kumar",
-        role: "Farmer"
-      },
-      likes: 15,
-      views: 128,
-      comments: 8,
-      createdAt: "2024-01-15T10:30:00Z",
-      tags: ["wheat", "winter", "cultivation"]
-    },
-    {
-      id: "2", 
-      title: "Dealing with aphid infestation in cotton crops",
-      content: "My cotton fields are showing signs of aphid infestation. Looking for organic and chemical solutions that have worked for others.",
-      category: "pest-control",
-      author: {
-        id: "2",
-        name: "Dr. Priya Sharma",
-        role: "Expert"
-      },
-      likes: 23,
-      views: 195,
-      comments: 12,
-      createdAt: "2024-01-14T14:20:00Z",
-      tags: ["cotton", "aphids", "pest-control", "organic"]
-    }
-  ];
-
-  const mockComments: Comment[] = [
-    {
-      id: "1",
-      content: "I've had great success with HD-2967 wheat variety. Make sure to maintain proper spacing and use balanced fertilizers.",
-      author: {
-        id: "3",
-        name: "Suresh Patel",
-        role: "Farmer"
-      },
-      likes: 5,
-      createdAt: "2024-01-15T11:00:00Z"
-    },
-    {
-      id: "2",
-      content: "Consider soil testing before planting. Wheat requires good drainage and pH between 6.0-7.5 for optimal growth.",
-      author: {
-        id: "4",
-        name: "Dr. Amit Singh",
-        role: "Expert"
-      },
-      likes: 8,
-      createdAt: "2024-01-15T11:30:00Z"
-    }
-  ];
-
   const handleCreatePost = () => {
     if (!newPost.title || !newPost.content || !newPost.category) {
       return;
     }
 
-    const post: Post = {
-      id: Date.now().toString(),
+    addPost({
       title: newPost.title,
       content: newPost.content,
-      category: newPost.category,
-      author: {
-        id: "current-user",
-        name: "You",
-        role: "Farmer"
-      },
-      likes: 0,
-      views: 0,
-      comments: 0,
-      createdAt: new Date().toISOString(),
-      tags: newPost.tags.split(',').map(tag => tag.trim()).filter(tag => tag)
-    };
-
-    setPosts(prev => [post, ...prev]);
-    setNewPost({ title: "", content: "", category: "", tags: "" });
+      category: newPost.category || undefined,
+      user_id: "current-user",
+      upvotes: 0,
+      views: 0
+    });
+    
+    setNewPost({ title: "", content: "", category: "" });
     setShowCreatePost(false);
   };
 
@@ -204,7 +104,7 @@ export const CommunityForum = () => {
     return date.toLocaleDateString() + " " + date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
   };
 
-  const filteredPosts = [...mockPosts, ...posts].filter(post => {
+  const filteredPosts = posts.filter(post => {
     const matchesSearch = post.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
                          post.content.toLowerCase().includes(searchQuery.toLowerCase());
     const matchesCategory = !selectedCategory || post.category === selectedCategory;
@@ -269,44 +169,14 @@ export const CommunityForum = () => {
           </CardContent>
         </Card>
 
-        {/* Comments */}
+        {/* Comments - Coming Soon */}
         <Card>
           <CardHeader>
-            <CardTitle>Comments ({mockComments.length})</CardTitle>
+            <CardTitle>Comments (Coming Soon)</CardTitle>
           </CardHeader>
           
           <CardContent className="space-y-4">
-            {mockComments.map(comment => (
-              <div key={comment.id} className="border-l-2 border-muted pl-4 space-y-2">
-                <div className="flex items-center gap-2 text-sm">
-                  <span className="font-medium">{comment.author.name}</span>
-                  {getRoleBadge(comment.author.role)}
-                  <span className="text-muted-foreground">•</span>
-                  <span className="text-muted-foreground">{formatDate(comment.createdAt)}</span>
-                </div>
-                <p className="text-sm">{comment.content}</p>
-                <div className="flex items-center gap-2">
-                  <Button variant="ghost" size="sm">
-                    <ThumbsUp className="h-3 w-3 mr-1" />
-                    {comment.likes}
-                  </Button>
-                  <Button variant="ghost" size="sm">
-                    <Reply className="h-3 w-3 mr-1" />
-                    Reply
-                  </Button>
-                </div>
-              </div>
-            ))}
-            
-            {/* Add Comment */}
-            <div className="space-y-2">
-              <Label>Add a comment</Label>
-              <Textarea placeholder="Share your thoughts..." />
-              <Button size="sm">
-                <Send className="h-4 w-4 mr-2" />
-                Post Comment
-              </Button>
-            </div>
+            <p className="text-muted-foreground">Comment functionality will be available soon</p>
           </CardContent>
         </Card>
       </div>
@@ -427,8 +297,27 @@ export const CommunityForum = () => {
       )}
 
       {/* Posts List */}
-      <div className="space-y-4">
-        {filteredPosts.map(post => (
+      {/* Loading State */}
+      {loading && (
+        <div className="text-center py-12">
+          <div className="inline-block p-4">
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+          </div>
+          <p className="text-muted-foreground mt-4">Loading forum posts...</p>
+        </div>
+      )}
+
+      {/* Error State */}
+      {error && (
+        <div className="p-4 bg-destructive/10 border border-destructive rounded-lg text-destructive">
+          Error loading posts: {error}
+        </div>
+      )}
+
+      {/* Posts List */}
+      {!loading && !error && (
+        <div className="space-y-4">
+          {filteredPosts.map(post => (
           <Card key={post.id} className="cursor-pointer hover:shadow-md transition-shadow">
             <CardContent className="pt-6" onClick={() => setSelectedPost(post)}>
               <div className="space-y-3">
@@ -476,10 +365,11 @@ export const CommunityForum = () => {
               </div>
             </CardContent>
           </Card>
-        ))}
-      </div>
+          ))}
+        </div>
+      )}
 
-      {filteredPosts.length === 0 && (
+      {!loading && !error && filteredPosts.length === 0 && (
         <Card>
           <CardContent className="pt-6">
             <div className="text-center py-12">

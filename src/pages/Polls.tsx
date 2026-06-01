@@ -5,11 +5,11 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
-import { Textarea } from "@/components/ui/textarea";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useLanguage } from "@/contexts/LanguageContext";
+import { usePolls } from "@/hooks/usePolls";
 import {
   Calendar,
   CheckCircle,
@@ -22,108 +22,12 @@ import {
   Wheat
 } from "lucide-react";
 
-interface Poll {
-  id: string;
-  title: string;
-  description: string;
-  category: 'crop_selection' | 'pricing' | 'technique' | 'market_trend';
-  status: 'active' | 'completed' | 'upcoming';
-  creator: string;
-  createdAt: string;
-  endDate: string;
-  totalVotes: number;
-  options: {
-    id: string;
-    text: string;
-    votes: number;
-    percentage: number;
-  }[];
-  userVoted?: string;
-  region: string;
-}
-
-const mockPolls: Poll[] = [
-  {
-    id: '1',
-    title: 'Best Crop for Rabi Season 2024',
-    description: 'Help fellow farmers decide which crop has the best potential for the upcoming Rabi season based on market trends and weather predictions.',
-    category: 'crop_selection',
-    status: 'active',
-    creator: 'Agricultural Expert Dr. Patel',
-    createdAt: '2024-03-10',
-    endDate: '2024-03-25',
-    totalVotes: 234,
-    options: [
-      { id: '1a', text: 'Wheat', votes: 89, percentage: 38 },
-      { id: '1b', text: 'Barley', votes: 56, percentage: 24 },
-      { id: '1c', text: 'Chickpea', votes: 67, percentage: 29 },
-      { id: '1d', text: 'Mustard', votes: 22, percentage: 9 }
-    ],
-    region: 'Maharashtra'
-  },
-  {
-    id: '2',
-    title: 'Fair Price for Tomatoes This Season',
-    description: 'What do you think is a fair price for tomatoes considering current market conditions?',
-    category: 'pricing',
-    status: 'active',
-    creator: 'Farmers Collective Pune',
-    createdAt: '2024-03-12',
-    endDate: '2024-03-20',
-    totalVotes: 156,
-    options: [
-      { id: '2a', text: '₹20-25 per kg', votes: 62, percentage: 40 },
-      { id: '2b', text: '₹25-30 per kg', votes: 47, percentage: 30 },
-      { id: '2c', text: '₹30-35 per kg', votes: 31, percentage: 20 },
-      { id: '2d', text: 'Above ₹35 per kg', votes: 16, percentage: 10 }
-    ],
-    userVoted: '2a',
-    region: 'Maharashtra'
-  },
-  {
-    id: '3',
-    title: 'Most Effective Organic Fertilizer',
-    description: 'Share your experience with organic fertilizers. Which one has given you the best results?',
-    category: 'technique',
-    status: 'active',
-    creator: 'Green Farming Initiative',
-    createdAt: '2024-03-08',
-    endDate: '2024-03-30',
-    totalVotes: 89,
-    options: [
-      { id: '3a', text: 'Vermicompost', votes: 34, percentage: 38 },
-      { id: '3b', text: 'FYM (Farm Yard Manure)', votes: 28, percentage: 31 },
-      { id: '3c', text: 'Compost', votes: 19, percentage: 21 },
-      { id: '3d', text: 'Bio-fertilizer', votes: 8, percentage: 9 }
-    ],
-    region: 'All India'
-  },
-  {
-    id: '4',
-    title: 'Cotton Market Outlook',
-    description: 'How do you see the cotton market performing in the next 6 months?',
-    category: 'market_trend',
-    status: 'completed',
-    creator: 'Cotton Association of India',
-    createdAt: '2024-02-15',
-    endDate: '2024-03-01',
-    totalVotes: 412,
-    options: [
-      { id: '4a', text: 'Prices will increase', votes: 165, percentage: 40 },
-      { id: '4b', text: 'Prices will remain stable', votes: 124, percentage: 30 },
-      { id: '4c', text: 'Prices will decrease', votes: 82, percentage: 20 },
-      { id: '4d', text: 'Uncertain/Volatile', votes: 41, percentage: 10 }
-    ],
-    userVoted: '4a',
-    region: 'All India'
-  }
-];
-
 const Polls = () => {
   const { t } = useLanguage();
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [selectedPoll, setSelectedPoll] = useState<string | null>(null);
   const [showCreatePoll, setShowCreatePoll] = useState(false);
+  const { polls, loading, error, voteOnPoll } = usePolls();
   const [newPoll, setNewPoll] = useState({
     title: '',
     description: '',
@@ -307,8 +211,22 @@ const Polls = () => {
             </TabsList>
 
             <TabsContent value="active" className="space-y-6">
-              <div className="grid gap-6">
-                {mockPolls.filter(poll => poll.status === 'active').map((poll) => {
+              {loading && (
+                <div className="text-center py-12">
+                  <div className="inline-block p-4">
+                    <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+                  </div>
+                  <p className="text-muted-foreground mt-4">Loading polls...</p>
+                </div>
+              )}
+              {error && (
+                <div className="p-4 bg-destructive/10 border border-destructive rounded-lg text-destructive">
+                  Error loading polls: {error}
+                </div>
+              )}
+              {!loading && !error && (
+                <div className="grid gap-6">
+                  {polls.map((poll) => {
                   const CategoryIcon = categoryIcons[poll.category];
                   
                   return (
@@ -388,13 +306,16 @@ const Polls = () => {
                       </CardContent>
                     </Card>
                   );
-                })}
-              </div>
+                  })}
+                </div>
+              )}
             </TabsContent>
 
             <TabsContent value="completed" className="space-y-6">
-              <div className="grid gap-6">
-                {mockPolls.filter(poll => poll.status === 'completed').map((poll) => {
+              <div className="text-center py-12">
+                <p className="text-muted-foreground">Completed polls coming soon</p>
+              </div>
+              {/* Removed: mockPolls.filter(poll => poll.status === 'completed').map((poll) => {
                   const CategoryIcon = categoryIcons[poll.category];
                   const winningOption = poll.options.reduce((prev, current) => 
                     prev.votes > current.votes ? prev : current
