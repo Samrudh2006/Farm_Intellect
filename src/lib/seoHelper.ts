@@ -415,8 +415,10 @@ export function updateOpenGraphImage(imageUrl: string) {
 export function setPageMetadata(metadata: PageMetadata) {
   updateDocumentTitle(generatePageTitle(metadata.title));
   updateMetaDescription(metadata.description);
-  updateCanonicalUrl(metadata.url || SITE_URL);
+  updateCanonicalUrl(metadata.url || (typeof window !== "undefined" ? window.location.href : SITE_URL));
   if (metadata.image) {
     updateOpenGraphImage(metadata.image);
   }
+  // Update social meta tags so per-route OG/Twitter previews are accurate
+  setSocialMetaTags(metadata);
 }
