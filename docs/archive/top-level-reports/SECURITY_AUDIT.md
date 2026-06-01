@@ -31,7 +31,7 @@ Anon Key: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6I
 **Exposure:** Hardcoded in source code  
 **What was exposed:**
 ```
-API Key: AIzaSyD4sPDW7IzQk63CLjOlXf_QA_lP-BINvMQ
+API Key: [REDACTED_GOOGLE_API_KEY]
 Project ID: farmintellect65
 Firebase Domain: farmintellect65.firebaseapp.com
 Messaging Sender ID: 960040509665
