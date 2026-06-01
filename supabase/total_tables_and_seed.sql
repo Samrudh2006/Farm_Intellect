@@ -8,14 +8,14 @@ ALTER TABLE public.knowledge_articles ENABLE ROW LEVEL SECURITY;
 DROP POLICY IF EXISTS "Anyone can view knowledge articles" ON public.knowledge_articles;
 CREATE POLICY "Anyone can view knowledge articles" ON public.knowledge_articles FOR SELECT USING (true);
 
-CREATE TABLE IF NOT EXISTS public.forum_posts ( id UUID DEFAULT gen_random_uuid() PRIMARY KEY, user_id UUID REFERENCES public.users(id) ON DELETE CASCADE NOT NULL, title TEXT NOT NULL, content TEXT NOT NULL, category TEXT NOT NULL, created_at TIMESTAMPTZ DEFAULT NOW() );
+CREATE TABLE IF NOT EXISTS public.forum_posts ( id UUID DEFAULT gen_random_uuid() PRIMARY KEY, user_id UUID REFERENCES auth.users(id) ON DELETE CASCADE NOT NULL, title TEXT NOT NULL, content TEXT NOT NULL, category TEXT NOT NULL, created_at TIMESTAMPTZ DEFAULT NOW() );
 ALTER TABLE public.forum_posts ENABLE ROW LEVEL SECURITY;
 DROP POLICY IF EXISTS "Anyone can view forum posts" ON public.forum_posts;
 DROP POLICY IF EXISTS "Users can create forum posts" ON public.forum_posts;
 CREATE POLICY "Anyone can view forum posts" ON public.forum_posts FOR SELECT USING (true);
 CREATE POLICY "Users can create forum posts" ON public.forum_posts FOR INSERT WITH CHECK (auth.uid() = user_id);
 
-CREATE TABLE IF NOT EXISTS public.polls ( id UUID DEFAULT gen_random_uuid() PRIMARY KEY, creator_id UUID REFERENCES public.users(id) ON DELETE CASCADE NOT NULL, question TEXT NOT NULL, options JSONB NOT NULL, created_at TIMESTAMPTZ DEFAULT NOW() );
+CREATE TABLE IF NOT EXISTS public.polls ( id UUID DEFAULT gen_random_uuid() PRIMARY KEY, creator_id UUID REFERENCES auth.users(id) ON DELETE CASCADE NOT NULL, question TEXT NOT NULL, options JSONB NOT NULL, created_at TIMESTAMPTZ DEFAULT NOW() );
 ALTER TABLE public.polls ENABLE ROW LEVEL SECURITY;
 DROP POLICY IF EXISTS "Anyone can view polls" ON public.polls;
 DROP POLICY IF EXISTS "Users can create polls" ON public.polls;
@@ -56,7 +56,7 @@ CREATE POLICY "Anyone can view merchants" ON public.merchant_profiles FOR SELECT
 
 CREATE TABLE IF NOT EXISTS public.field_events (
     id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
-    user_id UUID REFERENCES public.users(id) ON DELETE CASCADE,
+    user_id UUID REFERENCES auth.users(id) ON DELETE CASCADE,
     event_type TEXT NOT NULL,
     event_description TEXT,
     field_name TEXT,
@@ -69,7 +69,7 @@ CREATE POLICY "Users view their events" ON public.field_events FOR SELECT USING 
 
 CREATE TABLE IF NOT EXISTS public.user_tasks (
     id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
-    user_id UUID REFERENCES public.users(id) ON DELETE CASCADE,
+    user_id UUID REFERENCES auth.users(id) ON DELETE CASCADE,
     title TEXT NOT NULL,
     description TEXT,
     due_date DATE,
@@ -84,7 +84,7 @@ CREATE POLICY "Users view their tasks" ON public.user_tasks FOR ALL USING (auth.
 
 CREATE TABLE IF NOT EXISTS public.scheme_matches (
     id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
-    user_id UUID REFERENCES public.users(id) ON DELETE CASCADE,
+    user_id UUID REFERENCES auth.users(id) ON DELETE CASCADE,
     scheme_name TEXT NOT NULL,
     scheme_type TEXT,
     eligibility_score NUMERIC NOT NULL,
@@ -97,7 +97,7 @@ CREATE POLICY "Users view their schemes" ON public.scheme_matches FOR SELECT USI
 
 CREATE TABLE IF NOT EXISTS public.activity_log (
     id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
-    user_id UUID REFERENCES public.users(id) ON DELETE CASCADE,
+    user_id UUID REFERENCES auth.users(id) ON DELETE CASCADE,
     action TEXT NOT NULL,
     action_type TEXT NOT NULL,
     metadata JSONB,
