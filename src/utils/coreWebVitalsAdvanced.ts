@@ -45,7 +45,7 @@ export class CoreWebVitalsMonitor {
         const lcpObserver = new PerformanceObserver((entryList) => {
           const entries = entryList.getEntries();
           const lastEntry = entries[entries.length - 1];
-          this.metrics.LCP = Math.round(lastEntry.renderTime || lastEntry.loadTime);
+          this.metrics.LCP = Math.round((lastEntry as any).renderTime || (lastEntry as any).loadTime);
           this.notifyCallbacks();
         });
         lcpObserver.observe({ entryTypes: ["largest-contentful-paint"] });
@@ -59,7 +59,7 @@ export class CoreWebVitalsMonitor {
           const entries = entryList.getEntries();
           entries.forEach((entry) => {
             if (this.metrics.FID === null) {
-              this.metrics.FID = Math.round(entry.processingDuration);
+              this.metrics.FID = Math.round((entry as any).processingDuration);
             }
           });
           this.notifyCallbacks();
@@ -74,8 +74,8 @@ export class CoreWebVitalsMonitor {
         const clsObserver = new PerformanceObserver((entryList) => {
           const entries = entryList.getEntries();
           entries.forEach((entry) => {
-            if (!entry.hadRecentInput) {
-              this.metrics.CLS = (this.metrics.CLS || 0) + entry.value;
+            if (!(entry as any).hadRecentInput) {
+              this.metrics.CLS = (this.metrics.CLS || 0) + (entry as any).value;
             }
           });
           this.notifyCallbacks();

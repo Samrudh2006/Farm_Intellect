@@ -218,7 +218,7 @@ export function generateCompositeSchema(...schemas: any[]) {
 export function injectSchema(schema: any): void {
   if (typeof document === "undefined") return;
 
-  let scriptTag = document.querySelector("script[type='application/ld+json'][data-type='schema']");
+  let scriptTag = document.querySelector("script[type='application/ld+json'][data-type='schema']") as HTMLScriptElement | null;
   if (!scriptTag) {
     scriptTag = document.createElement("script");
     scriptTag.type = "application/ld+json";
