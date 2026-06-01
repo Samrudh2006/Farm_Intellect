@@ -79,7 +79,7 @@ if (process.env.SENTRY_DSN) {
     environment: process.env.NODE_ENV || 'development',
     tracesSampleRate: 0.1,
   });
-  app.use(Sentry.Handlers.requestHandler());
+  // Sentry v8+ auto-instruments Express — no manual requestHandler needed
 }
 
 app.use(
@@ -211,7 +211,7 @@ io.on('connection', (socket) => {
 app.use(errorHandler);
 
 // 404 handler
-app.use('*', (req, res) => {
+app.use('/{*splat}', (req, res) => {
   res.status(404).json({ error: 'Route not found' });
 });
 
