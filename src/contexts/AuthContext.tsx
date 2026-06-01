@@ -23,7 +23,7 @@ interface AuthContextType {
   session: SupabaseSession | null;
   profile: UserProfile | null;
   loading: boolean;
-  signUpWithAadhaar: (aadhaar: string, passkey: string, metadata: { display_name: string; role: string; phone?: string; location?: string }) => Promise<{ error: Error | null }>;
+  signUpWithAadhaar: (aadhaar: string, passkey: string, metadata: { first_name: string; role: 'farmer' | 'merchant' | 'expert' | 'admin'; phone_number?: string; state?: string; district?: string; village?: string }) => Promise<{ error: Error | null }>;
   signInWithAadhaar: (aadhaar: string, passkey: string) => Promise<{ error: Error | null }>;
   signInWithPhoneOTP: (phone: string, role: string, name?: string) => Promise<{ otp: string; error: Error | null }>;
   verifyPhoneOTP: (phone: string, otp: string) => Promise<{ error: Error | null }>;
