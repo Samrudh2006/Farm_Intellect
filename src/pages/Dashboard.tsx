@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { Header } from "@/components/layout/Header";
 import { Sidebar } from "@/components/layout/Sidebar";
@@ -10,101 +10,137 @@ import { SmartInsights } from "@/components/dashboard/SmartInsights";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Progress } from "@/components/ui/progress";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { cropsData, getSeasonalCrops } from "@/data/cropsData";
-import { 
-  Wheat, 
-  TrendingUp, 
-  Users, 
-  DollarSign,
+import { getSeasonalCrops } from "@/data/cropsData";
+import { useCurrentUser } from "@/hooks/useCurrentUser";
+import { useDashboardData } from "@/hooks/useDashboardData";
+import { supabase } from "@/integrations/supabase/client";
+import { formatDistanceToNow } from "date-fns";
+import {
+  Wheat,
+  TrendingUp,
   Activity,
-  Calendar,
   Brain,
   MapPin,
-  Droplets,
-  Thermometer,
   AlertTriangle,
   CheckCircle,
   Clock,
   Leaf,
-  Sun,
-  CloudRain,
   Target,
-  Zap,
-  Bell
+  Bell,
+  Loader2,
 } from "lucide-react";
+
+interface FarmAlert {
+  id: string;
+  type: string;
+  title: string;
+  message: string;
+  created_at: string;
+}
+
+interface MarketPrice {
+  crop: string;
+  modalPrice: number;
+  unit: string;
+}
+
+const getCurrentSeason = (): "kharif" | "rabi" | "zaid" => {
+  const m = new Date().getMonth() + 1;
+  if (m >= 6 && m <= 10) return "kharif";
+  if (m === 11 || m <= 3) return "rabi";
+  return "zaid";
+};
 
 const Dashboard = () => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
-  
-  // Mock user data - in real app this would come from auth context
-  const user = {
-    name: "John Farmer",
-    role: "farmer",
-  };
+  const { user } = useCurrentUser();
+  const { cropPlans, tasks, loading: dashLoading } = useDashboardData();
+
+  const [alerts, setAlerts] = useState<FarmAlert[]>([]);
+  const [alertsLoading, setAlertsLoading] = useState(true);
+  const [marketPrices, setMarketPrices] = useState<MarketPrice[]>([]);
+  const [pricesLoading, setPricesLoading] = useState(true);
+
+  useEffect(() => {
+    let active = true;
+    (async () => {
+      if (!user.id) { setAlertsLoading(false); return; }
+      const { data } = await supabase
+        .from("notifications")
+        .select("id,type,title,message,created_at")
+        .eq("user_id", user.id)
+        .order("created_at", { ascending: false })
+        .limit(5);
+      if (active) {
+        setAlerts((data as FarmAlert[]) || []);
+        setAlertsLoading(false);
+      }
+    })();
+    return () => { active = false; };
+  }, [user.id]);
+
+  useEffect(() => {
+    let active = true;
+    (async () => {
+      try {
+        const { data, error } = await supabase.functions.invoke("market-prices", {
+          body: { state: undefined, district: undefined },
+        });
+        if (active && !error && data?.prices) {
+          setMarketPrices(data.prices.slice(0, 6));
+        }
+      } catch {
+        // No mock fallback — leave empty
+      } finally {
+        if (active) setPricesLoading(false);
+      }
+    })();
+    return () => { active = false; };
+  }, []);
+
+  const totalAcres = cropPlans.reduce((sum, c) => sum + (Number(c.area_acres) || 0), 0);
+  const pendingTasks = tasks.length;
 
   const stats = [
     {
       title: "Active Crops",
-      value: "12",
-      change: { value: "+2 this month", trend: "up" as const },
+      value: dashLoading ? "—" : String(cropPlans.length),
       icon: Wheat,
       variant: "primary" as const,
     },
     {
       title: "Total Area",
-      value: "45.2 ha",
-      change: { value: "+5.2 ha added", trend: "up" as const },
+      value: dashLoading ? "—" : `${totalAcres.toFixed(1)} acres`,
       icon: MapPin,
       variant: "earth" as const,
     },
     {
-      title: "Active Sensors",
-      value: "24",
-      change: { value: "All operational", trend: "neutral" as const },
+      title: "Alerts",
+      value: alertsLoading ? "—" : String(alerts.length),
       icon: Activity,
       variant: "water" as const,
     },
     {
       title: "Pending Tasks",
-      value: "8",
-      change: { value: "Due this week", trend: "neutral" as const },
+      value: dashLoading ? "—" : String(pendingTasks),
       icon: Clock,
       variant: "harvest" as const,
     },
   ];
 
-  const currentSeason = 'rabi'; // This would be calculated based on current date
+  const currentSeason = getCurrentSeason();
   const seasonalCrops = getSeasonalCrops(currentSeason);
-  
-  const farmAlerts = [
-    { type: 'warning', message: 'Wheat field A needs irrigation in 2 days', time: '2 hours ago' },
-    { type: 'info', message: 'Weather forecast: Light rain expected tomorrow', time: '4 hours ago' },
-    { type: 'success', message: 'Cotton harvest completed successfully', time: '1 day ago' },
-  ];
-
-  const taskList = [
-    { id: 1, task: 'Apply fertilizer to Field B', crop: 'Wheat', priority: 'high', due: 'Today' },
-    { id: 2, task: 'Pest inspection for cotton', crop: 'Cotton', priority: 'medium', due: 'Tomorrow' },
-    { id: 3, task: 'Harvest preparation for Field C', crop: 'Mustard', priority: 'low', due: '3 days' },
-  ];
-
-  const marketPrices = [
-    { crop: 'Wheat', price: '₹2,200/quintal', change: '+5.2%', trend: 'up' },
-    { crop: 'Cotton', price: '₹6,800/quintal', change: '-2.1%', trend: 'down' },
-    { crop: 'Mustard', price: '₹4,500/quintal', change: '+8.5%', trend: 'up' },
-  ];
 
   return (
     <div className="min-h-screen bg-background">
-      <Header 
+      <Header
         user={user}
         onMenuClick={() => setSidebarOpen(!sidebarOpen)}
-        notificationCount={3}
+        notificationCount={alerts.length}
       />
-      
-      <Sidebar 
+
+      <Sidebar
         isOpen={sidebarOpen}
         onClose={() => setSidebarOpen(false)}
         userRole={user.role}
@@ -112,22 +148,19 @@ const Dashboard = () => {
 
       <main className="md:ml-64 p-6">
         <div className="space-y-6">
-          {/* Page Header */}
           <div>
             <h2 className="text-3xl font-bold text-foreground">Dashboard</h2>
             <p className="text-muted-foreground">
-              Welcome back, {user.name}. Here's what's happening on your farm today.
+              Welcome back{user.name ? `, ${user.name}` : ""}. Here's what's happening on your farm today.
             </p>
           </div>
 
-          {/* Stats Grid */}
           <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
             {stats.map((stat, index) => (
               <StatCard key={index} {...stat} />
             ))}
           </div>
 
-          {/* Farmer-Specific Dashboard Content */}
           <Tabs defaultValue="overview" className="space-y-6">
             <TabsList className="grid w-full grid-cols-5">
               <TabsTrigger value="overview">Overview</TabsTrigger>
@@ -138,14 +171,12 @@ const Dashboard = () => {
             </TabsList>
 
             <TabsContent value="overview" className="space-y-6">
-              {/* AI Smart Insights */}
               <SmartInsights />
-              
+
               <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
                 <div className="lg:col-span-2 space-y-6">
                   <CropStatusWidget />
-                  
-                  {/* Farm Alerts */}
+
                   <Card>
                     <CardHeader>
                       <CardTitle className="flex items-center gap-2">
@@ -154,47 +185,46 @@ const Dashboard = () => {
                       </CardTitle>
                     </CardHeader>
                     <CardContent className="space-y-3">
-                      {farmAlerts.map((alert, index) => (
-                        <div key={index} className="flex items-start gap-3 p-3 rounded-lg bg-accent/50">
-                          {alert.type === 'warning' && <AlertTriangle className="h-4 w-4 text-harvest mt-0.5" />}
-                          {alert.type === 'info' && <Bell className="h-4 w-4 text-primary mt-0.5" />}
-                          {alert.type === 'success' && <CheckCircle className="h-4 w-4 text-green-500 mt-0.5" />}
-                          <div className="flex-1">
-                            <p className="text-sm">{alert.message}</p>
-                            <p className="text-xs text-muted-foreground">{alert.time}</p>
+                      {alertsLoading ? (
+                        <div className="flex justify-center p-4"><Loader2 className="h-5 w-5 animate-spin text-muted-foreground" /></div>
+                      ) : alerts.length === 0 ? (
+                        <p className="text-sm text-muted-foreground text-center py-4">No alerts yet.</p>
+                      ) : (
+                        alerts.map((alert) => (
+                          <div key={alert.id} className="flex items-start gap-3 p-3 rounded-lg bg-accent/50">
+                            {alert.type === "warning" && <AlertTriangle className="h-4 w-4 text-harvest mt-0.5" />}
+                            {alert.type === "info" && <Bell className="h-4 w-4 text-primary mt-0.5" />}
+                            {alert.type === "success" && <CheckCircle className="h-4 w-4 text-green-500 mt-0.5" />}
+                            <div className="flex-1">
+                              <p className="text-sm font-medium">{alert.title}</p>
+                              <p className="text-sm text-muted-foreground">{alert.message}</p>
+                              <p className="text-xs text-muted-foreground">
+                                {formatDistanceToNow(new Date(alert.created_at), { addSuffix: true })}
+                              </p>
+                            </div>
                           </div>
-                        </div>
-                      ))}
+                        ))
+                      )}
                     </CardContent>
                   </Card>
                 </div>
-                
+
                 <div className="space-y-6">
                   <WeatherWidget />
-                  
-                  {/* Quick Actions */}
+
                   <Card>
                     <CardHeader>
                       <CardTitle>Quick Actions</CardTitle>
                     </CardHeader>
                     <CardContent className="space-y-2">
                       <Button variant="outline" className="w-full justify-start" asChild>
-                        <Link to="/crops">
-                          <Wheat className="h-4 w-4 mr-2" />
-                          Add New Crop
-                        </Link>
+                        <Link to="/crops"><Wheat className="h-4 w-4 mr-2" />Add New Crop</Link>
                       </Button>
                       <Button variant="outline" className="w-full justify-start" asChild>
-                        <Link to="/sensors">
-                          <Activity className="h-4 w-4 mr-2" />
-                          Monitor Sensors
-                        </Link>
+                        <Link to="/sensors"><Activity className="h-4 w-4 mr-2" />Monitor Sensors</Link>
                       </Button>
                       <Button variant="outline" className="w-full justify-start" asChild>
-                        <Link to="/ai-advisory">
-                          <Brain className="h-4 w-4 mr-2" />
-                          AI Advisory
-                        </Link>
+                        <Link to="/ai-advisory"><Brain className="h-4 w-4 mr-2" />AI Advisory</Link>
                       </Button>
                     </CardContent>
                   </Card>
@@ -203,32 +233,29 @@ const Dashboard = () => {
             </TabsContent>
 
             <TabsContent value="crops" className="space-y-6">
-              <div className="grid gap-6">
-                {/* Current Season Crops */}
-                <Card>
-                  <CardHeader>
-                    <CardTitle className="flex items-center gap-2">
-                      <Leaf className="h-5 w-5 text-primary" />
-                      Current Season Crops ({currentSeason.charAt(0).toUpperCase() + currentSeason.slice(1)})
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-                      {seasonalCrops.slice(0, 6).map((crop) => (
-                        <div key={crop.id} className="border rounded-lg p-4 hover:shadow-md transition-shadow">
-                          <img src={crop.image} alt={crop.name} className="w-full h-32 object-cover rounded-md mb-3" />
-                          <h4 className="font-semibold">{crop.name}</h4>
-                          <p className="text-sm text-muted-foreground">{crop.hindi}</p>
-                          <div className="flex items-center justify-between mt-2">
-                            <Badge variant="outline">{crop.difficulty}</Badge>
-                            <span className="text-sm font-medium text-primary">{crop.marketPrice.split('/')[0]}</span>
-                          </div>
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <Leaf className="h-5 w-5 text-primary" />
+                    Current Season Crops ({currentSeason.charAt(0).toUpperCase() + currentSeason.slice(1)})
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+                    {seasonalCrops.slice(0, 6).map((crop) => (
+                      <div key={crop.id} className="border rounded-lg p-4 hover:shadow-md transition-shadow">
+                        <img src={crop.image} alt={crop.name} className="w-full h-32 object-cover rounded-md mb-3" />
+                        <h4 className="font-semibold">{crop.name}</h4>
+                        <p className="text-sm text-muted-foreground">{crop.hindi}</p>
+                        <div className="flex items-center justify-between mt-2">
+                          <Badge variant="outline">{crop.difficulty}</Badge>
+                          <span className="text-sm font-medium text-primary">{crop.marketPrice.split("/")[0]}</span>
                         </div>
-                      ))}
-                    </div>
-                  </CardContent>
-                </Card>
-              </div>
+                      </div>
+                    ))}
+                  </div>
+                </CardContent>
+              </Card>
             </TabsContent>
 
             <TabsContent value="tasks" className="space-y-6">
@@ -236,27 +263,37 @@ const Dashboard = () => {
                 <CardHeader>
                   <CardTitle className="flex items-center gap-2">
                     <Target className="h-5 w-5 text-primary" />
-                    Today's Tasks
+                    Your Tasks
                   </CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-4">
-                  {taskList.map((task) => (
-                    <div key={task.id} className="flex items-center justify-between p-3 border rounded-lg">
-                      <div className="flex items-center gap-3">
-                        <CheckCircle className="h-4 w-4 text-muted-foreground cursor-pointer hover:text-primary" />
-                        <div>
-                          <p className="font-medium">{task.task}</p>
-                          <p className="text-sm text-muted-foreground">{task.crop}</p>
+                  {dashLoading ? (
+                    <div className="flex justify-center p-4"><Loader2 className="h-5 w-5 animate-spin text-muted-foreground" /></div>
+                  ) : tasks.length === 0 ? (
+                    <p className="text-sm text-muted-foreground text-center py-4">No pending tasks.</p>
+                  ) : (
+                    tasks.map((task) => (
+                      <div key={task.id} className="flex items-center justify-between p-3 border rounded-lg">
+                        <div className="flex items-center gap-3">
+                          <CheckCircle className="h-4 w-4 text-muted-foreground" />
+                          <div>
+                            <p className="font-medium">{task.title}</p>
+                            {task.description && <p className="text-sm text-muted-foreground">{task.description}</p>}
+                          </div>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <Badge variant={task.priority === "high" ? "destructive" : task.priority === "medium" ? "secondary" : "outline"}>
+                            {task.priority}
+                          </Badge>
+                          {task.due_date && (
+                            <span className="text-sm text-muted-foreground">
+                              {formatDistanceToNow(new Date(task.due_date), { addSuffix: true })}
+                            </span>
+                          )}
                         </div>
                       </div>
-                      <div className="flex items-center gap-2">
-                        <Badge variant={task.priority === 'high' ? 'destructive' : task.priority === 'medium' ? 'secondary' : 'outline'}>
-                          {task.priority}
-                        </Badge>
-                        <span className="text-sm text-muted-foreground">{task.due}</span>
-                      </div>
-                    </div>
-                  ))}
+                    ))
+                  )}
                 </CardContent>
               </Card>
             </TabsContent>
@@ -270,19 +307,23 @@ const Dashboard = () => {
                   </CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-4">
-                  {marketPrices.map((item, index) => (
-                    <div key={index} className="flex items-center justify-between p-3 border rounded-lg">
-                      <div>
-                        <p className="font-medium">{item.crop}</p>
-                        <p className="text-lg font-bold text-primary">{item.price}</p>
+                  {pricesLoading ? (
+                    <div className="flex justify-center p-4"><Loader2 className="h-5 w-5 animate-spin text-muted-foreground" /></div>
+                  ) : marketPrices.length === 0 ? (
+                    <p className="text-sm text-muted-foreground text-center py-4">Market prices unavailable.</p>
+                  ) : (
+                    marketPrices.map((item, index) => (
+                      <div key={index} className="flex items-center justify-between p-3 border rounded-lg">
+                        <div>
+                          <p className="font-medium">{item.crop}</p>
+                          <p className="text-lg font-bold text-primary">₹{item.modalPrice.toLocaleString("en-IN")}</p>
+                        </div>
+                        <div className="text-right">
+                          <Badge variant="outline">{item.unit}</Badge>
+                        </div>
                       </div>
-                      <div className="text-right">
-                        <Badge variant={item.trend === 'up' ? 'default' : 'destructive'}>
-                          {item.change}
-                        </Badge>
-                      </div>
-                    </div>
-                  ))}
+                    ))
+                  )}
                 </CardContent>
               </Card>
             </TabsContent>

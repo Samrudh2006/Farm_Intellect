@@ -32,18 +32,37 @@ export const CropStatusWidget = () => {
 
   useEffect(() => {
     const fetchCrops = async () => {
-      const { data, error } = await supabase.from('field_maps').select('*');
-      
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) { setLoading(false); return; }
+
+      const { data, error } = await supabase
+        .from('crop_plans')
+        .select('*')
+        .eq('user_id', user.id)
+        .order('created_at', { ascending: false });
+
       if (!error && data) {
-        const mapped: CropStatus[] = data.map(field => ({
-          name: field.crop,
-          stage: field.status.charAt(0).toUpperCase() + field.status.slice(1),
-          health: field.status === 'healthy' ? Math.floor(Math.random() * 20) + 80 : Math.floor(Math.random() * 30) + 40,
-          daysToHarvest: Math.floor(Math.random() * 60) + 10,
-          status: field.status === 'active' || field.status === 'healthy' ? "healthy" : "warning",
-          area: `${field.field_name} - ${field.area} hectares`
-        }));
-        // If DB is empty, provide a fallback generic empty state rather than mock
+        const mapped: CropStatus[] = data.map((plan: any) => {
+          const harvestDate = plan.expected_harvest ? new Date(plan.expected_harvest) : null;
+          const days = harvestDate
+            ? Math.max(0, Math.round((harvestDate.getTime() - Date.now()) / 86400000))
+            : undefined;
+          const statusLabel = (plan.status || 'planned') as string;
+          const uiStatus: CropStatus['status'] =
+            statusLabel === 'harvested' || statusLabel === 'active' || statusLabel === 'planned'
+              ? 'healthy'
+              : statusLabel === 'at_risk'
+                ? 'warning'
+                : 'healthy';
+          return {
+            name: plan.crop_name,
+            stage: statusLabel.charAt(0).toUpperCase() + statusLabel.slice(1),
+            health: 0,
+            daysToHarvest: days,
+            status: uiStatus,
+            area: plan.area_acres ? `${plan.area_acres} acres` : plan.season,
+          };
+        });
         setCrops(mapped);
       }
       setLoading(false);
@@ -84,13 +103,8 @@ export const CropStatusWidget = () => {
                   </div>
                 </div>
                 
-                <div className="space-y-2">
-                  <div className="flex justify-between text-sm">
-                    <span>Health Score</span>
-                    <span className="font-medium">{crop.health}%</span>
-                  </div>
-                  <Progress value={crop.health} className="h-2" />
-                </div>
+
+
                 
                 {crop.daysToHarvest && (
                   <div className="flex items-center gap-2 text-sm text-muted-foreground">

@@ -5,6 +5,7 @@ import { hasSupabaseEnv, supabase } from "@/integrations/supabase/client";
 export type CurrentUserRole = "farmer" | "merchant" | "admin";
 
 export interface CurrentUser {
+  id?: string;
   name: string;
   role: CurrentUserRole;
   email?: string;
@@ -21,6 +22,7 @@ export const useCurrentUser = (): {
   const { profile, user: authUser, signOut, refreshProfile } = useAuth();
 
   const user: CurrentUser = {
+    id: authUser?.id,
     name: profile ? `${profile.first_name || ""} ${profile.last_name || ""}`.trim() : (authUser?.email?.split("@")[0] || "User"),
     role: (profile?.role as CurrentUserRole) || "farmer",
     email: profile?.email || authUser?.email || "",

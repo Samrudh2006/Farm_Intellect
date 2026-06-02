@@ -85,20 +85,16 @@ const FieldMap = () => {
       
       if (error) throw error;
       
-      // Transform DB fields to match UI requirements
+      // Transform DB fields to match UI requirements. No synthetic sensor/health data.
       const transformed = (data || []).map(f => ({
         id: f.id,
         name: f.field_name,
         area: `${f.area} hectares`,
         crop: f.crop,
         coordinates: typeof f.coordinates === 'string' ? JSON.parse(f.coordinates) : f.coordinates,
-        // Mock sensors since they aren't part of field_maps schema natively yet
-        sensors: [
-          { type: "soil_moisture", value: Math.floor(Math.random() * 40) + 20, status: "optimal" },
-          { type: "temperature", value: Math.floor(Math.random() * 15) + 15, status: "optimal" }
-        ],
-        health: Math.floor(Math.random() * 30) + 70, // 70-100
-        lastUpdated: new Date().toISOString()
+        sensors: [],
+        health: null,
+        lastUpdated: f.updated_at || f.created_at || null,
       }));
 
       setFields(transformed);
