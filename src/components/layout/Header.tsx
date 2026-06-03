@@ -14,6 +14,7 @@ import { LanguageSelector } from "@/components/ui/language-selector";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { useAuth } from "@/contexts/AuthContext";
 import { useOfflineSyncStatus } from "@/hooks/useOfflineSyncStatus";
+import { useNotificationCount } from "@/hooks/useNotificationCount";
 
 interface HeaderProps {
   user?: {
@@ -22,14 +23,17 @@ interface HeaderProps {
     avatar?: string;
   };
   onMenuClick?: () => void;
+  /** Optional override. When undefined, the live unread count is used. */
   notificationCount?: number;
 }
 
-export const Header = ({ user, onMenuClick, notificationCount = 0 }: HeaderProps) => {
+export const Header = ({ user, onMenuClick, notificationCount }: HeaderProps) => {
   const navigate = useNavigate();
   const { t } = useLanguage();
   const { signOut } = useAuth();
   const { queuedCount, isOnline } = useOfflineSyncStatus();
+  const liveCount = useNotificationCount();
+  const displayCount = notificationCount ?? liveCount;
 
   const handleSignOut = async () => {
     await signOut();
