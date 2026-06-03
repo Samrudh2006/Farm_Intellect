@@ -137,8 +137,8 @@ const Dashboard = () => {
       <Header
         user={user}
         onMenuClick={() => setSidebarOpen(!sidebarOpen)}
-        notificationCount={alerts.length}
       />
+
 
       <Sidebar
         isOpen={sidebarOpen}
