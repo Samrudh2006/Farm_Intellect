@@ -264,7 +264,7 @@ const AICropScanner = () => {
       <Header 
         user={{ name: user.name, role: "farmer" }}
         onMenuClick={() => setSidebarOpen(!sidebarOpen)}
-        notificationCount={5}
+
       />
       
       <Sidebar 

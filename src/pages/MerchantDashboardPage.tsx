@@ -13,7 +13,7 @@ const MerchantDashboardPage = () => {
 
   return (
     <div className="min-h-screen bg-background">
-      <Header user={{ name: user.name, role: "merchant" }} onMenuClick={() => setSidebarOpen(!sidebarOpen)} notificationCount={3} />
+      <Header user={{ name: user.name, role: "merchant" }} onMenuClick={() => setSidebarOpen(!sidebarOpen)} />
       <Sidebar isOpen={sidebarOpen} onClose={() => setSidebarOpen(false)} userRole="merchant" />
       <main className="md:ml-64 p-6">
         <div className="relative rounded-2xl overflow-hidden mb-6 h-48">

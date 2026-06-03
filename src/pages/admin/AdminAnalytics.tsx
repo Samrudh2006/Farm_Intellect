@@ -16,7 +16,7 @@ const AdminAnalytics = () => {
       <Header 
         user={user}
         onMenuClick={() => setSidebarOpen(!sidebarOpen)}
-        notificationCount={3}
+
       />
       
       <Sidebar 

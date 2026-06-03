@@ -14,6 +14,7 @@ import { LanguageSelector } from "@/components/ui/language-selector";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { useAuth } from "@/contexts/AuthContext";
 import { useOfflineSyncStatus } from "@/hooks/useOfflineSyncStatus";
+import { useNotificationCount } from "@/hooks/useNotificationCount";
 
 interface HeaderProps {
   user?: {
@@ -22,14 +23,17 @@ interface HeaderProps {
     avatar?: string;
   };
   onMenuClick?: () => void;
+  /** Optional override. When undefined, the live unread count is used. */
   notificationCount?: number;
 }
 
-export const Header = ({ user, onMenuClick, notificationCount = 0 }: HeaderProps) => {
+export const Header = ({ user, onMenuClick, notificationCount }: HeaderProps) => {
   const navigate = useNavigate();
   const { t } = useLanguage();
   const { signOut } = useAuth();
   const { queuedCount, isOnline } = useOfflineSyncStatus();
+  const liveCount = useNotificationCount();
+  const displayCount = notificationCount ?? liveCount;
 
   const handleSignOut = async () => {
     await signOut();
@@ -92,11 +96,11 @@ export const Header = ({ user, onMenuClick, notificationCount = 0 }: HeaderProps
 
             <Button variant="ghost" size="icon" className="relative" onClick={() => navigate(`/${user?.role || "farmer"}/notifications`)}>
               <Bell className="h-5 w-5" />
-              {notificationCount > 0 && (
+              {displayCount > 0 && (
                 <Badge
                   className="absolute -top-2 -right-2 h-5 w-5 rounded-full p-0 flex items-center justify-center text-xs bg-accent text-accent-foreground"
                 >
-                  {notificationCount}
+                  {displayCount > 99 ? "99+" : displayCount}
                 </Badge>
               )}
             </Button>

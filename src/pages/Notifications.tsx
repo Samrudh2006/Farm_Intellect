@@ -14,7 +14,7 @@ const Notifications = () => {
       <Header 
         user={{ name: user.name, role: user.role }}
         onMenuClick={() => setSidebarOpen(!sidebarOpen)}
-        notificationCount={3}
+
       />
       
       <Sidebar 

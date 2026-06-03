@@ -1006,7 +1006,7 @@ const Schemes = () => {
       <Header
         user={{ name: user.name, role: "farmer" }}
         onMenuClick={() => setSidebarOpen(!sidebarOpen)}
-        notificationCount={3}
+
       />
 
       <Sidebar isOpen={sidebarOpen} onClose={() => setSidebarOpen(false)} userRole="farmer" />

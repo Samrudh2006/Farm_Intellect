@@ -13,7 +13,7 @@ const FarmerKnowledgeHub = () => {
       <Header
         user={{ name: user.name, role: "farmer" }}
         onMenuClick={() => setSidebarOpen(!sidebarOpen)}
-        notificationCount={0}
+
       />
       <Sidebar isOpen={sidebarOpen} onClose={() => setSidebarOpen(false)} userRole="farmer" />
       <main className="md:ml-64 p-6">
