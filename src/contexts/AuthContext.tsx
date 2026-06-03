@@ -101,6 +101,9 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         setUser(session?.user ?? null);
         if (session?.user) {
           await fetchProfile(session.user.id);
+          import("@/lib/firstLoginSeed").then((m) =>
+            m.ensureFirstLoginSeed(session.user.id).catch(() => {}),
+          );
         }
       } catch (err) {
         console.error("Auth setup error:", err);
@@ -117,6 +120,9 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         setUser(session?.user ?? null);
         if (session?.user) {
           await fetchProfile(session.user.id);
+          import("@/lib/firstLoginSeed").then((m) =>
+            m.ensureFirstLoginSeed(session.user.id).catch(() => {}),
+          );
         } else {
           setProfile(null);
         }
