@@ -46,7 +46,7 @@ const MerchantFarmers = () => {
 
   return (
     <div className="min-h-screen bg-background">
-      <Header user={user} onMenuClick={() => setSidebarOpen(!sidebarOpen)} notificationCount={3} />
+      <Header user={user} onMenuClick={() => setSidebarOpen(!sidebarOpen)} />
       <Sidebar isOpen={sidebarOpen} onClose={() => setSidebarOpen(false)} userRole={user.role} />
 
       <main className="md:ml-64 p-6">

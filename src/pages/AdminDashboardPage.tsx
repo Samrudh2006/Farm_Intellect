@@ -13,7 +13,7 @@ const AdminDashboardPage = () => {
 
   return (
     <div className="min-h-screen bg-background">
-      <Header user={{ name: user.name, role: "admin" }} onMenuClick={() => setSidebarOpen(!sidebarOpen)} notificationCount={2} />
+      <Header user={{ name: user.name, role: "admin" }} onMenuClick={() => setSidebarOpen(!sidebarOpen)} />
       <Sidebar isOpen={sidebarOpen} onClose={() => setSidebarOpen(false)} userRole="admin" />
       <main className="md:ml-64 p-6">
         <div className="relative rounded-2xl overflow-hidden mb-6 h-48">

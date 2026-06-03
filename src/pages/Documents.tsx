@@ -15,7 +15,7 @@ const Documents = () => {
       <Header 
         user={user}
         onMenuClick={() => setSidebarOpen(!sidebarOpen)}
-        notificationCount={3}
+
       />
       
       <Sidebar 

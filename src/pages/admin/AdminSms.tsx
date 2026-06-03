@@ -404,7 +404,7 @@ const AdminSms = () => {
 
   return (
     <div className="min-h-screen bg-background">
-      <Header user={{ name: user.name, role: user.role }} onMenuClick={() => setSidebarOpen(!sidebarOpen)} notificationCount={0} />
+      <Header user={{ name: user.name, role: user.role }} onMenuClick={() => setSidebarOpen(!sidebarOpen)} />
       <Sidebar isOpen={sidebarOpen} onClose={() => setSidebarOpen(false)} userRole={user.role} />
       <main className="space-y-6 p-4 sm:p-6 md:ml-64">
         <div className="flex flex-wrap items-center gap-2">
