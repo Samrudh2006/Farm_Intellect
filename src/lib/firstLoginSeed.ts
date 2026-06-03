@@ -78,27 +78,12 @@ export async function ensureFirstLoginSeed(userId: string): Promise<void> {
     },
   ];
 
-  const notifications = [
-    {
-      user_id: userId,
-      type: "info",
-      title: "Welcome to Farm Intellect",
-      message: "Your farm dashboard is ready. Add or edit crops anytime from Crops.",
-    },
-    {
-      user_id: userId,
-      type: "warning",
-      title: "Light rain forecast tomorrow",
-      message: "Delay irrigation by 24 hours where possible.",
-    },
-  ];
-
+  // notifications table has no client INSERT policy by design — alerts arrive
+  // via the generate-alerts edge function. We only seed user-owned rows here.
   await Promise.all([
     supabase.from("crop_plans").insert(cropPlans),
     supabase.from("user_tasks").insert(tasks),
-    supabase.from("notifications").insert(notifications as any),
   ]).catch((e) => {
-    // notifications table currently has no INSERT policy — that's expected, ignore
     console.warn("[seed] partial insert", e);
   });
 
