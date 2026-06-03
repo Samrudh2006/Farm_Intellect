@@ -1,23 +1,24 @@
-import { useState, useEffect } from "react";
+import { useEffect, useRef, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Progress } from "@/components/ui/progress";
-import { 
-  Mic, 
-  MicOff, 
-  Volume2, 
-  VolumeX, 
-  MessageSquare, 
+import {
+  Mic,
+  MicOff,
+  Volume2,
+  VolumeX,
+  MessageSquare,
   Languages,
   Headphones,
   Brain,
-  Zap,
-  CheckCircle
+  CheckCircle,
+  AlertTriangle,
 } from "lucide-react";
 import { toast } from "sonner";
+import { reportError } from "@/lib/error-handling";
 
 interface VoiceCommand {
   text: string;
@@ -27,124 +28,147 @@ interface VoiceCommand {
   timestamp: Date;
 }
 
+const SUPPORTED = {
+  english: { name: "English", code: "en-US", flag: "🇬🇧" },
+  hindi: { name: "हिंदी", code: "hi-IN", flag: "🇮🇳" },
+  punjabi: { name: "ਪੰਜਾਬੀ", code: "pa-IN", flag: "🇮🇳" },
+  gujarati: { name: "ગુજરાતી", code: "gu-IN", flag: "🇮🇳" },
+  marathi: { name: "मराठी", code: "mr-IN", flag: "🇮🇳" },
+  tamil: { name: "தமிழ்", code: "ta-IN", flag: "🇮🇳" },
+  telugu: { name: "తెలుగు", code: "te-IN", flag: "🇮🇳" },
+  kannada: { name: "ಕನ್ನಡ", code: "kn-IN", flag: "🇮🇳" },
+} as const;
+
+const QUICK_QUERIES: Record<string, string[]> = {
+  english: [
+    "What is the best time to plant wheat?",
+    "How much water does rice need?",
+    "What are the symptoms of blight disease?",
+    "When should I harvest my cotton crop?",
+  ],
+  hindi: [
+    "गेहूं बोने का सबसे अच्छा समय क्या है?",
+    "धान को कितना पानी चाहिए?",
+    "झुलसा रोग के लक्षण क्या हैं?",
+    "कपास की फसल कब काटनी चाहिए?",
+  ],
+};
+
 export const MultiLanguageVoiceAssistant = () => {
   const [isListening, setIsListening] = useState(false);
   const [isSpeaking, setIsSpeaking] = useState(false);
-  const [selectedLanguage, setSelectedLanguage] = useState("english");
+  const [selectedLanguage, setSelectedLanguage] = useState<keyof typeof SUPPORTED>("english");
   const [volume, setVolume] = useState(80);
   const [commands, setCommands] = useState<VoiceCommand[]>([]);
   const [currentQuery, setCurrentQuery] = useState("");
   const [processingLevel, setProcessingLevel] = useState(0);
+  const [sttSupported, setSttSupported] = useState(true);
+  const recognitionRef = useRef<any>(null);
 
-  const supportedLanguages = {
-    english: { name: "English", code: "en", flag: "🇬🇧" },
-    hindi: { name: "हिंदी", code: "hi", flag: "🇮🇳" },
-    punjabi: { name: "ਪੰਜਾਬੀ", code: "pa", flag: "🇮🇳" },
-    gujarati: { name: "ગુજરાતી", code: "gu", flag: "🇮🇳" },
-    marathi: { name: "मराठी", code: "mr", flag: "🇮🇳" },
-    tamil: { name: "தமிழ்", code: "ta", flag: "🇮🇳" },
-    telugu: { name: "తెలుగు", code: "te", flag: "🇮🇳" },
-    kannada: { name: "ಕನ್ನಡ", code: "kn", flag: "🇮🇳" }
-  };
+  useEffect(() => {
+    const SR: any =
+      (typeof window !== "undefined" &&
+        ((window as any).SpeechRecognition || (window as any).webkitSpeechRecognition)) ||
+      null;
+    if (!SR) {
+      setSttSupported(false);
+      return;
+    }
+    const rec = new SR();
+    rec.continuous = false;
+    rec.interimResults = true;
+    rec.maxAlternatives = 1;
+    rec.lang = SUPPORTED[selectedLanguage].code;
+    recognitionRef.current = rec;
+  }, [selectedLanguage]);
 
-  const sampleQueries = {
-    english: [
-      "What's the best time to plant wheat?",
-      "How much water does rice need?",
-      "What are the symptoms of blight disease?",
-      "When should I harvest my cotton crop?"
-    ],
-    hindi: [
-      "गेहूं बोने का सबसे अच्छा समय क्या है?",
-      "धान को कितना पानी चाहिए?",
-      "झुलसा रोग के लक्षण क्या हैं?",
-      "कपास की फसल कब काटनी चाहिए?"
-    ],
-    punjabi: [
-      "ਕਣਕ ਬੀਜਣ ਦਾ ਸਭ ਤੋਂ ਵਧੀਆ ਸਮਾਂ ਕੀ ਹੈ?",
-      "ਚਾਵਲ ਨੂੰ ਕਿੰਨਾ ਪਾਣੀ ਚਾਹੀਦਾ ਹੈ?",
-      "ਝੁਲਸਾ ਰੋਗ ਦੇ ਲੱਛਣ ਕੀ ਹਨ?",
-      "ਕਪਾਹ ਦੀ ਫਸਲ ਕਦੋਂ ਵੱਢਣੀ ਚਾਹੀਦੀ ਹੈ?"
-    ]
-  };
-
-  const simulateVoiceRecognition = () => {
-    setIsListening(true);
-    setProcessingLevel(0);
-    
-    // Simulate processing
-    const interval = setInterval(() => {
-      setProcessingLevel(prev => {
-        if (prev >= 100) {
-          clearInterval(interval);
-          processVoiceCommand();
-          return 100;
-        }
-        return prev + 10;
-      });
-    }, 200);
-  };
-
-  const processVoiceCommand = async () => {
-    const language = selectedLanguage as keyof typeof sampleQueries;
-    const queries = sampleQueries[language] || sampleQueries.english;
-    const randomQuery = queries[Math.floor(Math.random() * queries.length)];
-    const langName = supportedLanguages[language as keyof typeof supportedLanguages].name;
-    
-    setCurrentQuery(randomQuery);
+  const handleResult = async (transcript: string, confidence: number) => {
+    setCurrentQuery(transcript);
     setIsListening(false);
-    
+    setProcessingLevel(50);
+    const langName = SUPPORTED[selectedLanguage].name;
     try {
       const { data, error } = await supabase.functions.invoke("voice-assistant", {
-        body: { prompt: randomQuery, language: langName }
+        body: { prompt: transcript, language: langName },
       });
-
       if (error) throw error;
       if (data?.error) throw new Error(data.error);
-
       const responseText = data.response || "I could not generate a response right now.";
-      
-      const newCommand: VoiceCommand = {
-        text: randomQuery,
+      const entry: VoiceCommand = {
+        text: transcript,
         language: langName,
-        confidence: Math.round(85 + Math.random() * 10),
+        confidence: Math.round(confidence * 100),
         response: responseText,
-        timestamp: new Date()
+        timestamp: new Date(),
       };
-      
-      setCommands(prev => [newCommand, ...prev.slice(0, 4)]);
+      setCommands((prev) => [entry, ...prev.slice(0, 4)]);
       setCurrentQuery("");
+      setProcessingLevel(100);
       speakResponse(responseText);
-      toast("Voice command processed by AI!");
-      
+      toast("Voice command processed");
     } catch (err: any) {
-      console.error(err);
-      toast("AI Voice Assistant is currently disconnected. Falling back to local logic.");
-      const newCommand: VoiceCommand = {
-        text: randomQuery,
-        language: langName,
-        confidence: Math.round(85 + Math.random() * 10),
-        response: "Sorry, I am having trouble reaching the AI server. Please ensure the voice-assistant Edge Function is deployed.",
-        timestamp: new Date()
-      };
-      setCommands(prev => [newCommand, ...prev.slice(0, 4)]);
-      setCurrentQuery("");
+      reportError("VoiceAssistant", err);
+      toast.error("Voice assistant unavailable. Please try again.");
       setProcessingLevel(0);
     }
   };
 
-  const speakResponse = (text: string) => {
-    setIsSpeaking(true);
-    setTimeout(() => {
-      setIsSpeaking(false);
-    }, 3000);
+  const startListening = () => {
+    if (!sttSupported || !recognitionRef.current) {
+      toast.error("Speech recognition not supported in this browser. Try Chrome or Edge.");
+      return;
+    }
+    const rec = recognitionRef.current;
+    rec.lang = SUPPORTED[selectedLanguage].code;
+    setIsListening(true);
+    setProcessingLevel(10);
+    setCurrentQuery("");
+
+    rec.onresult = (event: any) => {
+      const last = event.results[event.results.length - 1];
+      if (last.isFinal) {
+        handleResult(last[0].transcript, last[0].confidence || 0.9);
+      } else {
+        setCurrentQuery(last[0].transcript);
+        setProcessingLevel((p) => Math.min(80, p + 10));
+      }
+    };
+    rec.onerror = (e: any) => {
+      setIsListening(false);
+      setProcessingLevel(0);
+      if (e.error !== "aborted") toast.error(`Mic error: ${e.error}`);
+    };
+    rec.onend = () => {
+      setIsListening(false);
+    };
+    try {
+      rec.start();
+    } catch {
+      /* already started */
+    }
   };
 
   const stopListening = () => {
+    recognitionRef.current?.stop();
     setIsListening(false);
     setProcessingLevel(0);
-    setCurrentQuery("");
   };
+
+  const speakResponse = (text: string) => {
+    if (typeof window === "undefined" || !("speechSynthesis" in window)) return;
+    const u = new SpeechSynthesisUtterance(text);
+    u.lang = SUPPORTED[selectedLanguage].code;
+    u.volume = volume / 100;
+    u.onstart = () => setIsSpeaking(true);
+    u.onend = () => setIsSpeaking(false);
+    window.speechSynthesis.cancel();
+    window.speechSynthesis.speak(u);
+  };
+
+  const runQuickQuery = (text: string) =>
+    handleResult(text, 1);
+
+  const lang = SUPPORTED[selectedLanguage];
 
   return (
     <Card className="w-full">
@@ -154,7 +178,7 @@ export const MultiLanguageVoiceAssistant = () => {
           Multi-Language Voice Assistant
         </CardTitle>
         <p className="text-sm text-muted-foreground">
-          Ask farming questions in your local language - AI responds instantly
+          Ask farming questions in your local language — speech is captured live.
         </p>
       </CardHeader>
       <CardContent>
@@ -164,182 +188,151 @@ export const MultiLanguageVoiceAssistant = () => {
             <TabsTrigger value="languages">Languages</TabsTrigger>
             <TabsTrigger value="history">History</TabsTrigger>
           </TabsList>
-          
+
           <TabsContent value="assistant" className="space-y-6">
-            {/* Voice Control Panel */}
+            {!sttSupported && (
+              <div className="p-3 rounded border border-destructive/30 bg-destructive/5 flex items-center gap-2 text-sm text-destructive">
+                <AlertTriangle className="h-4 w-4" />
+                Voice input requires Chrome, Edge or Safari. Use the quick queries below instead.
+              </div>
+            )}
+
             <div className="text-center space-y-4">
-              <div className="relative">
+              <div className="relative inline-block">
                 <Button
                   size="lg"
-                  className={`w-24 h-24 rounded-full ${isListening ? 'animate-pulse bg-red-500 hover:bg-red-600' : ''}`}
-                  onClick={isListening ? stopListening : simulateVoiceRecognition}
+                  className={`w-24 h-24 rounded-full ${isListening ? "animate-pulse bg-destructive hover:bg-destructive/90" : ""}`}
+                  onClick={isListening ? stopListening : startListening}
+                  disabled={!sttSupported}
+                  aria-label={isListening ? "Stop listening" : "Start listening"}
                 >
-                  {isListening ? (
-                    <Mic className="h-8 w-8" />
-                  ) : (
-                    <MicOff className="h-8 w-8" />
-                  )}
+                  {isListening ? <Mic className="h-8 w-8" /> : <MicOff className="h-8 w-8" />}
                 </Button>
-                
                 {isListening && (
-                  <div className="absolute -inset-4 border-4 border-red-300 rounded-full animate-ping" />
+                  <div className="absolute -inset-4 border-4 border-destructive/40 rounded-full animate-ping" />
                 )}
               </div>
-              
-              <div className="space-y-2">
-                <p className="text-lg font-medium">
-                  {isListening ? "Listening..." : "Tap to speak"}
-                </p>
+              <div className="space-y-1">
+                <p className="text-lg font-medium">{isListening ? "Listening…" : "Tap to speak"}</p>
                 <p className="text-sm text-muted-foreground">
-                  Language: {supportedLanguages[selectedLanguage as keyof typeof supportedLanguages]?.flag}{" "}
-                  {supportedLanguages[selectedLanguage as keyof typeof supportedLanguages]?.name}
+                  {lang.flag} {lang.name}
                 </p>
               </div>
             </div>
 
-            {/* Processing Indicator */}
-            {isListening && (
+            {(isListening || processingLevel > 0) && (
               <div className="space-y-3">
                 <div className="flex items-center gap-2">
-                  <Brain className="h-4 w-4 text-blue-500" />
-                  <span className="text-sm">Processing voice input...</span>
+                  <Brain className="h-4 w-4 text-primary" />
+                  <span className="text-sm">Processing…</span>
                 </div>
                 <Progress value={processingLevel} className="w-full" />
-                
                 {currentQuery && (
                   <div className="p-3 bg-muted rounded-lg">
-                    <p className="text-sm font-medium">Recognized:</p>
+                    <p className="text-sm font-medium">Heard:</p>
                     <p className="text-sm">{currentQuery}</p>
                   </div>
                 )}
               </div>
             )}
 
-            {/* Speaking Indicator */}
             {isSpeaking && (
-              <div className="flex items-center justify-center gap-2 p-4 bg-green-50 rounded-lg">
+              <div className="flex items-center justify-center gap-2 p-4 bg-green-50 dark:bg-green-950/30 rounded-lg">
                 <Volume2 className="h-5 w-5 text-green-600 animate-pulse" />
-                <span className="text-green-700">AI Assistant is speaking...</span>
+                <span className="text-green-700 dark:text-green-300">AI Assistant is speaking…</span>
               </div>
             )}
 
-            {/* Volume Control */}
             <div className="flex items-center gap-3">
               <VolumeX className="h-4 w-4" />
-              <div className="flex-1">
-                <input
-                  type="range"
-                  min="0"
-                  max="100"
-                  value={volume}
-                  onChange={(e) => setVolume(parseInt(e.target.value))}
-                  className="w-full"
-                />
-              </div>
+              <input
+                type="range"
+                min={0}
+                max={100}
+                value={volume}
+                onChange={(e) => setVolume(parseInt(e.target.value))}
+                className="flex-1"
+                aria-label="Volume"
+              />
               <Volume2 className="h-4 w-4" />
               <span className="text-sm font-medium w-12">{volume}%</span>
             </div>
 
-            {/* Quick Commands */}
             <div className="space-y-2">
-              <h3 className="text-sm font-medium">Quick Voice Commands:</h3>
+              <h3 className="text-sm font-medium">Quick queries:</h3>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
-                {(sampleQueries[selectedLanguage as keyof typeof sampleQueries] || sampleQueries.english).map((query, index) => (
+                {(QUICK_QUERIES[selectedLanguage] ?? QUICK_QUERIES.english).map((q) => (
                   <Button
-                    key={index}
+                    key={q}
                     variant="outline"
                     size="sm"
-                    className="text-left h-auto p-2 whitespace-normal"
-                    onClick={() => {
-                      setCurrentQuery(query);
-                      setTimeout(() => processVoiceCommand(), 500);
-                    }}
+                    className="text-left h-auto p-2 whitespace-normal justify-start"
+                    onClick={() => runQuickQuery(q)}
                   >
-                    <MessageSquare className="h-3 w-3 mr-1 flex-shrink-0" />
-                    <span className="text-xs">{query}</span>
+                    <MessageSquare className="h-3 w-3 mr-2 flex-shrink-0" />
+                    <span className="text-xs">{q}</span>
                   </Button>
                 ))}
               </div>
             </div>
           </TabsContent>
-          
+
           <TabsContent value="languages" className="space-y-4">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-              {Object.entries(supportedLanguages).map(([key, lang]) => (
+              {Object.entries(SUPPORTED).map(([key, l]) => (
                 <Button
                   key={key}
                   variant={selectedLanguage === key ? "default" : "outline"}
                   className="justify-start h-auto p-3"
-                  onClick={() => setSelectedLanguage(key)}
+                  onClick={() => setSelectedLanguage(key as keyof typeof SUPPORTED)}
                 >
-                  <span className="text-lg mr-2">{lang.flag}</span>
+                  <span className="text-lg mr-2">{l.flag}</span>
                   <div className="text-left">
-                    <p className="font-medium">{lang.name}</p>
-                    <p className="text-xs opacity-70">{lang.code.toUpperCase()}</p>
+                    <p className="font-medium">{l.name}</p>
+                    <p className="text-xs opacity-70">{l.code}</p>
                   </div>
-                  {selectedLanguage === key && (
-                    <CheckCircle className="h-4 w-4 ml-auto text-green-500" />
-                  )}
+                  {selectedLanguage === key && <CheckCircle className="h-4 w-4 ml-auto text-green-500" />}
                 </Button>
               ))}
             </div>
-            
-            <div className="p-4 bg-muted rounded-lg">
-              <h3 className="font-medium mb-2">AI Voice Features:</h3>
-              <ul className="text-sm space-y-1 text-muted-foreground">
-                <li>• Real-time speech recognition in 8+ languages</li>
-                <li>• Context-aware agricultural responses</li>
-                <li>• Natural language processing for local dialects</li>
-                <li>• Offline voice commands support</li>
-                <li>• Personalized accent adaptation</li>
-              </ul>
-            </div>
           </TabsContent>
-          
+
           <TabsContent value="history" className="space-y-4">
-            <div className="space-y-3">
-              <h3 className="text-lg font-semibold">Recent Voice Interactions</h3>
-              
-              {commands.length === 0 ? (
-                <div className="text-center p-8 border-2 border-dashed border-muted-foreground/25 rounded-lg">
-                  <Mic className="h-12 w-12 mx-auto mb-4 text-muted-foreground" />
-                  <p className="text-muted-foreground">No voice commands yet</p>
-                  <p className="text-sm text-muted-foreground">Start speaking to see your interaction history</p>
-                </div>
-              ) : (
-                commands.map((command, index) => (
-                  <div key={index} className="p-4 border rounded-lg space-y-3">
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-2">
-                        <Languages className="h-4 w-4 text-blue-500" />
-                        <span className="text-sm font-medium">{command.language}</span>
-                        <Badge variant="outline">{command.confidence}% confident</Badge>
-                      </div>
-                      <span className="text-xs text-muted-foreground">
-                        {command.timestamp.toLocaleTimeString()}
-                      </span>
+            {commands.length === 0 ? (
+              <div className="text-center p-8 border-2 border-dashed border-muted-foreground/25 rounded-lg">
+                <Mic className="h-12 w-12 mx-auto mb-4 text-muted-foreground" />
+                <p className="text-muted-foreground">No voice commands yet</p>
+              </div>
+            ) : (
+              commands.map((c, i) => (
+                <div key={i} className="p-4 border rounded-lg space-y-3">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                      <Languages className="h-4 w-4 text-blue-500" />
+                      <span className="text-sm font-medium">{c.language}</span>
+                      <Badge variant="outline">{c.confidence}% confident</Badge>
                     </div>
-                    
-                    <div className="space-y-2">
-                      <div>
-                        <p className="text-sm font-medium text-blue-700">You said:</p>
-                        <p className="text-sm bg-blue-50 p-2 rounded">{command.text}</p>
-                      </div>
-                      
-                      <div>
-                        <p className="text-sm font-medium text-green-700">AI Response:</p>
-                        <p className="text-sm bg-green-50 p-2 rounded">{command.response}</p>
-                      </div>
-                    </div>
-                    
-                    <Button size="sm" variant="outline" onClick={() => speakResponse(command.response)}>
-                      <Volume2 className="h-3 w-3 mr-1" />
-                      Replay Response
-                    </Button>
+                    <span className="text-xs text-muted-foreground">
+                      {c.timestamp.toLocaleTimeString()}
+                    </span>
                   </div>
-                ))
-              )}
-            </div>
+                  <div className="space-y-2">
+                    <div>
+                      <p className="text-sm font-medium text-blue-700 dark:text-blue-300">You said:</p>
+                      <p className="text-sm bg-muted p-2 rounded">{c.text}</p>
+                    </div>
+                    <div>
+                      <p className="text-sm font-medium text-green-700 dark:text-green-300">AI Response:</p>
+                      <p className="text-sm bg-muted p-2 rounded">{c.response}</p>
+                    </div>
+                  </div>
+                  <Button size="sm" variant="outline" onClick={() => speakResponse(c.response)}>
+                    <Volume2 className="h-3 w-3 mr-1" />
+                    Replay
+                  </Button>
+                </div>
+              ))
+            )}
           </TabsContent>
         </Tabs>
       </CardContent>
