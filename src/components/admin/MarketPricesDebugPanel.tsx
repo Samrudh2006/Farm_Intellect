@@ -19,7 +19,8 @@ const SOURCE_LABEL: Record<MarketPriceSource, { label: string; variant: "default
  * non-admin users so it is safe to mount anywhere.
  */
 export const MarketPricesDebugPanel = ({ state = "Punjab", district = "" }: { state?: string; district?: string }) => {
-  const { isAdmin } = useAuth();
+  const { profile } = useAuth();
+  const isAdmin = profile?.role === "admin";
   const { prices, source, lastFetched, loading, error, staleAgeMs, refresh } = useMarketPrices(state, district);
 
   if (!isAdmin) return null;
