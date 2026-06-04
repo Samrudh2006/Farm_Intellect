@@ -25,6 +25,9 @@ jobs:
       - name: Lint frontend
         run: npm run lint
 
+      - name: Audit for mock/hardcoded data
+        run: npm run audit:mock-data
+
       - name: Test frontend
         run: npm run test
 
