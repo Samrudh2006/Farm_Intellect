@@ -12,7 +12,8 @@
     "test:watch": "vitest",
     "test:coverage": "vitest run --coverage",
     "lint": "eslint .",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "audit:mock-data": "node scripts/audit-mock-data.mjs"
   },
   "dependencies": {
     "@capacitor/cli": "^8.2.0",
