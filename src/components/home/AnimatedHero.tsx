@@ -1,3 +1,4 @@
+// audit-allow: mock-data — visual/UI randomness only, no data semantics
 import { useEffect, useRef } from "react";
 
 export const AnimatedHero = () => {

@@ -1,3 +1,4 @@
+// audit-allow: mock-data — visual/UI randomness only, no data semantics
 import * as React from "react";
 import { Slot } from "@radix-ui/react-slot";
 import { VariantProps, cva } from "class-variance-authority";

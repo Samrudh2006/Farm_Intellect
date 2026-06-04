@@ -49,6 +49,8 @@ for (const file of walk(SRC)) {
   const rel = "/" + relative(ROOT, file).replace(/\\/g, "/");
   if (ALLOW.some((r) => r.test(rel))) continue;
   const src = readFileSync(file, "utf8");
+  // Per-file opt-out for non-data uses (e.g. visual jitter, canvas placement, id generation).
+  if (/audit-allow:\s*mock-data/i.test(src)) continue;
   for (const { pattern, label } of FORBIDDEN) {
     pattern.lastIndex = 0;
     let m;
