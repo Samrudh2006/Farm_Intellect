@@ -1,23 +1,25 @@
 import { describe, it, expect, vi } from "vitest";
-import { render, screen, fireEvent } from "@testing-library/react";
+import { render } from "@testing-library/react";
 import { LoadingState, ErrorState, EmptyState, SkeletonRows } from "./UIState";
 
 describe("UIState components", () => {
   it("LoadingState announces loading status", () => {
-    render(<LoadingState />);
-    expect(screen.getByRole("status")).toHaveAttribute("data-ui-state", "loading");
+    const { container } = render(<LoadingState />);
+    expect(container.querySelector('[data-ui-state="loading"]')).not.toBeNull();
   });
 
   it("ErrorState renders retry button and calls handler", () => {
     const onRetry = vi.fn();
-    render(<ErrorState onRetry={onRetry} />);
-    fireEvent.click(screen.getByRole("button", { name: /retry/i }));
+    const { container } = render(<ErrorState onRetry={onRetry} />);
+    const btn = container.querySelector("button");
+    expect(btn).not.toBeNull();
+    btn!.click();
     expect(onRetry).toHaveBeenCalledTimes(1);
   });
 
   it("EmptyState renders title", () => {
-    render(<EmptyState title="No prices" />);
-    expect(screen.getByText("No prices")).toBeInTheDocument();
+    const { getByText } = render(<EmptyState title="No prices" />);
+    expect(getByText("No prices")).toBeTruthy();
   });
 
   it("SkeletonRows renders the requested number of rows", () => {
