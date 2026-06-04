@@ -6,6 +6,7 @@ import { StatCard } from "@/components/ui/stat-card";
 import { WeatherWidget } from "@/components/dashboard/WeatherWidget";
 import { CropStatusWidget } from "@/components/dashboard/CropStatusWidget";
 import { AIRecommendations } from "@/components/dashboard/AIRecommendations";
+import { MarketPricesDebugPanel } from "@/components/admin/MarketPricesDebugPanel";
 import { SmartInsights } from "@/components/dashboard/SmartInsights";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -330,6 +331,7 @@ const Dashboard = () => {
 
             <TabsContent value="insights" className="space-y-6">
               <AIRecommendations />
+              <MarketPricesDebugPanel />
             </TabsContent>
           </Tabs>
         </div>
