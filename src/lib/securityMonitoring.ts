@@ -410,7 +410,17 @@ export const checkMemoryUsage = (): void => {
   }
 };
 
-// Initialize memory check every 5 minutes
+// Initialize memory check every 5 minutes (deferred to avoid blocking module load)
 if (typeof window !== 'undefined') {
-  setInterval(checkMemoryUsage, 5 * 60 * 1000);
+  // Use requestIdleCallback to defer initialization
+  if ('requestIdleCallback' in window) {
+    requestIdleCallback(() => {
+      setInterval(checkMemoryUsage, 5 * 60 * 1000);
+    });
+  } else {
+    // Fallback for browsers that don't support requestIdleCallback
+    setTimeout(() => {
+      setInterval(checkMemoryUsage, 5 * 60 * 1000);
+    }, 0);
+  }
 }
