@@ -1,0 +1,3 @@
+# Globs (one per line, `*` matches any chars). Comments start with #.
+# Example:
+# /src/components/marketing/Confetti.tsx
