@@ -15,11 +15,11 @@ import {
   Eye, 
   Calendar,
   User,
-  Loader2
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useCurrentUser } from "@/hooks/useCurrentUser";
 import { useToast } from "@/hooks/use-toast";
+import { LoadingState, ErrorState, EmptyState } from "@/components/state/UIState";
 
 interface Post {
   id: string;
