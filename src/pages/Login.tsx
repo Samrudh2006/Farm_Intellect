@@ -79,7 +79,6 @@ const Login = () => {
 
   // Redirect if already logged in
   useEffect(() => {
-    console.log("[v0] Login page auth check:", { user: !!user, profile: !!profile, userRole: profile?.role });
     if (user && profile) {
       const routes: Record<string, string> = {
         farmer: "/farmer/dashboard",
@@ -87,7 +86,6 @@ const Login = () => {
         admin: "/admin/dashboard",
       };
       const targetRoute = routes[profile.role] || "/farmer/dashboard";
-      console.log("[v0] Redirecting to:", targetRoute);
       navigate(targetRoute);
     }
   }, [user, profile, navigate]);
@@ -205,7 +203,6 @@ const Login = () => {
         
         toast({ title: "Signup Failed", description: errorDescription, variant: "destructive" });
       } else {
-        console.log("[v0] Signup successful, waiting for profile load...");
         toast({ title: "🎉 Account Created!", description: "You are now logged in" });
         // Optionally register biometric right after signup
         if (bioRegisterOnSignup.length > 0 && bioSupported) {
@@ -258,7 +255,6 @@ const Login = () => {
       } else {
         // Reset attempts on successful login
         setLoginAttempts(0);
-        console.log("[v0] Login successful, waiting for profile load...");
         toast({ title: t("auth.login_success"), description: t("auth.welcome_back") });
         logSecurityEvent({
           eventType: "LOGIN_SUCCESS",

@@ -35,8 +35,8 @@ const pendingOTPs = new Map<string, { otp: string; password: string; expiresAt: 
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
-const aadhaarToEmail = (aadhaar: string) => `aadhaar_${aadhaar.replace(/\\s/g, "")}@farmapp.local.io`;
-const phoneToEmail = (phone: string) => `phone_${phone.replace(/\\D/g, "")}@farmapp.local.io`;
+const aadhaarToEmail = (aadhaar: string) => `aadhaar_${aadhaar.replace(/\s/g, "")}@farmapp.local.io`;
+const phoneToEmail = (phone: string) => `phone_${phone.replace(/\D/g, "")}@farmapp.local.io`;
 
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [user, setUser] = useState<SupabaseUser | null>(null);
@@ -174,7 +174,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
   // Keep simulated OTP for Phone numbers since Twilio is not enabled in this project
   const signInWithPhoneOTP = async (phone: string, role: 'farmer' | 'merchant' | 'expert' | 'admin', name?: string) => {
-    const cleanPhone = phone.replace(/\\D/g, "");
+    const cleanPhone = phone.replace(/\D/g, "");
     const email = phoneToEmail(cleanPhone);
     const otpArray = new Uint32Array(1);
     crypto.getRandomValues(otpArray);
@@ -207,7 +207,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   };
 
   const verifyPhoneOTP = async (phone: string, otpCode: string) => {
-    const cleanPhone = phone.replace(/\\D/g, "");
+    const cleanPhone = phone.replace(/\D/g, "");
     const pending = pendingOTPs.get(cleanPhone);
 
     if (!pending || pending.otp !== otpCode) {
