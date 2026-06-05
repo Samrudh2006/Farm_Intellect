@@ -1,9 +1,10 @@
-import { useState, useEffect } from "react";
-import { Wheat, TrendingUp, AlertTriangle, CheckCircle, Loader2 } from "lucide-react";
+import { useState, useEffect, useCallback } from "react";
+import { Wheat, TrendingUp, AlertTriangle, CheckCircle } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 import { Badge } from "@/components/ui/badge";
 import { supabase } from "@/integrations/supabase/client";
+import { LoadingState, ErrorState, EmptyState } from "@/components/state/UIState";
 
 interface CropStatus {
   name: string;
@@ -29,47 +30,48 @@ const statusColors = {
 export const CropStatusWidget = () => {
   const [crops, setCrops] = useState<CropStatus[]>([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
-  useEffect(() => {
-    const fetchCrops = async () => {
+  const fetchCrops = useCallback(async () => {
+    setLoading(true);
+    setError(null);
+    try {
       const { data: { user } } = await supabase.auth.getUser();
-      if (!user) { setLoading(false); return; }
+      if (!user) { setCrops([]); return; }
 
-      const { data, error } = await supabase
+      const { data, error: qErr } = await supabase
         .from('crop_plans')
         .select('*')
         .eq('user_id', user.id)
         .order('created_at', { ascending: false });
 
-      if (!error && data) {
-        const mapped: CropStatus[] = data.map((plan: any) => {
-          const harvestDate = plan.expected_harvest ? new Date(plan.expected_harvest) : null;
-          const days = harvestDate
-            ? Math.max(0, Math.round((harvestDate.getTime() - Date.now()) / 86400000))
-            : undefined;
-          const statusLabel = (plan.status || 'planned') as string;
-          const uiStatus: CropStatus['status'] =
-            statusLabel === 'harvested' || statusLabel === 'active' || statusLabel === 'planned'
-              ? 'healthy'
-              : statusLabel === 'at_risk'
-                ? 'warning'
-                : 'healthy';
-          return {
-            name: plan.crop_name,
-            stage: statusLabel.charAt(0).toUpperCase() + statusLabel.slice(1),
-            health: 0,
-            daysToHarvest: days,
-            status: uiStatus,
-            area: plan.area_acres ? `${plan.area_acres} acres` : plan.season,
-          };
-        });
-        setCrops(mapped);
-      }
+      if (qErr) throw qErr;
+      const mapped: CropStatus[] = (data || []).map((plan: any) => {
+        const harvestDate = plan.expected_harvest ? new Date(plan.expected_harvest) : null;
+        const days = harvestDate
+          ? Math.max(0, Math.round((harvestDate.getTime() - Date.now()) / 86400000))
+          : undefined;
+        const statusLabel = (plan.status || 'planned') as string;
+        const uiStatus: CropStatus['status'] =
+          statusLabel === 'at_risk' ? 'warning' : 'healthy';
+        return {
+          name: plan.crop_name,
+          stage: statusLabel.charAt(0).toUpperCase() + statusLabel.slice(1),
+          health: 0,
+          daysToHarvest: days,
+          status: uiStatus,
+          area: plan.area_acres ? `${plan.area_acres} acres` : plan.season,
+        };
+      });
+      setCrops(mapped);
+    } catch (e: any) {
+      setError(e?.message || "Failed to load crop status");
+    } finally {
       setLoading(false);
-    };
-
-    fetchCrops();
+    }
   }, []);
+
+  useEffect(() => { void fetchCrops(); }, [fetchCrops]);
 
   return (
     <Card>
@@ -81,9 +83,11 @@ export const CropStatusWidget = () => {
       </CardHeader>
       <CardContent className="space-y-4">
         {loading ? (
-          <div className="flex justify-center p-4"><Loader2 className="h-6 w-6 animate-spin text-muted-foreground" /></div>
+          <LoadingState title="Loading crop status…" compact />
+        ) : error ? (
+          <ErrorState title="Crop data unavailable" description={error} onRetry={fetchCrops} compact />
         ) : crops.length === 0 ? (
-          <div className="text-center p-4 text-muted-foreground text-sm">No crops mapped yet. Add fields in the Field Map tab.</div>
+          <EmptyState title="No crops mapped yet" description="Add fields in the Field Map tab to see status here." compact />
         ) : (
           crops.map((crop, index) => {
             const StatusIcon = statusIcons[crop.status] || CheckCircle;
