@@ -33,6 +33,7 @@ interface Post {
 export const CommunityForum = () => {
   const [posts, setPosts] = useState<Post[]>([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const [selectedPost, setSelectedPost] = useState<Post | null>(null);
   const [showCreatePost, setShowCreatePost] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
@@ -61,6 +62,7 @@ export const CommunityForum = () => {
 
   const fetchPosts = async () => {
     setLoading(true);
+    setError(null);
     try {
       const { data, error } = await supabase
         .from('forum_posts')
@@ -71,6 +73,7 @@ export const CommunityForum = () => {
       setPosts(data || []);
     } catch (err: any) {
       console.error(err);
+      setError(err?.message || "Failed to load posts");
     } finally {
       setLoading(false);
     }
@@ -219,7 +222,9 @@ export const CommunityForum = () => {
       )}
 
       {loading ? (
-         <div className="flex justify-center py-12"><Loader2 className="h-8 w-8 animate-spin text-primary" /></div>
+        <LoadingState title="Loading discussions…" />
+      ) : error ? (
+        <ErrorState title="Could not load posts" description={error} onRetry={fetchPosts} />
       ) : (
         <div className="space-y-4">
           {filteredPosts.map(post => (
@@ -242,14 +247,11 @@ export const CommunityForum = () => {
             </Card>
           ))}
           {filteredPosts.length === 0 && (
-            <Card>
-              <CardContent className="pt-6 text-center py-12">
-                <MessageSquare className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-                <h3 className="text-lg font-medium mb-2">No posts found</h3>
-                <p className="text-muted-foreground mb-4">Be the first to start a discussion!</p>
-                <Button onClick={() => setShowCreatePost(true)}><Plus className="h-4 w-4 mr-2" />Create Post</Button>
-              </CardContent>
-            </Card>
+            <EmptyState
+              title="No posts yet"
+              description="Be the first to start a discussion!"
+              onRetry={() => setShowCreatePost(true)}
+            />
           )}
         </div>
       )}

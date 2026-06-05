@@ -18,10 +18,10 @@ import {
   Activity,
   Plus,
   Settings,
-  Loader2
 } from "lucide-react";
 import { ndviClassification, ndwiClassification, cropNDVIProfiles } from "@/data/satelliteData";
 import { useToast } from "@/hooks/use-toast";
+import { LoadingState, ErrorState, EmptyState } from "@/components/state/UIState";
 
 const sensorIcons: Record<string, any> = {
   soil_moisture: Droplets,
@@ -67,6 +67,7 @@ const FieldMap = () => {
   const { toast } = useToast();
   const [fields, setFields] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
   const getHealthColor = (health: number) => {
     if (health >= 80) return "text-primary";
@@ -80,12 +81,10 @@ const FieldMap = () => {
 
   const fetchFields = async () => {
     setLoading(true);
+    setError(null);
     try {
       const { data, error } = await supabase.from('field_maps').select('*');
-      
       if (error) throw error;
-      
-      // Transform DB fields to match UI requirements. No synthetic sensor/health data.
       const transformed = (data || []).map(f => ({
         id: f.id,
         name: f.field_name,
@@ -96,13 +95,11 @@ const FieldMap = () => {
         health: null,
         lastUpdated: f.updated_at || f.created_at || null,
       }));
-
       setFields(transformed);
-      if (transformed.length > 0) {
-        setSelectedField(transformed[0].id);
-      }
-    } catch (error: any) {
-      toast({ title: "Failed to load fields", description: error.message, variant: "destructive" });
+      if (transformed.length > 0) setSelectedField(transformed[0].id);
+    } catch (e: any) {
+      setError(e?.message || "Failed to load fields");
+      toast({ title: "Failed to load fields", description: e?.message, variant: "destructive" });
     } finally {
       setLoading(false);
     }
@@ -149,7 +146,9 @@ const FieldMap = () => {
                 </CardHeader>
                 <CardContent className="flex-1 p-0 relative min-h-[480px]">
                   {loading ? (
-                    <div className="flex justify-center items-center h-full"><Loader2 className="h-8 w-8 animate-spin text-primary" /></div>
+                    <LoadingState title="Loading field map…" />
+                  ) : error ? (
+                    <ErrorState title="Field map unavailable" description={error} onRetry={fetchFields} />
                   ) : fields.length > 0 ? (
                     (() => {
                       const activeField = fields.find((f) => f.id === selectedField) || fields[0];
@@ -203,7 +202,7 @@ const FieldMap = () => {
                       );
                     })()
                   ) : (
-                    <div className="flex justify-center items-center h-full text-muted-foreground">No fields mapped in database.</div>
+                    <EmptyState title="No fields mapped" description="Add your first field to see it on the map." />
                   )}
                 </CardContent>
               </Card>
