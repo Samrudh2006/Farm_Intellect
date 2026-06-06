@@ -1,4 +1,4 @@
-import { createContext, useContext, useEffect, useState, ReactNode } from "react";
+import { createContext, useCallback, useContext, useEffect, useState, ReactNode } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import type { User as SupabaseUser, Session as SupabaseSession } from "@supabase/supabase-js";
 
@@ -37,6 +37,11 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 const aadhaarToEmail = (aadhaar: string) => `aadhaar_${aadhaar.replace(/\\s/g, "")}@farmapp.local.io`;
 const phoneToEmail = (phone: string) => `phone_${phone.replace(/\\D/g, "")}@farmapp.local.io`;
+const appRoles = ["farmer", "merchant", "expert", "admin"] as const;
+
+const normalizeRole = (value: unknown): UserProfile["role"] => {
+  return appRoles.includes(value as UserProfile["role"]) ? (value as UserProfile["role"]) : "farmer";
+};
 
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [user, setUser] = useState<SupabaseUser | null>(null);
