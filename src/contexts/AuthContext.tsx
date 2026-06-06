@@ -22,8 +22,8 @@ interface AuthContextType {
   session: SupabaseSession | null;
   profile: UserProfile | null;
   loading: boolean;
-  signUpWithAadhaar: (aadhaar: string, passkey: string, metadata: { first_name: string; role: 'farmer' | 'merchant' | 'expert' | 'admin'; phone_number?: string; state?: string; district?: string; village?: string }) => Promise<{ error: Error | null }>;
-  signInWithAadhaar: (aadhaar: string, passkey: string) => Promise<{ error: Error | null }>;
+  signUpWithAadhaar: (aadhaar: string, passkey: string, metadata: { first_name: string; role: 'farmer' | 'merchant' | 'expert' | 'admin'; phone_number?: string; state?: string; district?: string; village?: string }) => Promise<{ error: Error | null; profile: UserProfile | null }>;
+  signInWithAadhaar: (aadhaar: string, passkey: string) => Promise<{ error: Error | null; profile: UserProfile | null }>;
   signInWithPhoneOTP: (phone: string, role: string, name?: string) => Promise<{ otp: string; error: Error | null }>;
   verifyPhoneOTP: (phone: string, otp: string) => Promise<{ error: Error | null }>;
   signOut: () => Promise<void>;
@@ -190,21 +190,36 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       if (error.message?.includes("rate_limit")) {
         enhancedError.message = "Too many signup attempts. Please wait a few minutes and try again.";
       }
-      return { error: enhancedError };
+      return { error: enhancedError, profile: null };
     }
 
-    // Critical check: If Confirm Email is enabled in Supabase, session will be null!
     if (data.user && !data.session) {
-      return { error: new Error("Supabase is blocking the login because 'Confirm Email' is turned on. Please go to your Supabase Dashboard -> Authentication -> Providers -> Email -> Turn OFF 'Confirm email', then try again.") };
+      return { error: new Error("Supabase is blocking the login because 'Confirm Email' is turned on. Please go to your Supabase Dashboard -> Authentication -> Providers -> Email -> Turn OFF 'Confirm email', then try again."), profile: null };
     }
 
-    return { error: null };
+    // Force profile fetch immediately so the frontend has it
+    if (data.user) {
+      const newProfile = await fetchProfile(data.user);
+      return { error: null, profile: newProfile };
+    }
+
+    return { error: null, profile: null };
   };
 
   const signInWithAadhaar = async (aadhaar: string, passkey: string) => {
     const email = aadhaarToEmail(aadhaar);
-    const { error } = await supabase.auth.signInWithPassword({ email, password: passkey });
-    return { error: error ? (error as Error) : null };
+    const { data, error } = await supabase.auth.signInWithPassword({ email, password: passkey });
+    
+    if (error) {
+      return { error: error as Error, profile: null };
+    }
+
+    if (data.user) {
+      const newProfile = await fetchProfile(data.user);
+      return { error: null, profile: newProfile };
+    }
+
+    return { error: null, profile: null };
   };
 
   // Keep simulated OTP for Phone numbers since Twilio is not enabled in this project

@@ -179,7 +179,7 @@ const Login = () => {
       }
 
       setLoading(true);
-      const { error } = await signUpWithAadhaar(cleanAadhaar, formData.passkey, {
+      const { error, profile: newProfile } = await signUpWithAadhaar(cleanAadhaar, formData.passkey, {
         first_name: formData.name,
         role: (selectedRole || "farmer") as 'farmer' | 'merchant' | 'admin',
         phone_number: formData.phone ? `+91${formData.phone}` : undefined,
@@ -189,20 +189,19 @@ const Login = () => {
       if (error) {
         console.error("[v0] Signup failed:", error.message);
         
-        // Provide user-friendly error messages
         let errorDescription = error.message;
         if (error.message?.includes("rate_limit")) {
           errorDescription = "Too many signup attempts. Please wait a few minutes before trying again.";
         } else if (error.message?.includes("already registered")) {
           errorDescription = "This Aadhaar is already registered. Please sign in instead.";
         } else if (error.message?.includes("invalid")) {
-          errorDescription = "Invalid email format. Please check your Aadhaar number.";
+          errorDescription = "Invalid format. Please check your Aadhaar number.";
         }
         
         toast({ title: "Signup Failed", description: errorDescription, variant: "destructive" });
       } else {
-        console.log("[v0] Signup successful, waiting for profile load...");
         toast({ title: "🎉 Account Created!", description: "You are now logged in" });
+        
         // Optionally register biometric right after signup
         if (bioRegisterOnSignup.length > 0 && bioSupported) {
           for (const kind of bioRegisterOnSignup) {
@@ -227,18 +226,25 @@ const Login = () => {
             description: "You can now login with fingerprint or login with face on this device.",
           });
         }
+        
+        // Hard redirect immediately to bypass any React state or Router lags
+        const targetRole = newProfile?.role || selectedRole || "farmer";
+        const targetRoute = roleHomeRoutes[targetRole as AppRole] || "/farmer/dashboard";
+        
+        setTimeout(() => {
+          window.location.href = targetRoute;
+        }, 500);
+        return;
       }
       setLoading(false);
     } else {
       setLoading(true);
-      const { error } = await signInWithAadhaar(cleanAadhaar, formData.passkey);
+      const { error, profile: newProfile } = await signInWithAadhaar(cleanAadhaar, formData.passkey);
       
       if (error) {
-        // Track failed login attempt
         const newAttempts = loginAttempts + 1;
         setLoginAttempts(newAttempts);
         
-        console.error("[v0] Login failed:", error.message);
         logSecurityEvent({
           eventType: "LOGIN_FAILED",
           severity: "medium",
@@ -252,16 +258,17 @@ const Login = () => {
           variant: "destructive" 
         });
       } else {
-        // Reset attempts on successful login
         setLoginAttempts(0);
-        console.log("[v0] Login successful, waiting for profile load...");
         toast({ title: t("auth.login_success"), description: t("auth.welcome_back") });
-        logSecurityEvent({
-          eventType: "LOGIN_SUCCESS",
-          severity: "low",
-          description: "Successful login"
-        });
-        // Navigation will be handled by the useEffect that watches user/profile
+        
+        // Hard redirect immediately
+        const targetRole = newProfile?.role || "farmer";
+        const targetRoute = roleHomeRoutes[targetRole as AppRole] || "/farmer/dashboard";
+        
+        setTimeout(() => {
+          window.location.href = targetRoute;
+        }, 500);
+        return;
       }
       setLoading(false);
     }
