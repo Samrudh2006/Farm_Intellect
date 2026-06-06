@@ -35,8 +35,8 @@ const pendingOTPs = new Map<string, { otp: string; password: string; expiresAt: 
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
-const aadhaarToEmail = (aadhaar: string) => `aadhaar_${aadhaar.replace(/\\s/g, "")}@farmapp.local.io`;
-const phoneToEmail = (phone: string) => `phone_${phone.replace(/\\D/g, "")}@farmapp.local.io`;
+const aadhaarToEmail = (aadhaar: string) => `aadhaar_${aadhaar.replace(/\s/g, "")}@farmapp.local.io`;
+const phoneToEmail = (phone: string) => `phone_${phone.replace(/\D/g, "")}@farmapp.local.io`;
 const appRoles = ["farmer", "merchant", "expert", "admin"] as const;
 
 const normalizeRole = (value: unknown): UserProfile["role"] => {
@@ -234,11 +234,18 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       return { error: error as Error, profile: null };
     }
 
-    if (data.user) {
-      if (data.session) {
-        setSession(data.session);
-        setUser(data.user);
-      }
+    if (data.user && !data.session) {
+      return {
+        error: new Error(
+          "Login blocked: Supabase returned no session. Go to Authentication → Providers → Email and turn OFF 'Confirm email', then try again."
+        ),
+        profile: null,
+      };
+    }
+
+    if (data.user && data.session) {
+      setSession(data.session);
+      setUser(data.user);
       const newProfile = await fetchProfile(data.user);
       return { error: null, profile: newProfile };
     }
@@ -256,7 +263,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     const tempPassword = `otp_${generatedOTP}_${Date.now()}`;
 
     // Try to sign up first
-    await supabase.auth.signUp({
+    const { data: signUpData, error: signUpError } = await supabase.auth.signUp({
       email,
       password: tempPassword,
       options: {
@@ -270,6 +277,10 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         emailRedirectTo: window.location.origin,
       },
     });
+
+    if (signUpError && !signUpError.message?.toLowerCase().includes("already")) {
+      return { otp: "", error: signUpError as Error };
+    }
 
     pendingOTPs.set(cleanPhone, {
       otp: generatedOTP,
