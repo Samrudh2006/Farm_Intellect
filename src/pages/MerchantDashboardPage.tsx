@@ -4,7 +4,7 @@ import { Sidebar } from "@/components/layout/Sidebar";
 import { RoleDashboard } from "@/components/dashboard/RoleDashboard";
 import { useCurrentUser } from "@/hooks/useCurrentUser";
 import { useLanguage } from "@/contexts/LanguageContext";
-import heroImage from "@/assets/hero-farming.jpg";
+const heroImage = "https://images.pexels.com/photos/1595104/pexels-photo-1595104.jpeg?auto=compress&cs=tinysrgb&w=1200";
 
 const MerchantDashboardPage = () => {
   const [sidebarOpen, setSidebarOpen] = useState(false);

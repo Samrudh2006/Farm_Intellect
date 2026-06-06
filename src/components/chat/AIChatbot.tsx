@@ -15,8 +15,8 @@ import {
   ThumbsUp,
   ThumbsDown
 } from "lucide-react";
-import krishiLogo from "@/assets/krishi-ai-logo.png";
-import krishiAvatar from "@/assets/krishi-ai-avatar.png";
+const krishiLogo = "https://images.pexels.com/photos/1612351/pexels-photo-1612351.jpeg?auto=compress&cs=tinysrgb&w=64";
+const krishiAvatar = "https://images.pexels.com/photos/1612351/pexels-photo-1612351.jpeg?auto=compress&cs=tinysrgb&w=64";
 import { streamChat, type AiMessage } from "@/lib/aiStream";
 import { toast } from "sonner";
 import ReactMarkdown from "react-markdown";

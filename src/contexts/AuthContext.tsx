@@ -149,9 +149,24 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       async (event, session) => {
         // We handle the initial session with getSession above to avoid race conditions
         if (event === 'INITIAL_SESSION') return;
-        
+
         if (!mounted) return;
-        
+
+        // For SIGNED_IN events, if signInWithAadhaar/signUpWithAadhaar already set the user
+        // and profile synchronously, skip the redundant loading cycle to prevent a redirect
+        // loop where RoutesWrapper briefly hides all routes (loading=true) and the protected
+        // route redirects back to /login before the new loading=false cycle completes.
+        if (event === 'SIGNED_IN' && session?.user) {
+          // Silently update session reference without triggering the loading spinner
+          setSession(session);
+          setUser(session.user);
+          // Profile was already fetched by the signIn* caller — don't re-fetch
+          import("@/lib/firstLoginSeed").then((m) =>
+            m.ensureFirstLoginSeed(session.user.id).catch(() => {})
+          );
+          return;
+        }
+
         setLoading(true);
         try {
           setSession(session);

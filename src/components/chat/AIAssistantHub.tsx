@@ -4,13 +4,9 @@ import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
-import {
-  Send, User, Volume2, VolumeX, Trash2, Copy, ThumbsUp, ThumbsDown,
-  StopCircle, RefreshCw, MessageCircle, Phone as PhoneIcon, Video,
-  Mic, MicOff, ImagePlus, X, Camera, Loader2
-} from "lucide-react";
-import krishiAvatar from "@/assets/krishi-ai-avatar.png";
-import doctorAvatar from "@/assets/doctor-avatar.png";
+import { Send, User, Volume2, VolumeX, Trash2, Copy, ThumbsUp, ThumbsDown, CircleStop as StopCircle, RefreshCw, MessageCircle, Phone as PhoneIcon, Video, Mic, MicOff, ImagePlus, X, Camera, Loader as Loader2 } from "lucide-react";
+const krishiAvatar = "https://images.pexels.com/photos/1612351/pexels-photo-1612351.jpeg?auto=compress&cs=tinysrgb&w=64";
+const doctorAvatar = "https://images.pexels.com/photos/5452201/pexels-photo-5452201.jpeg?auto=compress&cs=tinysrgb&w=64";
 import { streamChat, type AiMessage } from "@/lib/aiStream";
 import { toast } from "sonner";
 import ReactMarkdown from "react-markdown";

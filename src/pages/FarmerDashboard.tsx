@@ -6,7 +6,7 @@ import { RoleDashboard } from "@/components/dashboard/RoleDashboard";
 import { FarmerConsultationForm } from "@/components/consultations/FarmerConsultationForm";
 import { useCurrentUser } from "@/hooks/useCurrentUser";
 import { useLanguage } from "@/contexts/LanguageContext";
-import heroImage from "@/assets/hero-farming.jpg";
+const heroImage = "https://images.pexels.com/photos/1595104/pexels-photo-1595104.jpeg?auto=compress&cs=tinysrgb&w=1200";
 
 const FarmerDashboard = () => {
   const [sidebarOpen, setSidebarOpen] = useState(false);

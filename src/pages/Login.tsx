@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { ArrowLeft, Sun, Moon, Shield, Phone, MessageCircle, Eye, EyeOff, KeyRound, ChevronDown, Fingerprint, ScanFace, AlertTriangle } from "lucide-react";
+import { ArrowLeft, Sun, Moon, Shield, Phone, MessageCircle, Eye, EyeOff, KeyRound, ChevronDown, Fingerprint, ScanFace, TriangleAlert as AlertTriangle } from "lucide-react";
 import {
   isBiometricSupported,
   registerBiometric,
@@ -22,9 +22,9 @@ import { indianStates, getCitiesByState } from "@/data/indianLocations";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { logSecurityEvent } from "@/lib/securityMonitoring";
 import { roleHomeRoutes, type AppRole } from "@/lib/roles";
-import farmerImg from "@/assets/roles/farmer-role.jpg";
-import merchantImg from "@/assets/roles/merchant-role.jpg";
-import adminImg from "@/assets/roles/admin-role.jpg";
+const farmerImg = "https://images.pexels.com/photos/1595104/pexels-photo-1595104.jpeg?auto=compress&cs=tinysrgb&w=600";
+const merchantImg = "https://images.pexels.com/photos/3735168/pexels-photo-3735168.jpeg?auto=compress&cs=tinysrgb&w=600";
+const adminImg = "https://images.pexels.com/photos/3182812/pexels-photo-3182812.jpeg?auto=compress&cs=tinysrgb&w=600";
 
 const Login = () => {
   const { t } = useLanguage();
@@ -227,13 +227,9 @@ const Login = () => {
           });
         }
         
-        // Hard redirect immediately to bypass any React state or Router lags
         const targetRole = newProfile?.role || selectedRole || "farmer";
         const targetRoute = roleHomeRoutes[targetRole as AppRole] || "/farmer/dashboard";
-        
-        setTimeout(() => {
-          navigate(targetRoute, { replace: true });
-        }, 500);
+        navigate(targetRoute, { replace: true });
         return;
       }
       setLoading(false);
@@ -264,10 +260,7 @@ const Login = () => {
         // Hard redirect immediately
         const targetRole = newProfile?.role || "farmer";
         const targetRoute = roleHomeRoutes[targetRole as AppRole] || "/farmer/dashboard";
-        
-        setTimeout(() => {
-          navigate(targetRoute, { replace: true });
-        }, 500);
+        navigate(targetRoute, { replace: true });
         return;
       }
       setLoading(false);

@@ -1,9 +1,9 @@
 import { useState, useRef, useEffect, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useNavigate } from "react-router-dom";
-import { X, Sparkles, Mic, MicOff, Volume2, StopCircle, Loader2, Navigation, Zap, Command } from "lucide-react";
+import { X, Sparkles, Mic, MicOff, Volume2, CircleStop as StopCircle, Loader as Loader2, Navigation, Zap, Command } from "lucide-react";
 import ReactMarkdown from "react-markdown";
-import krishiAvatar from "@/assets/krishi-ai-avatar.png";
+const krishiAvatar = "https://images.pexels.com/photos/1612351/pexels-photo-1612351.jpeg?auto=compress&cs=tinysrgb&w=64";
 import { Button } from "@/components/ui/button";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { AshokaChakra } from "@/components/ui/ashoka-chakra";

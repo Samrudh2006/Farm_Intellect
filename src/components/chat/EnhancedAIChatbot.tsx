@@ -4,19 +4,8 @@ import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
-import {
-  Send,
-  User,
-  Volume2,
-  VolumeX,
-  RefreshCw,
-  Trash2,
-  Copy,
-  ThumbsUp,
-  ThumbsDown,
-  StopCircle
-} from "lucide-react";
-import krishiAvatar from "@/assets/krishi-ai-avatar.png";
+import { Send, User, Volume2, VolumeX, RefreshCw, Trash2, Copy, ThumbsUp, ThumbsDown, CircleStop as StopCircle } from "lucide-react";
+const krishiAvatar = "https://images.pexels.com/photos/1612351/pexels-photo-1612351.jpeg?auto=compress&cs=tinysrgb&w=64";
 import { streamChat, type AiMessage } from "@/lib/aiStream";
 import { toast } from "sonner";
 import ReactMarkdown from "react-markdown";

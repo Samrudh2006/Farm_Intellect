@@ -1,22 +1,23 @@
 // Comprehensive crop data with seasonal information and images
-import winterWheat from '@/assets/crops/winter-wheat.jpg';
-import rabiCrops from '@/assets/crops/rabi-crops.jpg';
-import kharifRice from '@/assets/crops/kharif-rice.jpg';
-import summerVegetables from '@/assets/crops/summer-vegetables.jpg';
-import cotton from '@/assets/crops/cotton.jpg';
-import sugarcane from '@/assets/crops/sugarcane.jpg';
-import maizeCorn from '@/assets/crops/maize-corn.jpg';
-import soybean from '@/assets/crops/soybean.jpg';
-import onion from '@/assets/crops/onion.jpg';
-import potato from '@/assets/crops/potato.jpg';
-import barley from '@/assets/crops/barley.jpg';
-import chickpea from '@/assets/crops/chickpea.jpg';
-import pea from '@/assets/crops/pea.jpg';
-import mustard from '@/assets/crops/mustard.jpg';
-import tomato from '@/assets/crops/tomato.jpg';
-import watermelon from '@/assets/crops/watermelon.jpg';
-import muskmelon from '@/assets/crops/muskmelon.jpg';
 import { createDatasetMetadata } from './datasetMetadata';
+
+const winterWheat = "https://images.pexels.com/photos/326082/pexels-photo-326082.jpeg?auto=compress&cs=tinysrgb&w=400";
+const rabiCrops = "https://images.pexels.com/photos/265216/pexels-photo-265216.jpeg?auto=compress&cs=tinysrgb&w=400";
+const kharifRice = "https://images.pexels.com/photos/2518861/pexels-photo-2518861.jpeg?auto=compress&cs=tinysrgb&w=400";
+const summerVegetables = "https://images.pexels.com/photos/1640777/pexels-photo-1640777.jpeg?auto=compress&cs=tinysrgb&w=400";
+const cotton = "https://images.pexels.com/photos/5725625/pexels-photo-5725625.jpeg?auto=compress&cs=tinysrgb&w=400";
+const sugarcane = "https://images.pexels.com/photos/15609996/pexels-photo-15609996.jpeg?auto=compress&cs=tinysrgb&w=400";
+const maizeCorn = "https://images.pexels.com/photos/547264/pexels-photo-547264.jpeg?auto=compress&cs=tinysrgb&w=400";
+const soybean = "https://images.pexels.com/photos/6157049/pexels-photo-6157049.jpeg?auto=compress&cs=tinysrgb&w=400";
+const onion = "https://images.pexels.com/photos/144206/pexels-photo-144206.jpeg?auto=compress&cs=tinysrgb&w=400";
+const potato = "https://images.pexels.com/photos/144248/pexels-photo-144248.jpeg?auto=compress&cs=tinysrgb&w=400";
+const barley = "https://images.pexels.com/photos/265216/pexels-photo-265216.jpeg?auto=compress&cs=tinysrgb&w=400";
+const chickpea = "https://images.pexels.com/photos/6157049/pexels-photo-6157049.jpeg?auto=compress&cs=tinysrgb&w=400";
+const pea = "https://images.pexels.com/photos/255469/pexels-photo-255469.jpeg?auto=compress&cs=tinysrgb&w=400";
+const mustard = "https://images.pexels.com/photos/158198/pexels-photo-158198.jpeg?auto=compress&cs=tinysrgb&w=400";
+const tomato = "https://images.pexels.com/photos/533280/pexels-photo-533280.jpeg?auto=compress&cs=tinysrgb&w=400";
+const watermelon = "https://images.pexels.com/photos/1313267/pexels-photo-1313267.jpeg?auto=compress&cs=tinysrgb&w=400";
+const muskmelon = "https://images.pexels.com/photos/2894192/pexels-photo-2894192.jpeg?auto=compress&cs=tinysrgb&w=400";
 
 export interface CropInfo {
   id: string;
