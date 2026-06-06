@@ -1,12 +1,8 @@
-import { defineConfig } from "vite";
+import { defineConfig, loadEnv } from "vite";
 import react from "@vitejs/plugin-react-swc";
 import path from "path";
 import { componentTagger } from "lovable-tagger";
 import { visualizer } from "rollup-plugin-visualizer";
-
-// Map environment variables from Vercel integration to Vite naming convention
-const SUPABASE_URL = process.env.SUPABASE_URL || process.env.NEXT_PUBLIC_SUPABASE_URL || '';
-const SUPABASE_ANON_KEY = process.env.SUPABASE_ANON_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || '';
 
 const vendorChunkGroups: Array<[string, string[]]> = [
   ["react-vendor", ["react", "react-dom"]],
@@ -20,31 +16,39 @@ const vendorChunkGroups: Array<[string, string[]]> = [
   ["markdown-vendor", ["react-markdown"]],
 ];
 
-// Safe default for local/preview builds; set VITE_ROBOTS_POLICY="index, follow" for production indexing.
-const robotsPolicy = process.env.VITE_ROBOTS_POLICY || "noindex, nofollow";
-
-const basePath = (() => {
-  const value = process.env.VITE_BASE_PATH?.trim();
-
-  if (!value) {
-    return "/";
-  }
-
-  const normalized = value.startsWith("/") ? value : `/${value}`;
-  return normalized.endsWith("/") ? normalized : `${normalized}/`;
-})();
-
 // https://vitejs.dev/config/
-export default defineConfig(({ mode }) => ({
-  base: basePath,
-  define: {
-    'import.meta.env.VITE_SUPABASE_URL': JSON.stringify(SUPABASE_URL),
-    'import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY': JSON.stringify(SUPABASE_ANON_KEY),
-  },
-  server: {
-    host: "::",
-    port: 4000,
-  },
+export default defineConfig(({ mode }) => {
+  // Load env file based on `mode` in the current working directory.
+  // Set the third parameter to '' to load all env regardless of the `VITE_` prefix.
+  const env = loadEnv(mode, process.cwd(), "");
+
+  const SUPABASE_URL = env.SUPABASE_URL || env.NEXT_PUBLIC_SUPABASE_URL || env.VITE_SUPABASE_URL || '';
+  const SUPABASE_ANON_KEY = env.SUPABASE_ANON_KEY || env.NEXT_PUBLIC_SUPABASE_ANON_KEY || env.VITE_SUPABASE_PUBLISHABLE_KEY || env.VITE_SUPABASE_ANON_KEY || '';
+
+  // Safe default for local/preview builds; set VITE_ROBOTS_POLICY="index, follow" for production indexing.
+  const robotsPolicy = env.VITE_ROBOTS_POLICY || "noindex, nofollow";
+
+  const basePath = (() => {
+    const value = env.VITE_BASE_PATH?.trim();
+
+    if (!value) {
+      return "/";
+    }
+
+    const normalized = value.startsWith("/") ? value : `/${value}`;
+    return normalized.endsWith("/") ? normalized : `${normalized}/`;
+  })();
+
+  return {
+    base: basePath,
+    define: {
+      'import.meta.env.VITE_SUPABASE_URL': JSON.stringify(SUPABASE_URL),
+      'import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY': JSON.stringify(SUPABASE_ANON_KEY),
+    },
+    server: {
+      host: "::",
+      port: 4000,
+    },
   test: {
     globals: true,
     environment: "jsdom",
@@ -118,5 +122,5 @@ export default defineConfig(({ mode }) => ({
         },
       },
     },
-  },
-}));
+  }
+});
