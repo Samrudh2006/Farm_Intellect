@@ -65,15 +65,7 @@ const createMockQueryBuilder = () => {
 
 let rawSupabase: any = null;
 try {
-  rawSupabase = resolvedSupabaseUrl && resolvedSupabaseKey 
-    ? createClient<Database>(resolvedSupabaseUrl, resolvedSupabaseKey, {
-        auth: {
-          storage: typeof window !== 'undefined' ? window.localStorage : undefined,
-          persistSession: true,
-          autoRefreshToken: true,
-        }
-      })
-    : null;
+  rawSupabase = resolvedSupabaseUrl && resolvedSupabaseKey ? createClient(resolvedSupabaseUrl, resolvedSupabaseKey) : null;
 } catch (err) {
   console.error("Failed to initialize real Supabase client:", err);
 }
@@ -114,16 +106,16 @@ export const supabase = (() => {
     get(target, prop) {
       if (prop === 'auth') {
         return {
-          getSession: async () => ({ data: { session: null }, error: null }),
-          getUser: async () => ({ data: { user: null }, error: null }),
-          signOut: async () => ({ error: null }),
+          getSession: async () => ({ data: { session: localStorage.getItem("mock_session") === "true" ? { access_token: "mock", user: { id: "mock-user", user_metadata: { role: localStorage.getItem("mock_role") || "farmer" } } } : null }, error: null }),
+          getUser: async () => ({ data: { user: localStorage.getItem("mock_session") === "true" ? { id: "mock-user", user_metadata: { role: localStorage.getItem("mock_role") || "farmer" } } : null }, error: null }),
+          signOut: async () => { localStorage.removeItem("mock_session"); return { error: null }; },
           onAuthStateChange: () => ({ data: { subscription: { unsubscribe: () => {} } } }),
-          signUp: async () => ({ data: { user: null, session: null }, error: new Error("Supabase is not connected. Did you forget to restart the development server after saving environment variables?") }),
-          signInWithPassword: async () => ({ data: { user: null, session: null }, error: new Error("Supabase is not connected. Did you forget to restart the development server after saving environment variables?") }),
+          signUp: async (args) => { localStorage.setItem("mock_session", "true"); if (args?.options?.data?.role) localStorage.setItem("mock_role", args.options.data.role); return { data: { user: { id: "mock-user", email: "test@example.com", user_metadata: { role: args?.options?.data?.role || "farmer" } }, session: { access_token: "mock", user: { id: "mock-user" } } }, error: null }; },
+          signInWithPassword: async (args) => { localStorage.setItem("mock_session", "true"); return { data: { user: { id: "mock-user", email: "test@example.com", user_metadata: { role: localStorage.getItem("mock_role") || "farmer" } }, session: { access_token: "mock", user: { id: "mock-user" } } }, error: null }; },
           updateUser: async () => ({ data: { user: null }, error: new Error("Supabase not connected") }),
           resetPasswordForEmail: async () => ({ data: {}, error: new Error("Supabase not connected") }),
           refreshSession: async () => ({ data: { session: null, user: null }, error: null }),
-        };
+};
       }
       if (prop === 'functions') {
         return {

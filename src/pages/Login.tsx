@@ -232,7 +232,7 @@ const Login = () => {
         const targetRoute = roleHomeRoutes[targetRole as AppRole] || "/farmer/dashboard";
         
         setTimeout(() => {
-          window.location.href = targetRoute;
+          navigate(targetRoute, { replace: true });
         }, 500);
         return;
       }
@@ -266,7 +266,7 @@ const Login = () => {
         const targetRoute = roleHomeRoutes[targetRole as AppRole] || "/farmer/dashboard";
         
         setTimeout(() => {
-          window.location.href = targetRoute;
+          navigate(targetRoute, { replace: true });
         }, 500);
         return;
       }

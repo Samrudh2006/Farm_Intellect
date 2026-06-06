@@ -136,8 +136,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         setLoading(false);
       }
     };
-
-    setupAuth();
+    // setupAuth(); // Removed to prevent race condition with onAuthStateChange
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       async (_event, session) => {
@@ -199,6 +198,10 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
     // Force profile fetch immediately so the frontend has it
     if (data.user) {
+      if (data.session) {
+        setSession(data.session);
+        setUser(data.user);
+      }
       const newProfile = await fetchProfile(data.user);
       return { error: null, profile: newProfile };
     }
@@ -215,6 +218,10 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     }
 
     if (data.user) {
+      if (data.session) {
+        setSession(data.session);
+        setUser(data.user);
+      }
       const newProfile = await fetchProfile(data.user);
       return { error: null, profile: newProfile };
     }
