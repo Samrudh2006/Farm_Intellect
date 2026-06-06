@@ -76,8 +76,11 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
           profileError = retryProfile.error;
           roleData = { role: repairedRole || requestedRole };
           roleError = null;
-        } else {
-          console.warn("RPC ensure_current_user_profile failed or missing. Falling back to metadata-based profile.", repairError);
+        } 
+        
+        // If RPC failed OR if it silently returned but profileData is STILL null, use fallback
+        if (repairError || !profileData) {
+          console.warn("RPC ensure_current_user_profile failed or missing, or returned empty. Falling back to metadata-based profile.");
           profileData = {
             user_id: authUser.id,
             display_name: displayName,
