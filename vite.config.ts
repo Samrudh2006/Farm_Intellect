@@ -49,7 +49,7 @@ export default defineConfig(({ mode }) => {
       host: "::",
       port: 4000,
     },
-  test: {
+    test: {
     globals: true,
     environment: "jsdom",
     setupFiles: "./src/test/setup.ts",
@@ -122,5 +122,6 @@ export default defineConfig(({ mode }) => {
         },
       },
     },
+  },
   }
 });

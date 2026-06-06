@@ -22,20 +22,8 @@ const Polls = lazy(() => import("@/pages/Polls"));
 const Schemes = lazy(() => import("@/pages/Schemes"));
 const AIAdvisory = lazy(() => import("@/pages/AIAdvisory"));
 const AICropScanner = lazy(() => import("@/pages/AICropScanner"));
-const Farmers = lazy(() => import("@/pages/Farmers"));
-const Analytics = lazy(() => import("@/pages/Analytics"));
-const Users = lazy(() => import("@/pages/Users"));
-const Settings = lazy(() => import("@/pages/Settings"));
 const NotFound = lazy(() => import("@/pages/NotFound"));
-const Forum = lazy(() => import("@/pages/Forum"));
-const Calendar = lazy(() => import("@/pages/Calendar"));
-const Notifications = lazy(() => import("@/pages/Notifications"));
-const Documents = lazy(() => import("@/pages/Documents"));
-const Chat = lazy(() => import("@/pages/Chat"));
-const FarmFeatures = lazy(() => import("@/pages/FarmFeatures"));
 const Profile = lazy(() => import("@/pages/Profile"));
-const ResetPassword = lazy(() => import("@/pages/ResetPassword"));
-const AppLauncher = lazy(() => import("@/pages/AppLauncher"));
 const MerchantFarmers = lazy(() => import("@/pages/merchant/MerchantFarmers"));
 const MerchantMarketPrices = lazy(() => import("@/pages/merchant/MerchantMarketPrices"));
 const MerchantRequirements = lazy(() => import("@/pages/merchant/MerchantRequirements"));
@@ -50,7 +38,6 @@ const AdminNotifications = lazy(() => import("@/pages/admin/AdminNotifications")
 const AdminChat = lazy(() => import("@/pages/admin/AdminChat"));
 const AdminAuditLog = lazy(() => import("@/pages/admin/AdminAuditLog"));
 const AdminSms = lazy(() => import("@/pages/admin/AdminSms"));
-const SmsRegister = lazy(() => import("@/pages/SmsRegister"));
 
 export const publicRoutes: PublicRouteConfig[] = [
   { path: "/", component: Index },
@@ -100,27 +87,6 @@ export const protectedRoutes: ProtectedRouteConfig[] = [
   { path: "/admin/notifications", component: AdminNotifications, allowedRoles: ["admin"] },
   { path: "/admin/sms", component: AdminSms, allowedRoles: ["admin"] },
   { path: "/admin/profile", component: Profile, allowedRoles: ["admin"] },
-
-  { path: "/dashboard", component: Dashboard },
-  { path: "/crops", component: Crops },
-  { path: "/advisory", component: Advisory },
-  { path: "/weather", component: Weather },
-  { path: "/sensors", component: Sensors },
-  { path: "/field-map", component: FieldMap },
-  { path: "/merchants", component: Merchants },
-  { path: "/polls", component: Polls },
-  { path: "/schemes", component: Schemes },
-  { path: "/ai-advisory", component: AIAdvisory },
-  { path: "/ai-crop-scanner", component: AICropScanner },
-  { path: "/farmers", component: Farmers },
-  { path: "/analytics", component: Analytics },
-  { path: "/users", component: Users },
-  { path: "/settings", component: Settings },
-  { path: "/forum", component: Forum },
-  { path: "/calendar", component: Calendar },
-  { path: "/notifications", component: Notifications },
-  { path: "/documents", component: Documents },
-  { path: "/chat", component: Chat },
 ];
 
 export const notFoundComponent = NotFound;

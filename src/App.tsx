@@ -40,12 +40,14 @@ const RouteLoader = () => (
 const ProtectedRoute = ({ children, allowedRoles }: { children: ReactNode; allowedRoles?: AppRole[] }) => {
   const guard = useRoleGuard(allowedRoles);
 
-  if (guard.status === "loading") {
+  if (guard.status === "loading" || guard.status === "awaiting-profile") {
     return (
       <div className="min-h-screen flex items-center justify-center bg-background">
         <div className="flex flex-col items-center gap-4">
           <span className="h-8 w-8 border-4 border-primary/30 border-t-primary rounded-full animate-spin" />
-          <p className="text-sm text-muted-foreground">Loading...</p>
+          <p className="text-sm text-muted-foreground">
+            {guard.status === "loading" ? "Loading..." : "Loading your profile..."}
+          </p>
         </div>
       </div>
     );
@@ -53,17 +55,6 @@ const ProtectedRoute = ({ children, allowedRoles }: { children: ReactNode; allow
 
   if (guard.status === "unauthenticated" || guard.status === "forbidden") {
     return <Navigate to={guard.redirectTo} replace />;
-  }
-
-  if (guard.status === "missing-profile") {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-background">
-        <div className="text-center">
-          <h2 className="text-lg font-semibold text-foreground mb-2">Profile Loading Failed</h2>
-          <p className="text-muted-foreground">Unable to load your profile. Please try refreshing the page.</p>
-        </div>
-      </div>
-    );
   }
 
   return <>{children}</>;
