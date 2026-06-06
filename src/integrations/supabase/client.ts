@@ -118,10 +118,10 @@ export const supabase = (() => {
           getUser: async () => ({ data: { user: null }, error: null }),
           signOut: async () => ({ error: null }),
           onAuthStateChange: () => ({ data: { subscription: { unsubscribe: () => {} } } }),
-          signUp: async () => ({ data: { user: null, session: null }, error: null }),
-          signInWithPassword: async () => ({ data: { user: null, session: null }, error: null }),
-          updateUser: async () => ({ data: { user: null }, error: null }),
-          resetPasswordForEmail: async () => ({ data: {}, error: null }),
+          signUp: async () => ({ data: { user: null, session: null }, error: new Error("Supabase is not connected. Did you forget to restart the development server after saving environment variables?") }),
+          signInWithPassword: async () => ({ data: { user: null, session: null }, error: new Error("Supabase is not connected. Did you forget to restart the development server after saving environment variables?") }),
+          updateUser: async () => ({ data: { user: null }, error: new Error("Supabase not connected") }),
+          resetPasswordForEmail: async () => ({ data: {}, error: new Error("Supabase not connected") }),
           refreshSession: async () => ({ data: { session: null, user: null }, error: null }),
         };
       }
