@@ -24,13 +24,19 @@ interface AuthContextType {
   loading: boolean;
   signUpWithAadhaar: (aadhaar: string, passkey: string, metadata: { first_name: string; role: 'farmer' | 'merchant' | 'expert' | 'admin'; phone_number?: string; state?: string; district?: string; village?: string }) => Promise<{ error: Error | null }>;
   signInWithAadhaar: (aadhaar: string, passkey: string) => Promise<{ error: Error | null }>;
+  signInWithPhoneOTP: (phone: string, role: string, name?: string) => Promise<{ otp: string; error: Error | null }>;
+  verifyPhoneOTP: (phone: string, otp: string) => Promise<{ error: Error | null }>;
   signOut: () => Promise<void>;
   refreshProfile: () => Promise<void>;
 }
 
+// Store pending OTPs in memory for simulated OTP
+const pendingOTPs = new Map<string, { otp: string; password: string; expiresAt: number }>();
+
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
-const aadhaarToEmail = (aadhaar: string) => `aadhaar_${aadhaar.replace(/\s/g, "")}@farmapp.local.io`;
+const aadhaarToEmail = (aadhaar: string) => `aadhaar_${aadhaar.replace(/\\s/g, "")}@farmapp.local.io`;
+const phoneToEmail = (phone: string) => `phone_${phone.replace(/\\D/g, "")}@farmapp.local.io`;
 const appRoles = ["farmer", "merchant", "expert", "admin"] as const;
 
 const normalizeRole = (value: unknown): UserProfile["role"] => {
@@ -54,11 +60,9 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       let { data: profileData, error: profileError } = profileResult;
       let { data: roleData, error: roleError } = roleResult;
 
-      // If missing profile, try the RPC to repair/create it
       if (profileError || roleError || !profileData || !roleData) {
         const displayName = metadata.display_name || metadata.name || metadata.first_name || authUser.email?.split("@")[0] || "User";
         const requestedRole = normalizeRole(metadata.role);
-        
         const { data: repairedRole, error: repairError } = await supabase.rpc("ensure_current_user_profile", {
           _display_name: displayName,
           _phone: metadata.phone_number || metadata.phone || null,
@@ -73,8 +77,6 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
           roleData = { role: repairedRole || requestedRole };
           roleError = null;
         } else {
-          // FIX: If the RPC fails (e.g. migrations not pushed), gracefully fallback to using metadata 
-          // so the user is not stuck on the login screen.
           console.warn("RPC ensure_current_user_profile failed or missing. Falling back to metadata-based profile.", repairError);
           profileData = {
             user_id: authUser.id,
@@ -89,12 +91,12 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       }
 
       if (!profileError && !roleError && profileData) {
-        const locationParts = profileData.location?.split(",") || [];
-        const city = locationParts[0]?.trim();
-        const state = locationParts[1]?.trim();
+        const locationParts = profileData.location?.split(",").map((s: string) => s.trim()) || [];
+        const city = locationParts[0];
+        const state = locationParts[1];
 
         const nextProfile: UserProfile = {
-          id: profileData.user_id || authUser.id,
+          id: profileData.user_id,
           first_name: profileData.display_name?.split(" ")[0] || undefined,
           last_name: profileData.display_name?.split(" ").slice(1).join(" ") || undefined,
           email: profileData.email || undefined,
@@ -108,8 +110,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         setProfile(nextProfile);
         return nextProfile;
       }
-      
-      console.error("Profile loading failed completely:", { profileError, roleError });
+      console.error("Profile loading failed:", { profileError, roleError });
       setProfile(null);
       return null;
     } catch (err) {
@@ -209,6 +210,68 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     return { error: error ? (error as Error) : null };
   };
 
+  // Keep simulated OTP for Phone numbers since Twilio is not enabled in this project
+  const signInWithPhoneOTP = async (phone: string, role: 'farmer' | 'merchant' | 'expert' | 'admin', name?: string) => {
+    const cleanPhone = phone.replace(/\\D/g, "");
+    const email = phoneToEmail(cleanPhone);
+    const otpArray = new Uint32Array(1);
+    crypto.getRandomValues(otpArray);
+    const generatedOTP = String(100000 + (otpArray[0] % 900000));
+    const tempPassword = `otp_${generatedOTP}_${Date.now()}`;
+
+    // Try to sign up first
+    await supabase.auth.signUp({
+      email,
+      password: tempPassword,
+      options: {
+        data: {
+          first_name: name || cleanPhone,
+          display_name: name || cleanPhone,
+          name: name || cleanPhone,
+          role,
+          phone_number: `+91${cleanPhone}`
+        },
+        emailRedirectTo: window.location.origin,
+      },
+    });
+
+    pendingOTPs.set(cleanPhone, {
+      otp: generatedOTP,
+      password: tempPassword,
+      expiresAt: Date.now() + 5 * 60 * 1000,
+    });
+
+    return { otp: generatedOTP, error: null };
+  };
+
+  const verifyPhoneOTP = async (phone: string, otpCode: string) => {
+    const cleanPhone = phone.replace(/\\D/g, "");
+    const pending = pendingOTPs.get(cleanPhone);
+
+    if (!pending || pending.otp !== otpCode) {
+      return { error: new Error("Invalid OTP. Please try again.") };
+    }
+
+    if (Date.now() > pending.expiresAt) {
+      pendingOTPs.delete(cleanPhone);
+      return { error: new Error("OTP expired. Please request a new one.") };
+    }
+
+    const email = phoneToEmail(cleanPhone);
+    const { error } = await supabase.auth.signInWithPassword({
+      email,
+      password: pending.password,
+    });
+
+    pendingOTPs.delete(cleanPhone);
+
+    if (error) {
+      return { error: error as Error };
+    }
+
+    return { error: null };
+  };
+
   const signOut = async () => {
     await supabase.auth.signOut();
     setSession(null);
@@ -224,6 +287,8 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       loading,
       signUpWithAadhaar,
       signInWithAadhaar,
+      signInWithPhoneOTP,
+      verifyPhoneOTP,
       signOut,
       refreshProfile,
     }}>
