@@ -169,7 +169,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   ) => {
     const email = aadhaarToEmail(aadhaar);
 
-    const { error } = await supabase.auth.signUp({
+    const { data, error } = await supabase.auth.signUp({
       email,
       password: passkey,
       options: {
@@ -191,6 +191,11 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         enhancedError.message = "Too many signup attempts. Please wait a few minutes and try again.";
       }
       return { error: enhancedError };
+    }
+
+    // Critical check: If Confirm Email is enabled in Supabase, session will be null!
+    if (data.user && !data.session) {
+      return { error: new Error("Supabase is blocking the login because 'Confirm Email' is turned on. Please go to your Supabase Dashboard -> Authentication -> Providers -> Email -> Turn OFF 'Confirm email', then try again.") };
     }
 
     return { error: null };
