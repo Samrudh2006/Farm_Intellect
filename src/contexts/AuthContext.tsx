@@ -1,4 +1,4 @@
-import { createContext, useContext, useEffect, useState, ReactNode } from "react";
+import { createContext, useCallback, useContext, useEffect, useState, ReactNode } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import type { User as SupabaseUser, Session as SupabaseSession } from "@supabase/supabase-js";
 
@@ -37,6 +37,11 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 const aadhaarToEmail = (aadhaar: string) => `aadhaar_${aadhaar.replace(/\\s/g, "")}@farmapp.local.io`;
 const phoneToEmail = (phone: string) => `phone_${phone.replace(/\\D/g, "")}@farmapp.local.io`;
+const appRoles = ["farmer", "merchant", "expert", "admin"] as const;
+
+const normalizeRole = (value: unknown): UserProfile["role"] => {
+  return appRoles.includes(value as UserProfile["role"]) ? (value as UserProfile["role"]) : "farmer";
+};
 
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [user, setUser] = useState<SupabaseUser | null>(null);
@@ -44,22 +49,37 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [profile, setProfile] = useState<UserProfile | null>(null);
   const [loading, setLoading] = useState(true);
 
-  const fetchProfile = async (userId: string) => {
+  const fetchProfile = useCallback(async (authUser: SupabaseUser) => {
     try {
+      const metadata = authUser.user_metadata || {};
       const [profileResult, roleResult] = await Promise.all([
-        supabase.from("profiles").select("*").eq("user_id", userId).single(),
-        supabase.from("user_roles").select("role").eq("user_id", userId).single(),
+        supabase.from("profiles").select("*").eq("user_id", authUser.id).maybeSingle(),
+        supabase.from("user_roles").select("role").eq("user_id", authUser.id).maybeSingle(),
       ]);
 
-      const { data: profileData, error: profileError } = profileResult;
-      const { data: roleData } = roleResult;
+      let { data: profileData, error: profileError } = profileResult;
+      let { data: roleData, error: roleError } = roleResult;
 
-      if (profileError) {
-        setProfile(null);
-        return null;
+      if (profileError || roleError || !profileData || !roleData) {
+        const displayName = metadata.display_name || metadata.name || metadata.first_name || authUser.email?.split("@")[0] || "User";
+        const requestedRole = normalizeRole(metadata.role);
+        const { data: repairedRole, error: repairError } = await supabase.rpc("ensure_current_user_profile", {
+          _display_name: displayName,
+          _phone: metadata.phone_number || metadata.phone || null,
+          _location: [metadata.district, metadata.state].filter(Boolean).join(", ") || metadata.location || metadata.state || null,
+          _requested_role: requestedRole,
+        });
+
+        if (!repairError) {
+          const retryProfile = await supabase.from("profiles").select("*").eq("user_id", authUser.id).maybeSingle();
+          profileData = retryProfile.data;
+          profileError = retryProfile.error;
+          roleData = { role: repairedRole || requestedRole };
+          roleError = null;
+        }
       }
 
-      if (profileData) {
+      if (!profileError && !roleError && profileData) {
         const locationParts = profileData.location?.split(",").map((s: string) => s.trim()) || [];
         const city = locationParts[0];
         const state = locationParts[1];
@@ -74,22 +94,24 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
           district: city || undefined,
           profile_picture_url: profileData.avatar_url || undefined,
           language_preference: "en",
-          role: (roleData?.role || "farmer") as 'farmer' | 'merchant' | 'expert' | 'admin',
+          role: normalizeRole(roleData?.role),
         };
         setProfile(nextProfile);
         return nextProfile;
       }
+      console.error("Profile loading failed:", { profileError, roleError });
       setProfile(null);
       return null;
     } catch (err) {
+      console.error("Profile loading failed:", err);
       setProfile(null);
       return null;
     }
-  };
+  }, []);
 
   const refreshProfile = async () => {
     if (user) {
-      await fetchProfile(user.id);
+      await fetchProfile(user);
     }
   };
 
@@ -100,7 +122,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         setSession(session);
         setUser(session?.user ?? null);
         if (session?.user) {
-          await fetchProfile(session.user.id);
+          await fetchProfile(session.user);
           import("@/lib/firstLoginSeed").then((m) =>
             m.ensureFirstLoginSeed(session.user.id).catch(() => {}),
           );
@@ -116,21 +138,26 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       async (_event, session) => {
-        setSession(session);
-        setUser(session?.user ?? null);
-        if (session?.user) {
-          await fetchProfile(session.user.id);
-          import("@/lib/firstLoginSeed").then((m) =>
-            m.ensureFirstLoginSeed(session.user.id).catch(() => {}),
-          );
-        } else {
-          setProfile(null);
+        setLoading(true);
+        try {
+          setSession(session);
+          setUser(session?.user ?? null);
+          if (session?.user) {
+            await fetchProfile(session.user);
+            import("@/lib/firstLoginSeed").then((m) =>
+              m.ensureFirstLoginSeed(session.user.id).catch(() => {}),
+            );
+          } else {
+            setProfile(null);
+          }
+        } finally {
+          setLoading(false);
         }
       }
     );
 
     return () => subscription.unsubscribe();
-  }, []);
+  }, [fetchProfile]);
 
   const signUpWithAadhaar = async (
     aadhaar: string,

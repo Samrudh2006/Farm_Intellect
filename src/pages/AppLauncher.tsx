@@ -2,6 +2,7 @@ import { useMemo } from "react";
 import { Link, Navigate } from "react-router-dom";
 import { ArrowRight, Download, ScanLine, ShieldCheck, Smartphone, Wifi } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
+import { roleHomeRoutes, type AppRole } from "@/lib/roles";
 import { usePwaStatus } from "@/hooks/usePwaStatus";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -9,20 +10,13 @@ import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { AshokaChakra } from "@/components/ui/ashoka-chakra";
 
-const roleRoutes: Record<string, string> = {
-  farmer: "/farmer/dashboard",
-  merchant: "/merchant/dashboard",
-  expert: "/expert/dashboard",
-  admin: "/admin/dashboard",
-};
-
 const AppLauncher = () => {
   const { user, profile, loading } = useAuth();
   const { isOnline, isInstalled, canInstall, installApp } = usePwaStatus();
 
   const destination = useMemo(() => {
     if (user && profile) {
-      return roleRoutes[profile.role] || "/dashboard";
+      return roleHomeRoutes[profile.role as AppRole] || "/dashboard";
     }
 
     return "/";
