@@ -239,7 +239,6 @@ const Login = () => {
         const newAttempts = loginAttempts + 1;
         setLoginAttempts(newAttempts);
         
-        console.error("[v0] Login failed:", error.message);
         logSecurityEvent({
           eventType: "LOGIN_FAILED",
           severity: "medium",
