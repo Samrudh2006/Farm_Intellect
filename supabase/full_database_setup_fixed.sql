@@ -1,4 +1,4 @@
-﻿-- Create app_role enum
+-- Create app_role enum
 CREATE TYPE IF NOT EXISTS public.app_role AS ENUM ('farmer', 'merchant', 'expert', 'admin');
 
 -- Create profiles table
