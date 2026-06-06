@@ -122,7 +122,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         setSession(session);
         setUser(session?.user ?? null);
         if (session?.user) {
-          await fetchProfile(session.user.id);
+          await fetchProfile(session.user);
           import("@/lib/firstLoginSeed").then((m) =>
             m.ensureFirstLoginSeed(session.user.id).catch(() => {}),
           );
@@ -138,21 +138,26 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       async (_event, session) => {
-        setSession(session);
-        setUser(session?.user ?? null);
-        if (session?.user) {
-          await fetchProfile(session.user.id);
-          import("@/lib/firstLoginSeed").then((m) =>
-            m.ensureFirstLoginSeed(session.user.id).catch(() => {}),
-          );
-        } else {
-          setProfile(null);
+        setLoading(true);
+        try {
+          setSession(session);
+          setUser(session?.user ?? null);
+          if (session?.user) {
+            await fetchProfile(session.user);
+            import("@/lib/firstLoginSeed").then((m) =>
+              m.ensureFirstLoginSeed(session.user.id).catch(() => {}),
+            );
+          } else {
+            setProfile(null);
+          }
+        } finally {
+          setLoading(false);
         }
       }
     );
 
     return () => subscription.unsubscribe();
-  }, []);
+  }, [fetchProfile]);
 
   const signUpWithAadhaar = async (
     aadhaar: string,
