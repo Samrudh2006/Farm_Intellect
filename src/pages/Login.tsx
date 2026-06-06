@@ -21,6 +21,7 @@ import { hasSupabaseEnv, supabase } from "@/integrations/supabase/client";
 import { indianStates, getCitiesByState } from "@/data/indianLocations";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { logSecurityEvent } from "@/lib/securityMonitoring";
+import { roleHomeRoutes, type AppRole } from "@/lib/roles";
 import farmerImg from "@/assets/roles/farmer-role.jpg";
 import merchantImg from "@/assets/roles/merchant-role.jpg";
 import adminImg from "@/assets/roles/admin-role.jpg";
@@ -29,7 +30,7 @@ const Login = () => {
   const { t } = useLanguage();
   const { toast } = useToast();
   const navigate = useNavigate();
-  const { user, profile, signUpWithAadhaar, signInWithAadhaar, signInWithPhoneOTP, verifyPhoneOTP } = useAuth();
+  const { user, profile, loading: authLoading, signUpWithAadhaar, signInWithAadhaar, signInWithPhoneOTP, verifyPhoneOTP } = useAuth();
 
   const [selectedRole, setSelectedRole] = useState<string | null>(null);
   const [isLogin, setIsLogin] = useState(true);
@@ -80,17 +81,12 @@ const Login = () => {
   // Redirect if already logged in
   useEffect(() => {
     console.log("[v0] Login page auth check:", { user: !!user, profile: !!profile, userRole: profile?.role });
-    if (user && profile) {
-      const routes: Record<string, string> = {
-        farmer: "/farmer/dashboard",
-        merchant: "/merchant/dashboard",
-        admin: "/admin/dashboard",
-      };
-      const targetRoute = routes[profile.role] || "/farmer/dashboard";
+    if (!authLoading && user && profile) {
+      const targetRoute = roleHomeRoutes[profile.role as AppRole] || "/farmer/dashboard";
       console.log("[v0] Redirecting to:", targetRoute);
-      navigate(targetRoute);
+      navigate(targetRoute, { replace: true });
     }
-  }, [user, profile, navigate]);
+  }, [authLoading, user, profile, navigate]);
 
   useEffect(() => {
     if (resendTimer > 0) {
