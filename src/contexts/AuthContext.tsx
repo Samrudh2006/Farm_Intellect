@@ -119,27 +119,39 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   };
 
   useEffect(() => {
-    const setupAuth = async () => {
+    let mounted = true;
+
+    const initializeAuth = async () => {
       try {
         const { data: { session } } = await supabase.auth.getSession();
-        setSession(session);
-        setUser(session?.user ?? null);
-        if (session?.user) {
-          await fetchProfile(session.user);
-          import("@/lib/firstLoginSeed").then((m) =>
-            m.ensureFirstLoginSeed(session.user.id).catch(() => {}),
-          );
+        if (mounted) {
+          setSession(session);
+          setUser(session?.user ?? null);
+          if (session?.user) {
+            await fetchProfile(session.user);
+            import("@/lib/firstLoginSeed").then((m) =>
+              m.ensureFirstLoginSeed(session.user.id).catch(() => {})
+            );
+          }
         }
       } catch (err) {
-        console.error("Auth setup error:", err);
+        console.error("Auth init error:", err);
       } finally {
-        setLoading(false);
+        if (mounted) {
+          setLoading(false);
+        }
       }
     };
-    // setupAuth(); // Removed to prevent race condition with onAuthStateChange
+
+    initializeAuth();
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      async (_event, session) => {
+      async (event, session) => {
+        // We handle the initial session with getSession above to avoid race conditions
+        if (event === 'INITIAL_SESSION') return;
+        
+        if (!mounted) return;
+        
         setLoading(true);
         try {
           setSession(session);
@@ -147,18 +159,23 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
           if (session?.user) {
             await fetchProfile(session.user);
             import("@/lib/firstLoginSeed").then((m) =>
-              m.ensureFirstLoginSeed(session.user.id).catch(() => {}),
+              m.ensureFirstLoginSeed(session.user.id).catch(() => {})
             );
           } else {
             setProfile(null);
           }
         } finally {
-          setLoading(false);
+          if (mounted) {
+            setLoading(false);
+          }
         }
       }
     );
 
-    return () => subscription.unsubscribe();
+    return () => {
+      mounted = false;
+      subscription.unsubscribe();
+    };
   }, [fetchProfile]);
 
   const signUpWithAadhaar = async (
