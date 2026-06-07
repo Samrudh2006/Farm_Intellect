@@ -16,6 +16,16 @@ import {
   ArrowRight, CheckCircle, Sparkles, Zap, BarChart3, Leaf, Play, X
 } from "lucide-react";
 
+import aiRecommendationsImg from "@/assets/icons/ai-recommendations.jpg";
+import weatherIntegrationImg from "@/assets/icons/weather-integration.jpg";
+import yieldOptimizationImg from "@/assets/icons/yield-optimization.jpg";
+import pestDiseaseControlImg from "@/assets/icons/pest-disease-control.jpg";
+import smartIrrigationImg from "@/assets/icons/smart-irrigation.jpg";
+import marketAnalyticsImg from "@/assets/icons/market-analytics.jpg";
+import organicFarmingImg from "@/assets/icons/organic-farming.jpg";
+import cropScannerImg from "@/assets/icons/crop-scanner.jpg";
+import heroFarmingImg from "@/assets/hero-farming.jpg";
+
 const fadeUp = {
   hidden: { opacity: 0, y: 30 },
   visible: (i: number) => ({
@@ -53,7 +63,7 @@ const Index = () => {
   const features = [
     { 
       icon: null,
-      image: `${import.meta.env.BASE_URL}icons/ai-recommendations.jpg`,
+      image: aiRecommendationsImg,
       title: t('landing.feature.ai.title'),
       description: t('landing.feature.ai.description'),
       iconBg: "bg-orange-100 dark:bg-orange-900",
@@ -64,7 +74,7 @@ const Index = () => {
     },
     { 
       icon: null,
-      image: `${import.meta.env.BASE_URL}icons/weather-integration.jpg`,
+      image: weatherIntegrationImg,
       title: t('landing.feature.weather.title'),
       description: t('landing.feature.weather.description'),
       iconBg: "bg-blue-100 dark:bg-blue-900",
@@ -75,7 +85,7 @@ const Index = () => {
     },
     { 
       icon: null,
-      image: `${import.meta.env.BASE_URL}icons/yield-optimization.jpg`,
+      image: yieldOptimizationImg,
       title: t('landing.feature.yield.title'),
       description: t('landing.feature.yield.description'),
       iconBg: "bg-green-100 dark:bg-green-900",
@@ -86,7 +96,7 @@ const Index = () => {
     },
     { 
       icon: null,
-      image: `${import.meta.env.BASE_URL}icons/pest-disease-control.jpg`,
+      image: pestDiseaseControlImg,
       title: t('landing.feature.pest.title'),
       description: t('landing.feature.pest.description'),
       iconBg: "bg-orange-100 dark:bg-orange-900",
@@ -97,7 +107,7 @@ const Index = () => {
     },
     { 
       icon: null,
-      image: `${import.meta.env.BASE_URL}icons/smart-irrigation.jpg`,
+      image: smartIrrigationImg,
       title: t('landing.feature.irrigation.title'),
       description: t('landing.feature.irrigation.description'),
       iconBg: "bg-blue-100 dark:bg-blue-900",
@@ -108,7 +118,7 @@ const Index = () => {
     },
     { 
       icon: null,
-      image: `${import.meta.env.BASE_URL}icons/market-analytics.jpg`,
+      image: marketAnalyticsImg,
       title: t('landing.feature.market.title'),
       description: t('landing.feature.market.description'),
       iconBg: "bg-green-100 dark:bg-green-900",
@@ -119,7 +129,7 @@ const Index = () => {
     },
     { 
       icon: null,
-      image: `${import.meta.env.BASE_URL}icons/organic-farming.jpg`,
+      image: organicFarmingImg,
       title: t('landing.feature.organic.title'),
       description: t('landing.feature.organic.description'),
       iconBg: "bg-orange-100 dark:bg-orange-900",
@@ -130,7 +140,7 @@ const Index = () => {
     },
     { 
       icon: null,
-      image: `${import.meta.env.BASE_URL}icons/crop-scanner.jpg`,
+      image: cropScannerImg,
       title: t('landing.feature.scanner.title'),
       description: t('landing.feature.scanner.description'),
       iconBg: "bg-purple-100 dark:bg-purple-900",
@@ -183,7 +193,7 @@ const Index = () => {
         {/* Background Image */}
         <div className="absolute inset-0 z-0">
           <img
-            src={`${import.meta.env.BASE_URL}images/hero-farming.jpg`}
+            src={heroFarmingImg}
             alt={t('landing.hero_image_alt')}
             className="w-full h-full object-cover"
             loading="eager"
