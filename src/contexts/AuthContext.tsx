@@ -38,9 +38,42 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 const aadhaarToEmail = (aadhaar: string) => `aadhaar_${aadhaar.replace(/\s/g, "")}@farmapp.local.io`;
 const phoneToEmail = (phone: string) => `phone_${phone.replace(/\D/g, "")}@farmapp.local.io`;
 const appRoles = ["farmer", "merchant", "expert", "admin"] as const;
+const selfSelectableRoles = ["farmer", "merchant", "expert"] as const;
+const rolePriority: Record<UserProfile["role"], number> = { admin: 0, expert: 1, merchant: 2, farmer: 3 };
 
 const normalizeRole = (value: unknown): UserProfile["role"] => {
   return appRoles.includes(value as UserProfile["role"]) ? (value as UserProfile["role"]) : "farmer";
+};
+
+const normalizeRequestedRole = (value: unknown): UserProfile["role"] => {
+  return selfSelectableRoles.includes(value as typeof selfSelectableRoles[number])
+    ? (value as UserProfile["role"])
+    : "farmer";
+};
+
+const selectHighestRole = (roles: Array<{ role: unknown }> | null | undefined): UserProfile["role"] | null => {
+  const normalized = (roles || []).map((row) => normalizeRole(row.role));
+  return normalized.sort((a, b) => rolePriority[a] - rolePriority[b])[0] || null;
+};
+
+const decodeJwtPayload = (token?: string | null) => {
+  if (!token) return null;
+  try {
+    const payload = JSON.parse(atob(token.split(".")[1].replace(/-/g, "+").replace(/_/g, "/")));
+    return {
+      sub: payload.sub,
+      aud: payload.aud,
+      role: payload.role,
+      aal: payload.aal,
+      amr: payload.amr,
+      exp: payload.exp,
+      iat: payload.iat,
+      email_domain: typeof payload.email === "string" ? payload.email.split("@")[1] : undefined,
+    };
+  } catch (error) {
+    console.warn("[auth-debug] Unable to decode JWT payload", error);
+    return null;
+  }
 };
 
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
@@ -52,34 +85,79 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const fetchProfile = useCallback(async (authUser: SupabaseUser) => {
     try {
       const metadata = authUser.user_metadata || {};
-      
-      // Attempt to fetch from DB
+      const displayName = metadata.display_name || metadata.name || metadata.first_name || authUser.email?.split("@")[0] || "User";
+      const requestedRole = normalizeRequestedRole(metadata.role);
+      const location = metadata.location || metadata.state || null;
+      const phone = metadata.phone_number || metadata.phone || null;
+      const { data: sessionData } = await supabase.auth.getSession();
+      const jwtPayload = decodeJwtPayload(sessionData.session?.access_token);
+
+      console.info("[auth-debug] frontend profile load started", {
+        user_id: authUser.id,
+        email_domain: authUser.email?.split("@")[1],
+        requested_role: requestedRole,
+        jwt: jwtPayload,
+      });
+
       const [profileResult, roleResult] = await Promise.all([
         supabase.from("profiles").select("*").eq("user_id", authUser.id).maybeSingle(),
-        supabase.from("user_roles").select("role").eq("user_id", authUser.id).maybeSingle(),
+        supabase.from("user_roles").select("role").eq("user_id", authUser.id),
       ]);
 
       let profileData = profileResult.data;
-      let roleData = roleResult.data;
+      let resolvedRole = selectHighestRole(roleResult.data as Array<{ role: unknown }> | null);
 
-      // If missing from DB, aggressively fallback to metadata. Do not rely on RPC.
-      if (!profileData || !roleData) {
-        const displayName = metadata.display_name || metadata.name || metadata.first_name || authUser.email?.split("@")[0] || "User";
-        const requestedRole = normalizeRole(metadata.role);
-        
-        console.warn("Profile or Role missing from DB. Using local metadata fallback to prevent login blocks.");
-        
-        profileData = profileData || {
+      console.info("[auth-debug] frontend profile query completed", {
+        user_id: authUser.id,
+        profile_exists: Boolean(profileData),
+        role_exists: Boolean(resolvedRole),
+        role: resolvedRole,
+        profile_error: profileResult.error?.message,
+        role_error: roleResult.error?.message,
+      });
+
+      if (!profileData || !resolvedRole || profileResult.error || roleResult.error) {
+        console.warn("[auth-debug] backend profile repair required", {
           user_id: authUser.id,
-          display_name: displayName,
-          phone: metadata.phone_number || metadata.phone,
-          location: metadata.state || null
-        };
-        
-        roleData = roleData || { role: requestedRole };
+          profile_exists: Boolean(profileData),
+          role_exists: Boolean(resolvedRole),
+          requested_role: requestedRole,
+        });
+
+        const { data: repairedRole, error: repairError } = await supabase.rpc("ensure_current_user_profile", {
+          _display_name: displayName,
+          _phone: phone,
+          _location: location,
+          _requested_role: requestedRole,
+        });
+
+        console.info("[auth-debug] backend profile repair completed", {
+          user_id: authUser.id,
+          repaired_role: repairedRole,
+          repair_error: repairError?.message,
+        });
+
+        if (!repairError) {
+          const [repairedProfileResult, repairedRoleResult] = await Promise.all([
+            supabase.from("profiles").select("*").eq("user_id", authUser.id).maybeSingle(),
+            supabase.from("user_roles").select("role").eq("user_id", authUser.id),
+          ]);
+          profileData = repairedProfileResult.data || profileData;
+          resolvedRole = normalizeRole(repairedRole || selectHighestRole(repairedRoleResult.data as Array<{ role: unknown }> | null) || requestedRole);
+        }
       }
 
-      // We are guaranteed to have profileData and roleData now
+      profileData = profileData || {
+        user_id: authUser.id,
+        display_name: displayName,
+        email: authUser.email,
+        phone,
+        location,
+        avatar_url: null,
+      };
+
+      resolvedRole = resolvedRole || requestedRole;
+
       const locationParts = profileData.location ? String(profileData.location).split(",") : [];
       const city = locationParts[0]?.trim();
       const state = locationParts[1]?.trim();
@@ -94,8 +172,15 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         district: city || undefined,
         profile_picture_url: profileData.avatar_url || undefined,
         language_preference: "en",
-        role: normalizeRole(roleData?.role),
+        role: normalizeRole(resolvedRole),
       };
+
+      console.info("[auth-debug] frontend profile resolved", {
+        user_id: authUser.id,
+        role: nextProfile.role,
+        profile_exists: Boolean(profileData),
+        target_ready: true,
+      });
       
       setProfile(nextProfile);
       return nextProfile;
