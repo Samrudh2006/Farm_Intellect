@@ -3,7 +3,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { useNavigate } from "react-router-dom";
 import { X, Sparkles, Mic, MicOff, Volume2, CircleStop as StopCircle, Loader as Loader2, Navigation, Zap, Command } from "lucide-react";
 import ReactMarkdown from "react-markdown";
-const krishiAvatar = "https://images.pexels.com/photos/1612351/pexels-photo-1612351.jpeg?auto=compress&cs=tinysrgb&w=64";
+import { krishiAiAvatarImage } from "@/lib/imageAssets";
 import { Button } from "@/components/ui/button";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { AshokaChakra } from "@/components/ui/ashoka-chakra";
@@ -269,7 +269,7 @@ export const FloatingAIAssistant = () => {
               </motion.div>
             ) : (
               <motion.div key="bot" initial={{ rotate: 90, opacity: 0 }} animate={{ rotate: 0, opacity: 1 }} exit={{ rotate: -90, opacity: 0 }} className="h-full w-full">
-                <img src={krishiAvatar} alt="Farm Intellect" className="h-full w-full object-cover rounded-full scale-125" />
+                <img src={krishiAiAvatarImage} alt="Farm Intellect" className="h-full w-full object-cover rounded-full scale-125" />
               </motion.div>
             )}
           </AnimatePresence>
@@ -292,7 +292,7 @@ export const FloatingAIAssistant = () => {
             {/* Header */}
             <div className="p-4 bg-gradient-to-r from-accent to-primary text-white flex items-center gap-3">
               <div className="w-8 h-8 rounded-full bg-white overflow-hidden flex-shrink-0">
-                <img src={krishiAvatar} alt="Farm Intellect" className="h-full w-full object-cover scale-110" />
+                <img src={krishiAiAvatarImage} alt="Farm Intellect" className="h-full w-full object-cover scale-110" />
               </div>
               <div className="flex-1">
                 <h3 className="font-bold text-sm font-heading">{t("ai.voice_agent_title")}</h3>

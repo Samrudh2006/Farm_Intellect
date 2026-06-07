@@ -5,8 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Send, User, Volume2, VolumeX, Trash2, Copy, ThumbsUp, ThumbsDown, CircleStop as StopCircle, RefreshCw, MessageCircle, Phone as PhoneIcon, Video, Mic, MicOff, ImagePlus, X, Camera, Loader as Loader2 } from "lucide-react";
-const krishiAvatar = "https://images.pexels.com/photos/1612351/pexels-photo-1612351.jpeg?auto=compress&cs=tinysrgb&w=64";
-const doctorAvatar = "https://images.pexels.com/photos/5452201/pexels-photo-5452201.jpeg?auto=compress&cs=tinysrgb&w=64";
+import { krishiAiAvatarImage } from "@/lib/imageAssets";
 import { streamChat, type AiMessage } from "@/lib/aiStream";
 import { toast } from "sonner";
 import ReactMarkdown from "react-markdown";
@@ -227,7 +226,7 @@ export const AIAssistantHub = () => {
           {message.type === "assistant" && (
             <Avatar className="w-8 h-8 border border-primary/20 shrink-0">
               <AvatarFallback className="p-0 overflow-hidden">
-                <img src={krishiAvatar} alt="AI" className="h-full w-full object-cover scale-110" />
+                <img src={krishiAiAvatarImage} alt="AI" className="h-full w-full object-cover scale-110" />
               </AvatarFallback>
             </Avatar>
           )}
@@ -355,7 +354,7 @@ export const AIAssistantHub = () => {
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 rounded-full bg-white flex items-center justify-center overflow-hidden border border-primary/20">
-              <img src={krishiAvatar} alt="Farm Intellect" className="h-10 w-10 object-cover scale-110" />
+              <img src={krishiAiAvatarImage} alt="Farm Intellect" className="h-10 w-10 object-cover scale-110" />
             </div>
             <div>
               <CardTitle className="text-lg">{t('ai.title') || "AI Assistant"}</CardTitle>

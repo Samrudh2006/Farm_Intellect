@@ -9,7 +9,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Badge } from "@/components/ui/badge";
-const appLogo = "https://images.pexels.com/photos/1595104/pexels-photo-1595104.jpeg?auto=compress&cs=tinysrgb&w=64";
+import { appLogoImage } from "@/lib/imageAssets";
 import { LanguageSelector } from "@/components/ui/language-selector";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { useAuth } from "@/contexts/AuthContext";
@@ -60,7 +60,7 @@ export const Header = ({ user, onMenuClick, notificationCount }: HeaderProps) =>
               <Menu className="h-5 w-5" />
             </Button>
             <div className="flex items-center gap-3">
-              <img src={appLogo} alt="Farm Intellect" className="h-9 w-9 object-contain" />
+              <img src={appLogoImage} alt="Farm Intellect" className="h-9 w-9 object-contain" />
               <h1 className="text-xl font-bold text-foreground">{t('header.app_title')}</h1>
             </div>
           </div>

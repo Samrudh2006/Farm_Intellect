@@ -22,9 +22,7 @@ import { indianStates, getCitiesByState } from "@/data/indianLocations";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { logSecurityEvent } from "@/lib/securityMonitoring";
 import { roleHomeRoutes, type AppRole } from "@/lib/roles";
-const farmerImg = "https://images.pexels.com/photos/1595104/pexels-photo-1595104.jpeg?auto=compress&cs=tinysrgb&w=600";
-const merchantImg = "https://images.pexels.com/photos/3735168/pexels-photo-3735168.jpeg?auto=compress&cs=tinysrgb&w=600";
-const adminImg = "https://images.pexels.com/photos/3182812/pexels-photo-3182812.jpeg?auto=compress&cs=tinysrgb&w=600";
+import { adminRoleImage, farmerRoleImage, merchantRoleImage } from "@/lib/imageAssets";
 
 const Login = () => {
   const { t } = useLanguage();
@@ -563,9 +561,9 @@ const Login = () => {
   }, [otp, otpSent, forgotPasskeyMode, forgotStep]);
 
   const roleCards = [
-    { role: "farmer", title: t("auth.signin_farmer"), image: farmerImg, description: t("auth.farmer_desc") },
-    { role: "merchant", title: t("auth.signin_merchant"), image: merchantImg, description: t("auth.merchant_desc") },
-    { role: "admin", title: t("auth.signin_admin"), image: adminImg, description: t("auth.admin_desc") },
+    { role: "farmer", title: t("auth.signin_farmer"), image: farmerRoleImage, description: t("auth.farmer_desc") },
+    { role: "merchant", title: t("auth.signin_merchant"), image: merchantRoleImage, description: t("auth.merchant_desc") },
+    { role: "admin", title: t("auth.signin_admin"), image: adminRoleImage, description: t("auth.admin_desc") },
   ];
 
   // ── Role Selection ──
