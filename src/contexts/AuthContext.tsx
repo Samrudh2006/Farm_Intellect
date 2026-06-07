@@ -209,6 +209,11 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     const initializeAuth = async () => {
       try {
         const { data: { session } } = await supabase.auth.getSession();
+        console.info("[auth-debug] auth initialization", {
+          has_session: Boolean(session),
+          user_id: session?.user?.id,
+          jwt: decodeJwtPayload(session?.access_token),
+        });
         if (mounted) {
           setSession(session);
           setUser(session?.user ?? null);
@@ -237,20 +242,12 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
         if (!mounted) return;
 
-        // For SIGNED_IN events, if signInWithAadhaar/signUpWithAadhaar already set the user
-        // and profile synchronously, skip the redundant loading cycle to prevent a redirect
-        // loop where RoutesWrapper briefly hides all routes (loading=true) and the protected
-        // route redirects back to /login before the new loading=false cycle completes.
-        if (event === 'SIGNED_IN' && session?.user) {
-          // Silently update session reference without triggering the loading spinner
-          setSession(session);
-          setUser(session.user);
-          // Profile was already fetched by the signIn* caller — don't re-fetch
-          import("@/lib/firstLoginSeed").then((m) =>
-            m.ensureFirstLoginSeed(session.user.id).catch(() => {})
-          );
-          return;
-        }
+        console.info("[auth-debug] auth state changed", {
+          event,
+          has_session: Boolean(session),
+          user_id: session?.user?.id,
+          jwt: decodeJwtPayload(session?.access_token),
+        });
 
         setLoading(true);
         try {
@@ -284,6 +281,12 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     metadata: { first_name: string; role: 'farmer' | 'merchant' | 'expert' | 'admin'; phone_number?: string; state?: string; district?: string; village?: string }
   ) => {
     const email = aadhaarToEmail(aadhaar);
+    const safeRole = normalizeRequestedRole(metadata.role);
+
+    console.info("[auth-debug] aadhaar signup started", {
+      email_domain: email.split("@")[1],
+      requested_role: safeRole,
+    });
 
     const { data, error } = await supabase.auth.signUp({
       email,
@@ -293,7 +296,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
           ...metadata,
           display_name: metadata.first_name,
           name: metadata.first_name,
-          role: metadata.role,
+          role: safeRole,
           phone_number: metadata.phone_number,
           state: metadata.state
         },
@@ -302,6 +305,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     });
 
     if (error) {
+      console.error("[auth-debug] aadhaar signup failed", { message: error.message, email_domain: email.split("@")[1] });
       const enhancedError = new Error(error.message);
       if (error.message?.includes("rate_limit")) {
         enhancedError.message = "Too many signup attempts. Please wait a few minutes and try again.";
@@ -310,7 +314,15 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     }
 
     if (data.user && !data.session) {
-      return { error: new Error("Supabase is blocking the login because 'Confirm Email' is turned on. Please go to your Supabase Dashboard -> Authentication -> Providers -> Email -> Turn OFF 'Confirm email', then try again."), profile: null };
+      console.warn("[auth-debug] signup returned user without session; attempting immediate sign-in", { user_id: data.user.id });
+      const signInResult = await supabase.auth.signInWithPassword({ email, password: passkey });
+      if (signInResult.error || !signInResult.data.session || !signInResult.data.user) {
+        return { error: new Error("Account was created, but the session did not open. Email auto-confirm is now enabled; please sign in once with the same Aadhaar and passkey."), profile: null };
+      }
+      setSession(signInResult.data.session);
+      setUser(signInResult.data.user);
+      const repairedProfile = await fetchProfile(signInResult.data.user);
+      return { error: null, profile: repairedProfile };
     }
 
     // Force profile fetch immediately so the frontend has it
@@ -320,6 +332,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         setUser(data.user);
       }
       const newProfile = await fetchProfile(data.user);
+      console.info("[auth-debug] aadhaar signup completed", { user_id: data.user.id, role: newProfile.role });
       return { error: null, profile: newProfile };
     }
 
@@ -328,16 +341,18 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
   const signInWithAadhaar = async (aadhaar: string, passkey: string) => {
     const email = aadhaarToEmail(aadhaar);
+    console.info("[auth-debug] aadhaar signin started", { email_domain: email.split("@")[1] });
     const { data, error } = await supabase.auth.signInWithPassword({ email, password: passkey });
     
     if (error) {
+      console.error("[auth-debug] aadhaar signin failed", { message: error.message, email_domain: email.split("@")[1] });
       return { error: error as Error, profile: null };
     }
 
     if (data.user && !data.session) {
       return {
         error: new Error(
-          "Login blocked: Supabase returned no session. Go to Authentication → Providers → Email and turn OFF 'Confirm email', then try again."
+          "Login blocked: the backend returned no active session. Email auto-confirm is enabled now; please retry once."
         ),
         profile: null,
       };
@@ -347,6 +362,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       setSession(data.session);
       setUser(data.user);
       const newProfile = await fetchProfile(data.user);
+      console.info("[auth-debug] aadhaar signin completed", { user_id: data.user.id, role: newProfile.role });
       return { error: null, profile: newProfile };
     }
 
