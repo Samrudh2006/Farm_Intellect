@@ -54,6 +54,7 @@ const Login = () => {
 
   const [selectedState, setSelectedState] = useState("");
   const [selectedCity, setSelectedCity] = useState("");
+  const [redirecting, setRedirecting] = useState(false);
 
   // Biometric (WebAuthn) state
   const [bioSupported, setBioSupported] = useState(false);
@@ -80,13 +81,27 @@ const Login = () => {
 
   // Redirect if already logged in
   useEffect(() => {
-    console.log("[v0] Login page auth check:", { user: !!user, profile: !!profile, userRole: profile?.role });
+    console.info("[auth-debug] login route auth check", { authLoading, has_user: Boolean(user), has_profile: Boolean(profile), role: profile?.role });
     if (!authLoading && user && profile) {
       const targetRoute = roleHomeRoutes[profile.role as AppRole] || "/farmer/dashboard";
-      console.log("[v0] Redirecting to:", targetRoute);
+      console.info("[auth-debug] deterministic post-login redirect", { user_id: user.id, role: profile.role, targetRoute });
+      setRedirecting(true);
       navigate(targetRoute, { replace: true });
     }
   }, [authLoading, user, profile, navigate]);
+
+  const redirectToDashboard = (nextProfile: { role?: string; id?: string } | null, fallbackRole?: string) => {
+    const targetRole = (nextProfile?.role || fallbackRole || "farmer") as AppRole;
+    const targetRoute = roleHomeRoutes[targetRole] || "/farmer/dashboard";
+    console.info("[auth-debug] submit redirect requested", {
+      profile_id: nextProfile?.id,
+      role: targetRole,
+      targetRoute,
+      authLoading,
+    });
+    setRedirecting(true);
+    navigate(targetRoute, { replace: true });
+  };
 
   useEffect(() => {
     if (resendTimer > 0) {
@@ -227,9 +242,7 @@ const Login = () => {
           });
         }
         
-        const targetRole = newProfile?.role || selectedRole || "farmer";
-        const targetRoute = roleHomeRoutes[targetRole as AppRole] || "/farmer/dashboard";
-        navigate(targetRoute, { replace: true });
+        redirectToDashboard(newProfile, selectedRole || "farmer");
         return;
       }
       setLoading(false);
@@ -257,10 +270,7 @@ const Login = () => {
         setLoginAttempts(0);
         toast({ title: t("auth.login_success"), description: t("auth.welcome_back") });
         
-        // Hard redirect immediately
-        const targetRole = newProfile?.role || "farmer";
-        const targetRoute = roleHomeRoutes[targetRole as AppRole] || "/farmer/dashboard";
-        navigate(targetRoute, { replace: true });
+        redirectToDashboard(newProfile, "farmer");
         return;
       }
       setLoading(false);
@@ -584,7 +594,7 @@ const Login = () => {
 
           <div className="grid sm:grid-cols-1 md:grid-cols-3 gap-6 max-w-5xl mx-auto">
             {roleCards.map((card) => (
-              <Card key={card.role} className="group cursor-pointer overflow-hidden border-2 border-transparent hover:border-primary/40 transition-all duration-300 hover:shadow-xl hover:-translate-y-1" onClick={() => handleRoleSelect(card.role)}>
+              <Card key={card.role} data-testid={`role-card-${card.role}`} className="group cursor-pointer overflow-hidden border-2 border-transparent hover:border-primary/40 transition-all duration-300 hover:shadow-xl hover:-translate-y-1" onClick={() => handleRoleSelect(card.role)}>
                 <div className="relative h-48 overflow-hidden">
                   <img src={card.image} alt={card.title} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" />
                   <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent" />
@@ -1059,11 +1069,11 @@ const Login = () => {
                   </div>
                 )}
 
-                <Button type="submit" className="w-full bg-primary text-primary-foreground hover:bg-primary/90" disabled={loading || isBlocked}>
-                  {loading ? (
+                <Button type="submit" data-testid="auth-submit" className="w-full bg-primary text-primary-foreground hover:bg-primary/90" disabled={loading || redirecting || isBlocked}>
+                  {loading || redirecting ? (
                     <span className="flex items-center gap-2">
                       <span className="h-4 w-4 border-2 border-primary-foreground/30 border-t-primary-foreground rounded-full animate-spin" />
-                      {t("common.loading")}
+                      {redirecting ? "Opening dashboard..." : t("common.loading")}
                     </span>
                   ) : isBlocked ? "Account Locked" : isLogin ? t("auth.signin") : t("auth.signup")}
                 </Button>
