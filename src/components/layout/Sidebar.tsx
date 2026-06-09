@@ -21,7 +21,8 @@ import {
   Building,
   Landmark,
   Video,
-  Smartphone
+  Smartphone,
+  Globe
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
@@ -78,6 +79,7 @@ const getNavigationItems = (t: (key: string) => string) => ({
     { icon: Smartphone, label: "📩 SMS & Field Ops", href: "/admin/sms" },
     { icon: Activity, label: "📋 Audit Log", href: "/admin/audit-log" },
     { icon: Bot, label: t('nav.ai_assistant'), href: "/admin/chat" },
+    { icon: Globe, label: "🌍 Intelligence Center", href: "/admin/intelligence-center" },
     { icon: Settings, label: t('nav.settings'), href: "/admin/settings" },
     { icon: Bell, label: t('nav.notifications'), href: "/admin/notifications" },
   ],

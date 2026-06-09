@@ -59,6 +59,12 @@ const AdminAuditLog = lazy(() => import("@/pages/admin/AdminAuditLog"));
 const AdminSms = lazy(() => import("@/pages/admin/AdminSms"));
 const SmsRegister = lazy(() => import("@/pages/SmsRegister"));
 
+// Intelligence Center
+const CommandCenter = lazy(() => import("@/pages/admin/intelligence/CommandCenter"));
+const Mission2030 = lazy(() => import("@/pages/admin/intelligence/Mission2030"));
+const WarRoom = lazy(() => import("@/pages/admin/intelligence/WarRoom"));
+const FutureHeadlines = lazy(() => import("@/pages/admin/intelligence/FutureHeadlines"));
+
 export const publicRoutes: PublicRouteConfig[] = [
   { path: "/", component: Index },
   { path: "/login", component: Login },
@@ -116,6 +122,11 @@ export const protectedRoutes: ProtectedRouteConfig[] = [
   { path: "/admin/notifications", component: AdminNotifications, allowedRoles: ["admin"] },
   { path: "/admin/sms", component: AdminSms, allowedRoles: ["admin"] },
   { path: "/admin/profile", component: Profile, allowedRoles: ["admin"] },
+  
+  { path: "/admin/intelligence-center", component: CommandCenter, allowedRoles: ["admin"] },
+  { path: "/admin/intelligence-center/mission-2030", component: Mission2030, allowedRoles: ["admin"] },
+  { path: "/admin/intelligence-center/war-room", component: WarRoom, allowedRoles: ["admin"] },
+  { path: "/admin/intelligence-center/future-headlines", component: FutureHeadlines, allowedRoles: ["admin"] },
 
   { path: "/dashboard", component: Dashboard },
   { path: "/crops", component: Crops },
