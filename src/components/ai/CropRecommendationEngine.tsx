@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { LottieAnimation, LOTTIE_URLS } from "@/components/ui/lottie-animation";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -8,6 +9,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { useToast } from "@/hooks/use-toast";
+import { triggerLottieSuccess } from "@/components/ui/lottie-success-overlay";
 import { apiFetch } from "@/lib/api";
 import {
   Brain,
@@ -131,6 +133,7 @@ const CropRecommendationEngine = () => {
           title: "Recommendations Ready",
           description: `${mapped.length} crops matched using backend ML models.`,
         });
+        triggerLottieSuccess();
       } else {
         throw new Error("No recommendations returned from AI service");
       }
@@ -344,10 +347,12 @@ const CropRecommendationEngine = () => {
           className="min-w-[200px]"
         >
           {loading ? (
-            <>
-              <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-              Generating...
-            </>
+            <div className="flex items-center justify-center">
+              <div className="w-8 h-8 mr-2">
+                <LottieAnimation url={LOTTIE_URLS.aiProcessing} />
+              </div>
+              Processing Farm Data...
+            </div>
           ) : (
             <>
               <Brain className="h-4 w-4 mr-2" />

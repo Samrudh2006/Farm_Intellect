@@ -1,4 +1,5 @@
 import { Wheat, TrendingUp, AlertTriangle, CheckCircle } from "lucide-react";
+import { LottieAnimation, LOTTIE_URLS } from "@/components/ui/lottie-animation";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 import { Badge } from "@/components/ui/badge";
@@ -55,7 +56,9 @@ export const CropStatusWidget = () => {
     <Card>
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
-          <Wheat className="h-5 w-5 text-primary" />
+          <div className="w-8 h-8 -ml-1">
+            <LottieAnimation url={LOTTIE_URLS.scanning} />
+          </div>
           Crop Status Overview
         </CardTitle>
       </CardHeader>

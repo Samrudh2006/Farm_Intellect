@@ -14,6 +14,7 @@ import { AmbientMusic } from "@/components/ui/ambient-music";
 import { InstallPrompt } from "@/components/pwa/InstallPrompt";
 import { PushNotificationProvider } from "@/components/system/PushNotificationProvider";
 import { CookieConsentBanner } from "@/components/system/CookieConsentBanner";
+import { LottieSuccessOverlay } from "@/components/ui/lottie-success-overlay";
 import { useRoleGuard } from "@/hooks/useRoleGuard";
 import { type AppRole } from "@/lib/roles";
 import { publicRoutes, protectedRoutes, notFoundComponent, type LazyPage } from "@/routes/routeConfig";
@@ -132,6 +133,7 @@ const App = () => {
                 <AmbientMusic />
                 <InstallPrompt />
                 <CookieConsentBanner />
+                <LottieSuccessOverlay />
               </BrowserRouter>
             </TooltipProvider>
           </AuthProvider>

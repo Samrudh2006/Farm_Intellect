@@ -3,7 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Mic, MicOff } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useLanguage } from "@/contexts/LanguageContext";
-
+import { LottieAnimation, LOTTIE_URLS } from "@/components/ui/lottie-animation";
 // Extend Window interface for SpeechRecognition
 interface SpeechRecognitionInstance extends EventTarget {
   continuous: boolean;
@@ -187,14 +187,16 @@ export const VoiceInput = ({
       disabled={disabled}
       className={cn(
         sizeClasses[size],
-        "rounded-full transition-all duration-200",
+        "rounded-full transition-all duration-200 overflow-hidden relative",
         isListening && "animate-pulse-glow",
         className
       )}
       title={isListening ? "Stop listening" : "Start voice input"}
     >
       {isListening ? (
-        <MicOff className="h-4 w-4" />
+        <div className="absolute inset-0 flex items-center justify-center scale-150 pointer-events-none">
+          <LottieAnimation url={LOTTIE_URLS.listening} />
+        </div>
       ) : (
         <Mic className="h-4 w-4" />
       )}

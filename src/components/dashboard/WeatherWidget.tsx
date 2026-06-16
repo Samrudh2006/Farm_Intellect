@@ -4,6 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { supabase } from "@/integrations/supabase/client";
 import { useCurrentUser } from "@/hooks/useCurrentUser";
+import { LottieAnimation, LOTTIE_URLS } from "@/components/ui/lottie-animation";
 
 const weatherIcons: Record<string, typeof Sun> = {
   Clear: Sun,
@@ -65,7 +66,11 @@ export const WeatherWidget = () => {
     return (
       <Card>
         <CardHeader><CardTitle className="flex items-center gap-2"><CloudSun className="h-5 w-5 text-primary" /> Weather</CardTitle></CardHeader>
-        <CardContent className="flex justify-center py-8"><Loader2 className="h-6 w-6 animate-spin text-muted-foreground" /></CardContent>
+        <CardContent className="flex justify-center py-8">
+          <div className="w-16 h-16">
+            <LottieAnimation url={LOTTIE_URLS.weather} />
+          </div>
+        </CardContent>
       </Card>
     );
   }
