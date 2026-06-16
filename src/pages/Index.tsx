@@ -1,6 +1,6 @@
 import { useState, useRef } from "react";
 import { Link, Navigate } from "react-router-dom";
-import { motion } from "framer-motion";
+import { motion, useScroll, useTransform } from "framer-motion";
 import { useAuth } from "@/contexts/AuthContext";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -48,6 +48,9 @@ const Index = () => {
   const [demoOpen, setDemoOpen] = useState(false);
   const [selectedFeature, setSelectedFeature] = useState<number | null>(null);
   const audioRef = useRef<HTMLAudioElement>(null);
+  
+  const { scrollY } = useScroll();
+  const backgroundY = useTransform(scrollY, [0, 1000], ["0%", "30%"]);
 
   // Auto-redirect authenticated users to their role dashboard
   if (!loading && user && profile) {
@@ -191,11 +194,12 @@ const Index = () => {
       {/* Hero Section with Background Image */}
       <section className="relative py-20 lg:py-32 overflow-hidden min-h-[85vh] flex items-center">
         {/* Background Image */}
-        <div className="absolute inset-0 z-0">
-          <img
+        <div className="absolute inset-0 z-0 overflow-hidden">
+          <motion.img
+            style={{ y: backgroundY }}
             src={heroFarmingImg}
             alt={t('landing.hero_image_alt')}
-            className="w-full h-full object-cover"
+            className="w-full h-[130%] object-cover absolute top-[-15%]"
             loading="eager"
             fetchPriority="high"
             decoding="async"

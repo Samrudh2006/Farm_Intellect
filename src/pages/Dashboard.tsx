@@ -7,6 +7,8 @@ import { WeatherWidget } from "@/components/dashboard/WeatherWidget";
 import { CropStatusWidget } from "@/components/dashboard/CropStatusWidget";
 import { AIRecommendations } from "@/components/dashboard/AIRecommendations";
 import { SmartInsights } from "@/components/dashboard/SmartInsights";
+import { TiltCard } from "@/components/ui/tilt-card";
+import { ScrollReveal } from "@/components/home/ScrollReveal";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -123,7 +125,11 @@ const Dashboard = () => {
           {/* Stats Grid */}
           <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
             {stats.map((stat, index) => (
-              <StatCard key={index} {...stat} />
+              <ScrollReveal key={index} delay={index * 0.1}>
+                <TiltCard>
+                  <StatCard {...stat} />
+                </TiltCard>
+              </ScrollReveal>
             ))}
           </div>
 

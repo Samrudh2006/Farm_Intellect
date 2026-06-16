@@ -5,6 +5,7 @@ import { SmartIrrigationCalculator } from "@/components/features/SmartIrrigation
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import CropRecommendationEngine from "@/components/ai/CropRecommendationEngine";
 import YieldPredictor from "@/components/analytics/YieldPredictor";
+import { Typewriter } from "@/components/ui/typewriter";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { useCurrentUser } from "@/hooks/useCurrentUser";
 
@@ -32,7 +33,7 @@ const AIAdvisory = () => {
           <div>
             <h2 className="text-3xl font-bold text-foreground">AI-Powered Advisory</h2>
             <p className="text-muted-foreground">
-              Get intelligent crop recommendations and yield predictions powered by advanced AI
+              <Typewriter text="Get intelligent crop recommendations and yield predictions powered by advanced AI." speed={35} />
             </p>
           </div>
 
