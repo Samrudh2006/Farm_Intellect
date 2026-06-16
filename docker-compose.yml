@@ -1,0 +1,28 @@
+version: '3.8'
+
+services:
+  backend:
+    build: 
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: farm-intellect-backend
+    restart: unless-stopped
+    ports:
+      - "3001:3001"
+    environment:
+      - NODE_ENV=production
+      - PORT=3001
+      - DATABASE_URL=${DATABASE_URL}
+      - DIRECT_URL=${DIRECT_URL}
+      - JWT_SECRET=${JWT_SECRET}
+      - JWT_EXPIRES_IN=7d
+      - FRONTEND_URL=${FRONTEND_URL}
+      - SENTRY_DSN=${SENTRY_DSN}
+      - LOG_LEVEL=info
+      # Add any other required backend variables here
+    # Optional: If you use a local database instead of Supabase, you can define it as a service here
+    # depends_on:
+    #   - db
+
+# volumes:
+#   db_data:
