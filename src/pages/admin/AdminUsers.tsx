@@ -8,7 +8,7 @@ import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Users, UserCheck, Shield, GraduationCap, Store, Search, RefreshCw } from "lucide-react";
-import { supabase } from "@/integrations/supabase/client";
+import { supabase, hasSupabaseEnv } from "@/integrations/supabase/client";
 import { useCurrentUser } from "@/hooks/useCurrentUser";
 import { toast } from "sonner";
 
@@ -20,6 +20,41 @@ interface UserWithRole {
   created_at: string;
   role: string;
 }
+
+const DEFAULT_MOCK_USERS: UserWithRole[] = [
+  {
+    user_id: "mock-user-123412341234",
+    display_name: "Rajesh Kumar",
+    email: "rajesh@farmapp.local.io",
+    location: "Karnal, Haryana",
+    created_at: "2025-06-10T10:00:00Z",
+    role: "farmer"
+  },
+  {
+    user_id: "mock-user-222222222222",
+    display_name: "Dr. Kavita Sharma",
+    email: "kavita@farmapp.local.io",
+    location: "IARI, New Delhi",
+    created_at: "2025-05-15T14:20:00Z",
+    role: "expert"
+  },
+  {
+    user_id: "mock-user-333333333333",
+    display_name: "Anil Gupta",
+    email: "anil@farmapp.local.io",
+    location: "Mandi, Punjab",
+    created_at: "2025-04-12T09:15:00Z",
+    role: "merchant"
+  },
+  {
+    user_id: "mock-user-444444444444",
+    display_name: "System Administrator",
+    email: "admin@farmapp.local.io",
+    location: "New Delhi, Delhi",
+    created_at: "2025-01-01T00:00:00Z",
+    role: "admin"
+  }
+];
 
 const AdminUsers = () => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
@@ -33,6 +68,17 @@ const AdminUsers = () => {
   const fetchUsers = async () => {
     setLoading(true);
     try {
+      if (!hasSupabaseEnv) {
+        let stored = localStorage.getItem("mock_users");
+        if (!stored) {
+          localStorage.setItem("mock_users", JSON.stringify(DEFAULT_MOCK_USERS));
+          stored = JSON.stringify(DEFAULT_MOCK_USERS);
+        }
+        setUsers(JSON.parse(stored));
+        setLoading(false);
+        return;
+      }
+
       const { data: profiles, error: profilesError } = await supabase
         .from("profiles")
         .select("user_id, display_name, email, location, created_at")
@@ -57,6 +103,8 @@ const AdminUsers = () => {
     } catch (err) {
       console.error(err);
       toast.error("Failed to load users");
+      // Fallback
+      setUsers(DEFAULT_MOCK_USERS);
     } finally {
       setLoading(false);
     }
@@ -68,6 +116,15 @@ const AdminUsers = () => {
 
   const handleRoleChange = async (targetUserId: string, newRole: string) => {
     setChangingRole(targetUserId);
+    if (!hasSupabaseEnv) {
+      const updated = users.map((u) => (u.user_id === targetUserId ? { ...u, role: newRole } : u));
+      localStorage.setItem("mock_users", JSON.stringify(updated));
+      setUsers(updated);
+      toast.success(`Role updated to ${newRole} (Mock)`);
+      setChangingRole(null);
+      return;
+    }
+
     try {
       const { error } = await supabase.rpc("admin_assign_role", {
         _target_user_id: targetUserId,

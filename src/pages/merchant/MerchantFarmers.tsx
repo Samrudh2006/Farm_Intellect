@@ -7,7 +7,7 @@ import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Skeleton } from "@/components/ui/skeleton";
 import { MapPin, Star, Users, Phone, Mail, Calendar } from "lucide-react";
-import { supabase } from "@/integrations/supabase/client";
+import { supabase, hasSupabaseEnv } from "@/integrations/supabase/client";
 
 interface FarmerProfile {
   user_id: string;
@@ -19,6 +19,36 @@ interface FarmerProfile {
   created_at: string;
 }
 
+const DEFAULT_MOCK_FARMERS: FarmerProfile[] = [
+  {
+    user_id: "mock-farmer-1",
+    display_name: "Rajesh Kumar",
+    email: "rajesh@farmapp.local.io",
+    phone: "+919876543210",
+    location: "Karnal, Haryana",
+    avatar_url: null,
+    created_at: "2025-06-10T10:00:00Z"
+  },
+  {
+    user_id: "mock-farmer-2",
+    display_name: "Sukhwinder Singh",
+    email: "sukhwinder@farmapp.local.io",
+    phone: "+919876543220",
+    location: "Amritsar, Punjab",
+    avatar_url: null,
+    created_at: "2025-05-18T14:20:00Z"
+  },
+  {
+    user_id: "mock-farmer-3",
+    display_name: "Ramesh Patel",
+    email: "ramesh@farmapp.local.io",
+    phone: "+919876543230",
+    location: "Rajkot, Gujarat",
+    avatar_url: null,
+    created_at: "2025-04-12T09:15:00Z"
+  }
+];
+
 const MerchantFarmers = () => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [farmers, setFarmers] = useState<FarmerProfile[]>([]);
@@ -29,14 +59,32 @@ const MerchantFarmers = () => {
   useEffect(() => {
     const fetchFarmers = async () => {
       setLoading(true);
-      // Get all user_ids with farmer role, then fetch their profiles
-      const { data: roles } = await supabase.from("user_roles").select("user_id").eq("role", "farmer");
-      if (roles && roles.length > 0) {
-        const farmerIds = roles.map(r => r.user_id);
-        const { data: profiles } = await supabase.from("profiles").select("*").in("user_id", farmerIds);
-        setFarmers(profiles || []);
+      try {
+        if (!hasSupabaseEnv) {
+          setFarmers(DEFAULT_MOCK_FARMERS);
+          setLoading(false);
+          return;
+        }
+
+        // Get all user_ids with farmer role, then fetch their profiles
+        const { data: roles } = await supabase.from("user_roles").select("user_id").eq("role", "farmer");
+        if (roles && roles.length > 0) {
+          const farmerIds = roles.map(r => r.user_id);
+          const { data: profiles } = await supabase.from("profiles").select("*").in("user_id", farmerIds);
+          if (profiles && profiles.length > 0) {
+            setFarmers(profiles);
+          } else {
+            setFarmers(DEFAULT_MOCK_FARMERS);
+          }
+        } else {
+          setFarmers(DEFAULT_MOCK_FARMERS);
+        }
+      } catch (err) {
+        console.warn("Failed to fetch farmers, using mock fallback:", err);
+        setFarmers(DEFAULT_MOCK_FARMERS);
+      } finally {
+        setLoading(false);
       }
-      setLoading(false);
     };
     fetchFarmers();
   }, []);

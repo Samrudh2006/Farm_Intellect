@@ -202,6 +202,88 @@ const wizardFields = (profile: SchemeWizardProfile) => [
   Boolean(profile.gender),
 ];
 
+const DEFAULT_MOCK_SCHEMES_CATALOG: Scheme[] = [
+  {
+    id: "scheme-pm-kisan",
+    title: "PM-KISAN (Pradhan Mantri Kisan Samman Nidhi)",
+    description: "An initiative by the Government of India that provides up to ₹6,000 per year in three equal installments as minimum income support to all small and marginal farmers.",
+    category: "subsidy",
+    amount: "₹6,000 / year",
+    eligibility: ["Small & marginal farmers", "Must own cultivable land", "Land holding up to 2 hectares"],
+    deadline: "2026-12-31",
+    status: "active",
+    state: "All India",
+    documents: ["Aadhaar Card", "Land Ownership Papers", "Bank Account Details"],
+    targetFarmerTypes: ["small", "marginal"],
+    interestFocus: ["income", "direct_benefit"],
+    irrigationNeeds: ["low", "medium", "high"],
+    minLandHolding: 0,
+    maxLandHolding: 2,
+    requiresDocuments: true,
+    cropFocus: ["wheat", "rice", "maize", "pulses", "any"],
+    applyUrl: "https://pmkisan.gov.in/",
+    learnMoreUrl: "https://pmkisan.gov.in/"
+  },
+  {
+    id: "scheme-pmfby",
+    title: "Pradhan Mantri Fasal Bima Yojana (PMFBY)",
+    description: "An actuarial premium based crop insurance scheme that yields financial support to farmers suffering crop loss/damage arising out of unforeseen events.",
+    category: "insurance",
+    amount: "Up to ₹50,000 / hectare coverage",
+    eligibility: ["All farmers growing notified crops", "Sharecroppers & tenant farmers are also eligible"],
+    deadline: "2026-07-31",
+    status: "ending_soon",
+    state: "All India",
+    documents: ["Land Records", "Sowing Certificate", "ID Proof", "Bank Passbook"],
+    targetFarmerTypes: ["small", "marginal", "large"],
+    interestFocus: ["insurance", "risk_mitigation"],
+    irrigationNeeds: ["low", "medium", "high"],
+    requiresDocuments: true,
+    cropFocus: ["wheat", "rice", "cotton", "oilseeds", "pulses"],
+    applyUrl: "https://pmfby.gov.in/",
+    learnMoreUrl: "https://pmfby.gov.in/"
+  },
+  {
+    id: "scheme-kcc",
+    title: "Kisan Credit Card (KCC) Loan Scheme",
+    description: "Provides farmers with timely credit support to meet their cultivation and other needs like purchase of inputs, seeds, fertilizers, and pesticides.",
+    category: "loan",
+    amount: "Up to ₹3,00,000 @ 4% interest rate",
+    eligibility: ["Owner cultivators", "Tenant farmers", "Sharecroppers", "Self-help groups of farmers"],
+    deadline: "2026-12-31",
+    status: "active",
+    state: "All India",
+    documents: ["Land Records", "KCC Application Form", "ID & Address Proof", "Panchayat Certificate"],
+    targetFarmerTypes: ["small", "marginal", "large"],
+    interestFocus: ["loan", "credit", "inputs"],
+    irrigationNeeds: ["low", "medium", "high"],
+    minLandHolding: 0,
+    requiresDocuments: true,
+    cropFocus: ["any"],
+    applyUrl: "https://www.sbi.co.in/web/personal-banking/loans/agriculture-loans/kisan-credit-card",
+    learnMoreUrl: "https://www.sbi.co.in/"
+  },
+  {
+    id: "scheme-pmksy",
+    title: "Pradhan Mantri Krishi Sinchayee Yojana (PMKSY)",
+    description: "Focuses on creating sources of assured irrigation, improving on-farm water use efficiency, and promoting micro-irrigation technologies (drip and sprinkler).",
+    category: "equipment",
+    amount: "Up to 80% subsidy on micro-irrigation setups",
+    eligibility: ["Farmers with cultivable land", "Members of water user associations"],
+    deadline: "2026-10-15",
+    status: "active",
+    state: "Punjab",
+    documents: ["Land Patta", "Electricity Bill", "Soil Health Card", "Aadhaar Card"],
+    targetFarmerTypes: ["small", "marginal", "large"],
+    interestFocus: ["irrigation", "equipment", "water_saving"],
+    irrigationNeeds: ["high", "medium"],
+    requiresDocuments: true,
+    cropFocus: ["any", "cotton", "sugarcane", "vegetables"],
+    applyUrl: "https://pmksy.gov.in/",
+    learnMoreUrl: "https://pmksy.gov.in/"
+  }
+];
+
 const Schemes = () => {
   const { user } = useCurrentUser();
   const { toast } = useToast();
@@ -223,7 +305,7 @@ const Schemes = () => {
     const fetchSchemes = async () => {
       setDbLoading(true);
       const { data, error } = await supabase.from("schemes").select("*");
-      if (data) {
+      if (data && data.length > 0) {
         setSchemeCatalog(data.map(d => ({
           id: d.id,
           title: d.title,
@@ -245,6 +327,8 @@ const Schemes = () => {
           applyUrl: d.apply_url,
           learnMoreUrl: d.learn_more_url
         })));
+      } else {
+        setSchemeCatalog(DEFAULT_MOCK_SCHEMES_CATALOG);
       }
       setDbLoading(false);
     };

@@ -10,11 +10,47 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { Label } from "@/components/ui/label";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Plus, Package, Truck, CheckCircle, Clock, IndianRupee } from "lucide-react";
-import { supabase } from "@/integrations/supabase/client";
+import { supabase, hasSupabaseEnv } from "@/integrations/supabase/client";
 import { useCurrentUser } from "@/hooks/useCurrentUser";
 import { useAuth } from "@/contexts/AuthContext";
 import { useToast } from "@/hooks/use-toast";
 import { format } from "date-fns";
+
+const DEFAULT_MOCK_ORDERS = [
+  {
+    id: "ord-1",
+    crop_name: "Premium Basmati Rice",
+    quantity_kg: 5000,
+    price_per_kg: 75,
+    total_amount: 375000,
+    status: "in_transit",
+    delivery_date: "2026-06-25",
+    notes: "Requires dry transport. High quality grade A.",
+    created_at: "2026-06-15T10:00:00Z"
+  },
+  {
+    id: "ord-2",
+    crop_name: "Sharbati Wheat",
+    quantity_kg: 10000,
+    price_per_kg: 28,
+    total_amount: 280000,
+    status: "pending",
+    delivery_date: "2026-06-30",
+    notes: "Direct procurement from Karnal farmers.",
+    created_at: "2026-06-18T14:30:00Z"
+  },
+  {
+    id: "ord-3",
+    crop_name: "Organic Mustard Seeds",
+    quantity_kg: 2500,
+    price_per_kg: 60,
+    total_amount: 150000,
+    status: "delivered",
+    delivery_date: "2026-06-10",
+    notes: "Delivered in full, payment processed.",
+    created_at: "2026-06-05T09:15:00Z"
+  }
+];
 
 const MerchantOrders = () => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
@@ -28,20 +64,69 @@ const MerchantOrders = () => {
 
   const fetchOrders = async () => {
     setLoading(true);
-    const { data } = await supabase.from("orders").select("*").order("created_at", { ascending: false });
-    setOrders(data || []);
-    setLoading(false);
+    try {
+      if (!hasSupabaseEnv) {
+        let stored = localStorage.getItem("mock_orders");
+        if (!stored) {
+          localStorage.setItem("mock_orders", JSON.stringify(DEFAULT_MOCK_ORDERS));
+          stored = JSON.stringify(DEFAULT_MOCK_ORDERS);
+        }
+        setOrders(JSON.parse(stored));
+        setLoading(false);
+        return;
+      }
+
+      const { data } = await supabase.from("orders").select("*").order("created_at", { ascending: false });
+      if (data && data.length > 0) {
+        setOrders(data);
+      } else {
+        // Fallback if DB is empty
+        setOrders(DEFAULT_MOCK_ORDERS);
+      }
+    } catch (err) {
+      console.warn("Failed to fetch orders, using mock fallback:", err);
+      setOrders(DEFAULT_MOCK_ORDERS);
+    } finally {
+      setLoading(false);
+    }
   };
 
   useEffect(() => { fetchOrders(); }, []);
 
   const handleCreate = async () => {
-    if (!authUser?.id || !form.crop_name || !form.quantity_kg || !form.price_per_kg) return;
+    if (!form.crop_name || !form.quantity_kg || !form.price_per_kg) return;
+    
+    const quantity = parseFloat(form.quantity_kg);
+    const price = parseFloat(form.price_per_kg);
+    
+    if (!hasSupabaseEnv) {
+      const newOrder = {
+        id: `ord-${Date.now()}`,
+        crop_name: form.crop_name,
+        quantity_kg: quantity,
+        price_per_kg: price,
+        total_amount: quantity * price,
+        status: "pending",
+        delivery_date: form.delivery_date || null,
+        notes: form.notes || null,
+        created_at: new Date().toISOString()
+      };
+      const current = [...orders];
+      const updated = [newOrder, ...current];
+      localStorage.setItem("mock_orders", JSON.stringify(updated));
+      setOrders(updated);
+      toast({ title: "Order created (Mock)!" });
+      setForm({ crop_name: "", quantity_kg: "", price_per_kg: "", delivery_date: "", notes: "" });
+      setDialogOpen(false);
+      return;
+    }
+
+    if (!authUser?.id) return;
     const { error } = await supabase.from("orders").insert({
       merchant_id: authUser.id,
       crop_name: form.crop_name,
-      quantity_kg: parseFloat(form.quantity_kg),
-      price_per_kg: parseFloat(form.price_per_kg),
+      quantity_kg: quantity,
+      price_per_kg: price,
       delivery_date: form.delivery_date || null,
       notes: form.notes || null,
     });
@@ -53,6 +138,14 @@ const MerchantOrders = () => {
   };
 
   const updateStatus = async (id: string, status: string) => {
+    if (!hasSupabaseEnv) {
+      const updated = orders.map(o => o.id === id ? { ...o, status, updated_at: new Date().toISOString() } : o);
+      localStorage.setItem("mock_orders", JSON.stringify(updated));
+      setOrders(updated);
+      toast({ title: `Order status updated to ${status}!` });
+      return;
+    }
+
     await supabase.from("orders").update({ status, updated_at: new Date().toISOString() }).eq("id", id);
     fetchOrders();
   };

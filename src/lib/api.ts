@@ -15,8 +15,8 @@ export class ApiError extends Error {
   }
 }
 
-// Client-side mock handler for document operations
-const handleMockDocuments = (path: string, init: RequestInit = {}): any => {
+// Client-side mock handler for document and AI operations
+const handleMockApi = (path: string, init: RequestInit = {}): any => {
   const method = (init.method || "GET").toUpperCase();
   
   const getDocs = () => {
@@ -98,13 +98,50 @@ const handleMockDocuments = (path: string, init: RequestInit = {}): any => {
     return { success: true };
   }
 
+  // Intercept crop disease scanner API
+  if (path === "/api/ai/detect-disease" && method === "POST") {
+    const formData = init.body as FormData;
+    const crop = formData?.get("cropType") as string || "wheat";
+    
+    const cropsToDiseases: Record<string, string> = {
+      wheat: "Leaf Rust (Puccinia triticina)",
+      rice: "Blast Disease (Magnaporthe oryzae)",
+      cotton: "Boll Rot (Colletotrichum gossypii)",
+      tomato: "Early Blight (Alternaria solani)",
+      potato: "Late Blight (Phytophthora infestans)",
+      maize: "Northern Leaf Blight (Exserohilum turcicum)"
+    };
+    
+    const disease = cropsToDiseases[crop.toLowerCase()] || "Leaf Spot (Fungal infection)";
+    
+    return {
+      detection: {
+        disease,
+        confidence: Math.round(85 + Math.random() * 10),
+        severity: "moderate",
+        category: "fungal",
+        description: `Typical symptoms of ${disease} observed on the leaf surface. Yellow-to-brown spots or pustules are present, reducing photosynthetic activity and overall yield potential.`,
+        symptomsDetected: ["Yellowing of leaves", "Brown spots", "Powdery lesions"],
+        treatment: {
+          chemical: ["Propiconazole @ 1ml/liter water", "Mancozeb @ 2g/liter water"],
+          organic: ["Neem oil spray @ 5ml/liter water", "Bordeaux mixture @ 1%"],
+          cultural: ["Prune affected leaves", "Improve soil drainage"]
+        },
+        prevention: ["Crop rotation", "Clean field borders", "Use certified disease-resistant seeds"],
+        yieldLossEstimate: "15-25%",
+        urgency: "within_week"
+      }
+    };
+  }
+
   return null;
 };
 
 export const apiFetch = async <T>(path: string, init: RequestInit = {}): Promise<T> => {
-  // If we are in mock mode (no Supabase env) and calling documents, bypass network fetch
-  if (!hasSupabaseEnv && path.startsWith("/api/documents")) {
-    return handleMockDocuments(path, init) as T;
+  // If we are in mock mode (no Supabase env) and calling documents/AI scanner, bypass network fetch
+  const isMockablePath = path.startsWith("/api/documents") || path === "/api/ai/detect-disease";
+  if (!hasSupabaseEnv && isMockablePath) {
+    return handleMockApi(path, init) as T;
   }
 
   const { data: { session } } = await supabase.auth.getSession();
@@ -141,10 +178,10 @@ export const apiFetch = async <T>(path: string, init: RequestInit = {}): Promise
       headers,
     });
   } catch (error) {
-    // If backend is down, fall back to mock documents locally
-    if (path.startsWith("/api/documents")) {
-      console.warn("Backend API down. Serving mock documents.");
-      return handleMockDocuments(path, init) as T;
+    // If backend is down, fall back to mock documents/AI scanner locally
+    if (isMockablePath) {
+      console.warn("Backend API down. Serving mock API fallback response.");
+      return handleMockApi(path, init) as T;
     }
 
     if (canQueue) {
