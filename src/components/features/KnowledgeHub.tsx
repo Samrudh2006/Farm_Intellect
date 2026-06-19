@@ -4,6 +4,8 @@ import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { PlayCircle, BookOpen, Video, ExternalLink, Headphones, Image, FileText, Pause, Download } from "lucide-react";
 import { AspectRatio } from "@/components/ui/aspect-ratio";
+import { getAssetUrl } from "@/utils/assets";
+
 
 export const KnowledgeHub = () => {
   const [playingPodcast, setPlayingPodcast] = useState<string | null>(null);
@@ -166,7 +168,7 @@ export const KnowledgeHub = () => {
                       <p className="text-sm text-muted-foreground">{podcast.description}</p>
                     </div>
                   </div>
-                  <audio id={podcast.id} src={podcast.src} onEnded={() => setPlayingPodcast(null)} />
+                  <audio id={podcast.id} src={getAssetUrl(podcast.src)} onEnded={() => setPlayingPodcast(null)} />
                   <div className="mt-4">
                     <Button 
                       variant="outline" 
@@ -204,10 +206,10 @@ export const KnowledgeHub = () => {
               <Card key={item.id} className="overflow-hidden hover:shadow-lg transition-shadow">
                 <div className="relative">
                   <img 
-                    src={item.src} 
+                    src={getAssetUrl(item.src)} 
                     alt={item.title}
                     className="w-full h-auto object-contain cursor-pointer"
-                    onClick={() => window.open(item.src, '_blank')}
+                    onClick={() => window.open(getAssetUrl(item.src), '_blank')}
                   />
                   <div className="absolute top-2 left-2 bg-primary text-primary-foreground px-3 py-1 rounded-full text-sm font-medium">
                     {item.category}
@@ -219,7 +221,7 @@ export const KnowledgeHub = () => {
                   <Button 
                     variant="outline" 
                     size="sm"
-                    onClick={() => window.open(item.src, '_blank')}
+                    onClick={() => window.open(getAssetUrl(item.src), '_blank')}
                   >
                     <ExternalLink className="h-4 w-4 mr-2" />
                     View Full Size
@@ -257,7 +259,7 @@ export const KnowledgeHub = () => {
                         <Button 
                           variant="default"
                           size="sm"
-                          onClick={() => window.open(item.src, '_blank')}
+                          onClick={() => window.open(getAssetUrl(item.src), '_blank')}
                         >
                           <ExternalLink className="h-4 w-4 mr-2" />
                           View PDF
@@ -267,7 +269,7 @@ export const KnowledgeHub = () => {
                           size="sm"
                           asChild
                         >
-                          <a href={item.src} download>
+                          <a href={getAssetUrl(item.src)} download>
                             <Download className="h-4 w-4 mr-2" />
                             Download
                           </a>
