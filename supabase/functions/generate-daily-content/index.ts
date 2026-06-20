@@ -54,7 +54,7 @@ Output MUST be a valid JSON array of objects with the properties: "content" (str
 
   } catch (e) {
     console.error("Error generating daily content:", e);
-    return new Response(JSON.stringify({ error: String(e) }), {
+    return new Response(JSON.stringify({ error: e instanceof Error ? e.message : "Internal Server Error" }), {
       status: 500,
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });

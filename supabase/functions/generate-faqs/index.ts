@@ -75,7 +75,7 @@ Output MUST be a strictly valid JSON array of objects with 'question' and 'answe
 
   } catch (e) {
     console.error("Error generating FAQs:", e);
-    return new Response(JSON.stringify({ error: String(e) }), {
+    return new Response(JSON.stringify({ error: e instanceof Error ? e.message : "Internal Server Error" }), {
       status: 500,
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });

@@ -81,7 +81,7 @@ Extract disease information from the user's text and output it as JSON strictly 
 
   } catch (e) {
     console.error("Error scraping disease:", e);
-    return new Response(JSON.stringify({ error: String(e) }), {
+    return new Response(JSON.stringify({ error: e instanceof Error ? e.message : "Internal Server Error" }), {
       status: 500,
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });

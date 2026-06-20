@@ -11,7 +11,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { BookOpen, Plus, Edit, Trash2, Eye, Send, FileText } from "lucide-react";
-import { supabase } from "@/integrations/supabase/client";
+import { supabase, hasSupabaseEnv } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { useCurrentUser } from "@/hooks/useCurrentUser";
 import { useToast } from "@/hooks/use-toast";
@@ -30,6 +30,31 @@ interface Article {
   created_at: string;
   author_id: string;
 }
+
+const DEFAULT_MOCK_ARTICLES: Article[] = [
+  {
+    id: "art-1",
+    title: "Understanding Soil pH for Better Yields",
+    content: "Soil pH is a crucial factor in crop production as it directly affects nutrient availability. Most crops prefer a slightly acidic to neutral pH (6.0 - 7.0). If your soil is too acidic, you can add lime. If it's too alkaline, elemental sulfur can help lower the pH.",
+    category: "Soil Health",
+    tags: ["soil", "pH", "nutrients"],
+    status: "published",
+    published_at: new Date(Date.now() - 86400000).toISOString(),
+    created_at: new Date(Date.now() - 86400000).toISOString(),
+    author_id: "mock-expert-1"
+  },
+  {
+    id: "art-2",
+    title: "Managing Fall Armyworm in Maize",
+    content: "Early detection is key to controlling Fall Armyworm (FAW). Look for window-pane damage on leaves. For chemical control, use recommended insecticides when 5-10% of plants are infested. Biological controls like Trichogramma wasps can also be effective.",
+    category: "Pest Control",
+    tags: ["maize", "pests", "FAW"],
+    status: "draft",
+    published_at: null,
+    created_at: new Date(Date.now() - 172800000).toISOString(),
+    author_id: "mock-expert-1"
+  }
+];
 
 const ExpertKnowledgeHub = () => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
@@ -50,12 +75,29 @@ const ExpertKnowledgeHub = () => {
 
   const fetchArticles = async () => {
     setLoading(true);
-    const { data } = await supabase
-      .from("knowledge_articles")
-      .select("*")
-      .order("created_at", { ascending: false });
-    setArticles((data as Article[]) || []);
-    setLoading(false);
+    try {
+      if (!hasSupabaseEnv) {
+        let stored = localStorage.getItem("mock_knowledge_articles");
+        if (!stored) {
+          localStorage.setItem("mock_knowledge_articles", JSON.stringify(DEFAULT_MOCK_ARTICLES));
+          stored = JSON.stringify(DEFAULT_MOCK_ARTICLES);
+        }
+        setArticles(JSON.parse(stored));
+        setLoading(false);
+        return;
+      }
+      
+      const { data } = await supabase
+        .from("knowledge_articles")
+        .select("*")
+        .order("created_at", { ascending: false });
+      setArticles((data as Article[]) || []);
+    } catch (err) {
+      console.warn("Failed to fetch articles, using mock fallback");
+      setArticles(DEFAULT_MOCK_ARTICLES);
+    } finally {
+      setLoading(false);
+    }
   };
 
   useEffect(() => { fetchArticles(); }, []);
@@ -74,7 +116,7 @@ const ExpertKnowledgeHub = () => {
   };
 
   const handleSave = async (publish: boolean) => {
-    if (!authUser?.id || !title.trim() || !content.trim()) return;
+    if (!title.trim() || !content.trim()) return;
     setSaving(true);
     const tags = tagsInput.split(",").map(t => t.trim()).filter(Boolean);
     const payload: any = {
@@ -86,6 +128,31 @@ const ExpertKnowledgeHub = () => {
       ...(publish ? { published_at: new Date().toISOString() } : {}),
       updated_at: new Date().toISOString(),
     };
+
+    if (!hasSupabaseEnv) {
+      let updatedArticles = [...articles];
+      if (editingId) {
+        updatedArticles = updatedArticles.map(a => a.id === editingId ? { ...a, ...payload } : a);
+        toast({ title: publish ? "Article published (Mock)!" : "Draft saved (Mock)" });
+      } else {
+        payload.id = `art-${Date.now()}`;
+        payload.author_id = authUser?.id || "mock-expert-1";
+        payload.created_at = new Date().toISOString();
+        updatedArticles = [payload, ...updatedArticles];
+        toast({ title: publish ? "Article published (Mock)!" : "Draft created (Mock)" });
+      }
+      localStorage.setItem("mock_knowledge_articles", JSON.stringify(updatedArticles));
+      setArticles(updatedArticles);
+      setSaving(false);
+      setDialogOpen(false);
+      resetForm();
+      return;
+    }
+
+    if (!authUser?.id) {
+      setSaving(false);
+      return;
+    }
 
     if (editingId) {
       await supabase.from("knowledge_articles").update(payload).eq("id", editingId);
@@ -102,6 +169,14 @@ const ExpertKnowledgeHub = () => {
   };
 
   const handleDelete = async (id: string) => {
+    if (!hasSupabaseEnv) {
+      const updated = articles.filter(a => a.id !== id);
+      localStorage.setItem("mock_knowledge_articles", JSON.stringify(updated));
+      setArticles(updated);
+      toast({ title: "Article deleted (Mock)" });
+      return;
+    }
+
     await supabase.from("knowledge_articles").delete().eq("id", id);
     toast({ title: "Article deleted" });
     fetchArticles();
@@ -109,9 +184,19 @@ const ExpertKnowledgeHub = () => {
 
   const handlePublishToggle = async (a: Article) => {
     const newStatus = a.status === "published" ? "draft" : "published";
+    const publishedAt = newStatus === "published" ? new Date().toISOString() : null;
+
+    if (!hasSupabaseEnv) {
+      const updated = articles.map(art => art.id === a.id ? { ...art, status: newStatus, published_at: publishedAt, updated_at: new Date().toISOString() } : art);
+      localStorage.setItem("mock_knowledge_articles", JSON.stringify(updated));
+      setArticles(updated);
+      toast({ title: newStatus === "published" ? "Published (Mock)!" : "Unpublished (Mock)" });
+      return;
+    }
+
     await supabase.from("knowledge_articles").update({
       status: newStatus,
-      published_at: newStatus === "published" ? new Date().toISOString() : null,
+      published_at: publishedAt,
       updated_at: new Date().toISOString(),
     }).eq("id", a.id);
     toast({ title: newStatus === "published" ? "Published!" : "Unpublished" });

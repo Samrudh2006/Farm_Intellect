@@ -9,11 +9,36 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
 import { MessageSquare, CheckCircle, Clock, AlertTriangle, Users } from "lucide-react";
-import { supabase } from "@/integrations/supabase/client";
+import { supabase, hasSupabaseEnv } from "@/integrations/supabase/client";
 import { useCurrentUser } from "@/hooks/useCurrentUser";
 import { useAuth } from "@/contexts/AuthContext";
 import { useToast } from "@/hooks/use-toast";
 import { format } from "date-fns";
+
+const DEFAULT_MOCK_CONSULTATIONS = [
+  {
+    id: "cons-1",
+    farmer_id: "mock-farmer-1",
+    expert_id: null,
+    title: "Wheat leaf discoloration",
+    description: "My wheat crop leaves are turning yellow with brown spots.",
+    category: "Disease",
+    priority: "high",
+    status: "pending",
+    created_at: new Date(Date.now() - 3600000).toISOString()
+  },
+  {
+    id: "cons-2",
+    farmer_id: "mock-farmer-2",
+    expert_id: "mock-expert-1",
+    title: "Best fertilizer for cotton",
+    description: "What NPK ratio should I use for BT cotton at flowering stage?",
+    category: "Nutrition",
+    priority: "medium",
+    status: "assigned",
+    created_at: new Date(Date.now() - 86400000).toISOString()
+  }
+];
 
 const ExpertConsultations = () => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
@@ -27,14 +52,40 @@ const ExpertConsultations = () => {
 
   const fetch = async () => {
     setLoading(true);
-    const { data } = await supabase.from("consultations").select("*").order("created_at", { ascending: false });
-    setConsultations(data || []);
-    setLoading(false);
+    try {
+      if (!hasSupabaseEnv) {
+        let stored = localStorage.getItem("mock_consultations");
+        if (!stored) {
+          localStorage.setItem("mock_consultations", JSON.stringify(DEFAULT_MOCK_CONSULTATIONS));
+          stored = JSON.stringify(DEFAULT_MOCK_CONSULTATIONS);
+        }
+        setConsultations(JSON.parse(stored));
+        setLoading(false);
+        return;
+      }
+      const { data } = await supabase.from("consultations").select("*").order("created_at", { ascending: false });
+      setConsultations(data || []);
+    } catch (err) {
+      console.warn("Failed to fetch consultations, using mock fallback");
+      setConsultations(DEFAULT_MOCK_CONSULTATIONS);
+    } finally {
+      setLoading(false);
+    }
   };
 
   useEffect(() => { fetch(); }, []);
 
   const handleAssign = async (id: string) => {
+    if (!hasSupabaseEnv) {
+      const updated = consultations.map(c => 
+        c.id === id ? { ...c, expert_id: authUser?.id || "mock-expert-1", status: "assigned", updated_at: new Date().toISOString() } : c
+      );
+      localStorage.setItem("mock_consultations", JSON.stringify(updated));
+      setConsultations(updated);
+      toast({ title: "Consultation assigned to you (Mock)" });
+      return;
+    }
+
     if (!authUser?.id) return;
     await supabase.from("consultations").update({ expert_id: authUser.id, status: "assigned", updated_at: new Date().toISOString() }).eq("id", id);
     toast({ title: "Consultation assigned to you" });
@@ -43,6 +94,25 @@ const ExpertConsultations = () => {
 
   const handleResolve = async () => {
     if (!resolveId || !resolution) return;
+
+    if (!hasSupabaseEnv) {
+      const updated = consultations.map(c => 
+        c.id === resolveId ? { 
+          ...c, 
+          status: "resolved", 
+          resolution, 
+          resolved_at: new Date().toISOString(),
+          updated_at: new Date().toISOString() 
+        } : c
+      );
+      localStorage.setItem("mock_consultations", JSON.stringify(updated));
+      setConsultations(updated);
+      toast({ title: "Consultation resolved (Mock)!" });
+      setResolveId(null);
+      setResolution("");
+      return;
+    }
+
     await supabase.from("consultations").update({
       status: "resolved",
       resolution,

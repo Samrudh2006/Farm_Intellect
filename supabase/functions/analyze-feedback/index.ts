@@ -89,7 +89,7 @@ Feedback: "${record.content}"`;
 
   } catch (e) {
     console.error("Error analyzing feedback:", e);
-    return new Response(JSON.stringify({ error: String(e) }), {
+    return new Response(JSON.stringify({ error: e instanceof Error ? e.message : "Internal Server Error" }), {
       status: 500,
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
