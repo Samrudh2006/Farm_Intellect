@@ -63,11 +63,16 @@ const ExpertConsultations = () => {
         setLoading(false);
         return;
       }
-      const { data } = await supabase.from("consultations").select("*").order("created_at", { ascending: false });
+      const { data, error } = await supabase.from("consultations").select("*").order("created_at", { ascending: false });
+      if (error) throw error;
       setConsultations(data || []);
     } catch (err) {
-      console.warn("Failed to fetch consultations, using mock fallback");
-      setConsultations(DEFAULT_MOCK_CONSULTATIONS);
+      console.warn("Failed to fetch consultations:", err);
+      if (!hasSupabaseEnv) {
+        setConsultations(DEFAULT_MOCK_CONSULTATIONS);
+      } else {
+        setConsultations([]);
+      }
     } finally {
       setLoading(false);
     }

@@ -26,12 +26,14 @@ CREATE TABLE IF NOT EXISTS public.schemes (
 -- Enable Row Level Security (RLS)
 ALTER TABLE public.schemes ENABLE ROW LEVEL SECURITY;
 
+DROP POLICY IF EXISTS "Public read access for schemes" ON public.schemes;
 -- Allow public read access to schemes
 CREATE POLICY "Public read access for schemes"
     ON public.schemes
     FOR SELECT
     USING (true);
 
+DROP POLICY IF EXISTS "Service role full access on schemes" ON public.schemes;
 -- Allow service role to manage schemes
 CREATE POLICY "Service role full access on schemes"
     ON public.schemes
@@ -48,6 +50,7 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
+DROP TRIGGER IF EXISTS on_scheme_update ON public.schemes;
 CREATE TRIGGER on_scheme_update
     BEFORE UPDATE ON public.schemes
     FOR EACH ROW

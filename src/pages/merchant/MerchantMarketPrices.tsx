@@ -44,17 +44,21 @@ const MerchantMarketPrices = () => {
         body: { state: "Punjab", district: "Ludhiana" },
       });
       if (error) throw error;
-      if (data && data.prices && data.prices.length > 0) {
+      if (data && data.prices) {
         setPrices(data.prices);
         setSource(data.source || "live");
       } else {
-        setPrices(DEFAULT_MOCK_PRICES);
-        setSource("cache");
+        setPrices([]);
+        setSource("live");
       }
     } catch (e) {
-      console.warn("Could not fetch market prices, using mock fallback:", e);
-      setPrices(DEFAULT_MOCK_PRICES);
-      setSource("cache");
+      console.warn("Could not fetch market prices:", e);
+      if (!hasSupabaseEnv) {
+        setPrices(DEFAULT_MOCK_PRICES);
+        setSource("cache");
+      } else {
+        setPrices([]);
+      }
     } finally {
       setLoading(false);
     }

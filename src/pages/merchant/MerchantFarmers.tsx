@@ -71,13 +71,9 @@ const MerchantFarmers = () => {
         if (roles && roles.length > 0) {
           const farmerIds = roles.map(r => r.user_id);
           const { data: profiles } = await supabase.from("profiles").select("*").in("user_id", farmerIds);
-          if (profiles && profiles.length > 0) {
-            setFarmers(profiles);
-          } else {
-            setFarmers(DEFAULT_MOCK_FARMERS);
-          }
+          setFarmers(profiles || []);
         } else {
-          setFarmers(DEFAULT_MOCK_FARMERS);
+          setFarmers([]);
         }
       } catch (err) {
         console.warn("Failed to fetch farmers, using mock fallback:", err);

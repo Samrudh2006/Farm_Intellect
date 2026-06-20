@@ -59,10 +59,19 @@ ALTER TABLE faqs ENABLE ROW LEVEL SECURITY;
 ALTER TABLE farmer_feedback ENABLE ROW LEVEL SECURITY;
 ALTER TABLE social_posts ENABLE ROW LEVEL SECURITY;
 
+DROP POLICY IF EXISTS "Allow public read on mandi_prices" ON mandi_prices;
 CREATE POLICY "Allow public read on mandi_prices" ON mandi_prices FOR SELECT USING (true);
+
+DROP POLICY IF EXISTS "Allow public read on crop_diseases" ON crop_diseases;
 CREATE POLICY "Allow public read on crop_diseases" ON crop_diseases FOR SELECT USING (true);
+
+DROP POLICY IF EXISTS "Allow public read on faqs" ON faqs;
 CREATE POLICY "Allow public read on faqs" ON faqs FOR SELECT USING (true);
+
+DROP POLICY IF EXISTS "Allow public insert on farmer_feedback" ON farmer_feedback;
 CREATE POLICY "Allow public insert on farmer_feedback" ON farmer_feedback FOR INSERT WITH CHECK (true);
+
+DROP POLICY IF EXISTS "Allow public read on social_posts" ON social_posts;
 CREATE POLICY "Allow public read on social_posts" ON social_posts FOR SELECT USING (true);
 
 -- Setup Webhooks for faqs and analyze-feedback
@@ -78,10 +87,12 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql SECURITY DEFINER;
 
+DROP TRIGGER IF EXISTS on_scheme_created ON schemes;
 CREATE TRIGGER on_scheme_created
   AFTER INSERT ON schemes
   FOR EACH ROW EXECUTE FUNCTION public.handle_new_scheme_or_disease();
 
+DROP TRIGGER IF EXISTS on_disease_created ON crop_diseases;
 CREATE TRIGGER on_disease_created
   AFTER INSERT ON crop_diseases
   FOR EACH ROW EXECUTE FUNCTION public.handle_new_scheme_or_disease();
@@ -98,6 +109,7 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql SECURITY DEFINER;
 
+DROP TRIGGER IF EXISTS on_feedback_created ON farmer_feedback;
 CREATE TRIGGER on_feedback_created
   AFTER INSERT ON farmer_feedback
   FOR EACH ROW EXECUTE FUNCTION public.handle_new_feedback();

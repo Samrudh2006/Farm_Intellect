@@ -76,13 +76,9 @@ const MerchantOrders = () => {
         return;
       }
 
-      const { data } = await supabase.from("orders").select("*").order("created_at", { ascending: false });
-      if (data && data.length > 0) {
-        setOrders(data);
-      } else {
-        // Fallback if DB is empty
-        setOrders(DEFAULT_MOCK_ORDERS);
-      }
+      const { data, error } = await supabase.from("orders").select("*").order("created_at", { ascending: false });
+      if (error) throw error;
+      setOrders(data || []);
     } catch (err) {
       console.warn("Failed to fetch orders, using mock fallback:", err);
       setOrders(DEFAULT_MOCK_ORDERS);

@@ -87,14 +87,16 @@ const ExpertKnowledgeHub = () => {
         return;
       }
       
-      const { data } = await supabase
-        .from("knowledge_articles")
-        .select("*")
-        .order("created_at", { ascending: false });
-      setArticles((data as Article[]) || []);
+      const { data, error } = await supabase.from("knowledge_articles").select("*").order("created_at", { ascending: false });
+      if (error) throw error;
+      setArticles(data || []);
     } catch (err) {
-      console.warn("Failed to fetch articles, using mock fallback");
-      setArticles(DEFAULT_MOCK_ARTICLES);
+      console.warn("Failed to fetch articles:", err);
+      if (!hasSupabaseEnv) {
+        setArticles(DEFAULT_MOCK_ARTICLES);
+      } else {
+        setArticles([]);
+      }
     } finally {
       setLoading(false);
     }
