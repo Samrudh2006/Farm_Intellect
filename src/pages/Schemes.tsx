@@ -304,33 +304,39 @@ const Schemes = () => {
   useEffect(() => {
     const fetchSchemes = async () => {
       setDbLoading(true);
-      const { data, error } = await supabase.from("schemes").select("*");
-      if (data && data.length > 0) {
-        setSchemeCatalog(data.map(d => ({
+      try {
+        const { data, error } = await supabase.from("schemes").select("*");
+        if (error) throw error;
+        setSchemeCatalog(data ? data.map(d => ({
           id: d.id,
           title: d.title,
           description: d.description,
-          category: d.category,
+          category: d.category as SchemeCategory,
           amount: d.amount,
           eligibility: d.eligibility,
           deadline: d.deadline,
-          status: d.status,
+          status: d.status as SchemeStatus,
           state: d.state,
           documents: d.documents,
-          targetFarmerTypes: d.target_farmer_types,
-          interestFocus: d.interest_focus,
-          irrigationNeeds: d.irrigation_needs,
+          targetFarmerTypes: d.target_farmer_types as any,
+          interestFocus: d.interest_focus as any,
+          irrigationNeeds: d.irrigation_needs as any,
           minLandHolding: d.min_land_holding,
           maxLandHolding: d.max_land_holding,
           requiresDocuments: d.requires_documents,
           cropFocus: d.crop_focus,
           applyUrl: d.apply_url,
           learnMoreUrl: d.learn_more_url
-        })));
-      } else {
-        setSchemeCatalog(DEFAULT_MOCK_SCHEMES_CATALOG);
+        })) : []);
+      } catch (err) {
+        if (!hasSupabaseEnv) {
+          setSchemeCatalog(DEFAULT_MOCK_SCHEMES_CATALOG);
+        } else {
+          setSchemeCatalog([]);
+        }
+      } finally {
+        setDbLoading(false);
       }
-      setDbLoading(false);
     };
     fetchSchemes();
   }, []);

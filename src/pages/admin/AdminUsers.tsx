@@ -103,8 +103,11 @@ const AdminUsers = () => {
     } catch (err) {
       console.error(err);
       toast.error("Failed to load users");
-      // Fallback
-      setUsers(DEFAULT_MOCK_USERS);
+      if (!hasSupabaseEnv) {
+        setUsers(DEFAULT_MOCK_USERS);
+      } else {
+        setUsers([]);
+      }
     } finally {
       setLoading(false);
     }
