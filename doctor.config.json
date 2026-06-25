@@ -1,11 +1,11 @@
 {
+  "customRulesOnly": true,
   "ignore": {
-    "files": [
-      "src/**",
-      "supabase/**",
-      "sql/**",
-      "backend/**",
-      ".github/**"
+    "rules": [
+      "supabase-rls-policy-risk",
+      "supabase-client-owned-authz-field",
+      "untrusted-redirect-following",
+      "build-pipeline-secret-boundary"
     ]
   }
 }
