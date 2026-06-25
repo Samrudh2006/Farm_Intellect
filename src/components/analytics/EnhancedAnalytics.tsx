@@ -10,6 +10,21 @@ import { supabase } from "@/integrations/supabase/client";
 import { nationalCropStats, cropProductionMetadata } from "@/data/cropProduction";
 import { mandiPrices, mandiPricesMetadata, getMSPCrops, getHighVolatilityCommodities } from "@/data/mandiPrices";
 
+const StatCard = ({ title, value, icon: Icon, subtitle, loading: isLoading }: any) => (
+  <Card className="tricolor-card">
+    <CardContent className="p-6">
+      <div className="flex items-center justify-between">
+        <div>
+          <p className="text-sm font-medium text-muted-foreground">{title}</p>
+          {isLoading ? <Skeleton className="h-8 w-16 mt-1" /> : <p className="text-2xl font-bold text-foreground">{value}</p>}
+          {subtitle && <p className="text-xs text-muted-foreground">{subtitle}</p>}
+        </div>
+        <div className="p-2 rounded-full bg-primary/10"><Icon className="h-6 w-6 text-primary" /></div>
+      </div>
+    </CardContent>
+  </Card>
+);
+
 export const EnhancedAnalytics = () => {
   const [timeRange, setTimeRange] = useState("30d");
   const [loading, setLoading] = useState(true);
@@ -74,20 +89,6 @@ export const EnhancedAnalytics = () => {
   const volatileCommodities = getHighVolatilityCommodities();
   const mspCrops = getMSPCrops();
 
-  const StatCard = ({ title, value, icon: Icon, subtitle, loading: isLoading }: any) => (
-    <Card className="tricolor-card">
-      <CardContent className="p-6">
-        <div className="flex items-center justify-between">
-          <div>
-            <p className="text-sm font-medium text-muted-foreground">{title}</p>
-            {isLoading ? <Skeleton className="h-8 w-16 mt-1" /> : <p className="text-2xl font-bold text-foreground">{value}</p>}
-            {subtitle && <p className="text-xs text-muted-foreground">{subtitle}</p>}
-          </div>
-          <div className="p-2 rounded-full bg-primary/10"><Icon className="h-6 w-6 text-primary" /></div>
-        </div>
-      </CardContent>
-    </Card>
-  );
 
   return (
     <div className="space-y-6">

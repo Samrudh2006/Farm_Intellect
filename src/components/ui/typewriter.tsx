@@ -10,11 +10,16 @@ interface TypewriterProps {
 export const Typewriter = ({ text, speed = 30, className = "" }: TypewriterProps) => {
   const [displayedText, setDisplayedText] = useState("");
   const [isTyping, setIsTyping] = useState(true);
+  const [prevText, setPrevText] = useState(text);
+
+  if (text !== prevText) {
+    setPrevText(text);
+    setDisplayedText("");
+    setIsTyping(true);
+  }
 
   useEffect(() => {
     let i = 0;
-    setIsTyping(true);
-    setDisplayedText("");
     
     const timer = setInterval(() => {
       if (i < text.length) {

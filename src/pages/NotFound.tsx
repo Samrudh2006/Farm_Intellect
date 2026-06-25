@@ -6,11 +6,11 @@ import { Home, ArrowLeft } from "lucide-react";
 import { AshokaChakra } from "@/components/ui/ashoka-chakra";
 
 const NotFound = () => {
-  const location = useLocation();
+  const currentLocation = useLocation();
 
   useEffect(() => {
-    console.error("404 Error: User attempted to access non-existent route:", location.pathname);
-  }, [location.pathname]);
+    console.error("404 Error: User attempted to access non-existent route:", currentLocation.pathname);
+  }, [currentLocation.pathname]);
 
   return (
     <div className="flex min-h-screen items-center justify-center bg-background p-6">
@@ -44,7 +44,7 @@ const NotFound = () => {
           </div>
           
           <p className="text-xs text-muted-foreground mt-6">
-            Path attempted: {location.pathname}
+            Path attempted: {currentLocation.pathname}
           </p>
         </CardContent>
       </Card>

@@ -24,18 +24,18 @@ interface SeoHeadProps {
 }
 
 export function SeoHead({ metadata, schema, customSchema, breadcrumbs }: SeoHeadProps) {
-  const location = useLocation();
+  const currentLocation = useLocation();
 
   useEffect(() => {
     // Use provided metadata or get from route config
-    const pageMetadata = metadata || getRouteMetadata(location.pathname);
+    const pageMetadata = metadata || getRouteMetadata(currentLocation.pathname);
 
     if (pageMetadata) {
       // Update page title and meta tags
       setPageMetadata(pageMetadata);
 
       // Update canonical URL
-      const canonicalUrl = `${window.location.origin}${location.pathname}`;
+      const canonicalUrl = `${window.location.origin}${currentLocation.pathname}`;
       updateCanonicalUrl(canonicalUrl);
     }
 
@@ -45,7 +45,7 @@ export function SeoHead({ metadata, schema, customSchema, breadcrumbs }: SeoHead
     if (customSchema) {
       schemaToInject = customSchema;
     } else if (schema) {
-      const generatedBreadcrumbs = breadcrumbs || generateBreadcrumbs(location.pathname);
+      const generatedBreadcrumbs = breadcrumbs || generateBreadcrumbs(currentLocation.pathname);
 
       switch (schema) {
         case "organization":
@@ -62,7 +62,7 @@ export function SeoHead({ metadata, schema, customSchema, breadcrumbs }: SeoHead
       }
     } else {
       // Default: add breadcrumb schema on all pages
-      const generatedBreadcrumbs = breadcrumbs || generateBreadcrumbs(location.pathname);
+      const generatedBreadcrumbs = breadcrumbs || generateBreadcrumbs(currentLocation.pathname);
       if (generatedBreadcrumbs.length > 1) {
         schemaToInject = generateBreadcrumbSchema(generatedBreadcrumbs);
       }
@@ -80,7 +80,7 @@ export function SeoHead({ metadata, schema, customSchema, breadcrumbs }: SeoHead
         cleanup();
       }
     };
-  }, [location.pathname, metadata, schema, customSchema, breadcrumbs]);
+  }, [currentLocation.pathname, metadata, schema, customSchema, breadcrumbs]);
 
   // This component doesn't render anything
   return null;
