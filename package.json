@@ -48,6 +48,7 @@
     "@sentry/react": "^10.58.0",
     "@supabase/supabase-js": "^2.98.0",
     "@tanstack/react-query": "^5.83.0",
+    "@tensorflow/tfjs": "^4.22.0",
     "@types/leaflet": "^1.9.21",
     "canvas-confetti": "^1.9.4",
     "class-variance-authority": "^0.7.1",
@@ -83,6 +84,7 @@
   "devDependencies": {
     "@eslint/js": "^9.32.0",
     "@tailwindcss/typography": "^0.5.16",
+    "@testing-library/dom": "^10.4.1",
     "@testing-library/jest-dom": "^6.9.1",
     "@testing-library/react": "^16.3.2",
     "@testing-library/user-event": "^14.6.1",
@@ -105,6 +107,6 @@
     "typescript": "^5.8.3",
     "typescript-eslint": "^8.38.0",
     "vite": "^8.0.16",
-    "vitest": "^4.0.18"
+    "vitest": "^4.1.9"
   }
 }

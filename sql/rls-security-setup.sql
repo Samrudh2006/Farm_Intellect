@@ -27,7 +27,8 @@ CREATE POLICY "Farmers can only insert their own consultations"
 
 CREATE POLICY "Farmers can only update their own consultations"
   ON consultations FOR UPDATE
-  USING (auth.uid() = farmer_id);
+  USING (auth.uid() = farmer_id)
+  WITH CHECK (auth.uid() = farmer_id);
 
 -- Enable RLS on crop recommendations
 ALTER TABLE crop_recommendations ENABLE ROW LEVEL SECURITY;
