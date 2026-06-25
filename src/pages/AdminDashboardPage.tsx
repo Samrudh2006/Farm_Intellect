@@ -4,7 +4,7 @@ import { Sidebar } from "@/components/layout/Sidebar";
 import { RoleDashboard } from "@/components/dashboard/RoleDashboard";
 import { useCurrentUser } from "@/hooks/useCurrentUser";
 import { useLanguage } from "@/contexts/LanguageContext";
-import heroImage from "@/assets/hero-farming.jpg";
+import heroImage from "@/assets/hero-farming.png";
 
 const AdminDashboardPage = () => {
   const [sidebarOpen, setSidebarOpen] = useState(false);

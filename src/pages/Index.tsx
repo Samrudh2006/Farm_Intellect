@@ -24,7 +24,7 @@ import smartIrrigationImg from "@/assets/icons/smart-irrigation.jpg";
 import marketAnalyticsImg from "@/assets/icons/market-analytics.jpg";
 import organicFarmingImg from "@/assets/icons/organic-farming.jpg";
 import cropScannerImg from "@/assets/icons/crop-scanner.jpg";
-import heroFarmingImg from "@/assets/hero-farming.jpg";
+import heroFarmingImg from "@/assets/hero-farming.png";
 
 const fadeUp = {
   hidden: { opacity: 0, y: 30 },
