@@ -27,7 +27,7 @@ export const GeoPersonalizationPanel = () => {
   const cityOptions = useMemo(() => getCitiesByState(preference.state), [preference.state]);
   const stateMarkets = useMemo(() => {
     const markets = getMandiPricesByState(preference.state);
-    return [...new Set(markets.map((entry) => entry.market))].sort();
+    return [...new Set(markets.map((entry) => entry.market))].toSorted();
   }, [preference.state]);
   const selectedMarketPrices = useMemo(() => getMandiPricesByMarket(preference.preferredMarket).slice(0, 6), [preference.preferredMarket]);
 

@@ -50,7 +50,7 @@ const ExpertConsultations = () => {
   const [resolveId, setResolveId] = useState<string | null>(null);
   const [resolution, setResolution] = useState("");
 
-  const fetch = async () => {
+  const fetchConsultations = async () => {
     setLoading(true);
     try {
       if (!hasSupabaseEnv) {
@@ -78,7 +78,7 @@ const ExpertConsultations = () => {
     }
   };
 
-  useEffect(() => { fetch(); }, []);
+  useEffect(() => { fetchConsultations(); }, []);
 
   const handleAssign = async (id: string) => {
     if (!hasSupabaseEnv) {
@@ -94,7 +94,7 @@ const ExpertConsultations = () => {
     if (!authUser?.id) return;
     await supabase.from("consultations").update({ expert_id: authUser.id, status: "assigned", updated_at: new Date().toISOString() }).eq("id", id);
     toast({ title: "Consultation assigned to you" });
-    fetch();
+    fetchConsultations();
   };
 
   const handleResolve = async () => {
@@ -127,7 +127,7 @@ const ExpertConsultations = () => {
     toast({ title: "Consultation resolved!" });
     setResolveId(null);
     setResolution("");
-    fetch();
+    fetchConsultations();
   };
 
   const statusBadge = (s: string) => {

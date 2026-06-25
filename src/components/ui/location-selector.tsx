@@ -17,9 +17,11 @@ export const LocationSelector = ({ value, onChange, placeholder = "Search city o
   const [highlightIndex, setHighlightIndex] = useState(-1);
   const wrapperRef = useRef<HTMLDivElement>(null);
 
-  useEffect(() => {
+  const prevValueRef = useRef(value);
+  if (value !== prevValueRef.current) {
+    prevValueRef.current = value;
     setQuery(value || "");
-  }, [value]);
+  }
 
   useEffect(() => {
     const handleClickOutside = (e: MouseEvent) => {

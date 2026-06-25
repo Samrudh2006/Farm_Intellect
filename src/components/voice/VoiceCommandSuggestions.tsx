@@ -13,6 +13,19 @@ interface VoiceCommandSuggestionsProps {
  * Context-aware voice command suggestions
  * Shows relevant commands based on current page
  */
+const fetchSuggestionsApi = async (currentRoute: string, token: string | null) => {
+  const response = await fetch(
+    `/api/commands/suggestions?currentRoute=${encodeURIComponent(currentRoute)}`,
+    {
+      headers: {
+        'Authorization': `Bearer ${token || ''}`,
+      },
+    }
+  );
+  if (!response.ok) throw new Error("Failed to fetch suggestions");
+  return response.json();
+};
+
 export const VoiceCommandSuggestions: React.FC<VoiceCommandSuggestionsProps> = ({
   currentRoute,
   onSuggestedCommandClick,
@@ -22,30 +35,31 @@ export const VoiceCommandSuggestions: React.FC<VoiceCommandSuggestionsProps> = (
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    let active = true;
     const fetchSuggestions = async () => {
       try {
-        const response = await fetch(
-          `/api/commands/suggestions?currentRoute=${encodeURIComponent(currentRoute)}`,
-          {
-            headers: {
-              'Authorization': `Bearer ${localStorage.getItem('token')}`,
-            },
-          }
-        );
-
-        if (response.ok) {
-          const data = await response.json();
+        const token = localStorage.getItem('token');
+        const data = await fetchSuggestionsApi(currentRoute, token);
+        if (active) {
           setSuggestions(data.suggestions || []);
         }
       } catch (error) {
         console.error('[v0] Failed to fetch suggestions:', error);
-        setSuggestions(getDefaultSuggestions(currentRoute));
+        if (active) {
+          setSuggestions(getDefaultSuggestions(currentRoute));
+        }
       } finally {
-        setLoading(false);
+        if (active) {
+          setLoading(false);
+        }
       }
     };
 
     fetchSuggestions();
+    
+    return () => {
+      active = false;
+    };
   }, [currentRoute]);
 
   const handleCommandClick = (command: string) => {

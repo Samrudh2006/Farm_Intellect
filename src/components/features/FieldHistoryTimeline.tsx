@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState, useSyncExternalStore } from "react";
 import { format, parseISO } from "date-fns";
 import {
   Activity,
@@ -63,9 +63,18 @@ const typeMeta: Record<FieldHistoryEntry["type"], { icon: typeof Activity; label
 
 const defaultEventDate = new Date().toISOString().slice(0, 16);
 
+const fieldHistorySubscribe = (onStoreChange: () => void) => {
+  window.addEventListener(PHASE1_STORAGE_EVENT, onStoreChange);
+  window.addEventListener("focus", onStoreChange);
+  return () => {
+    window.removeEventListener(PHASE1_STORAGE_EVENT, onStoreChange);
+    window.removeEventListener("focus", onStoreChange);
+  };
+};
+
 export const FieldHistoryTimeline = ({ fields, selectedField }: FieldHistoryTimelineProps) => {
   const { toast } = useToast();
-  const [entries, setEntries] = useState<FieldHistoryEntry[]>(() => getFieldHistoryEntries());
+  const entries = useSyncExternalStore(fieldHistorySubscribe, getFieldHistoryEntries);
   const [activeFieldFilter, setActiveFieldFilter] = useState<string>(selectedField ? String(selectedField) : "all");
   const [activeTypeFilter, setActiveTypeFilter] = useState<HistoryType>("all");
   const [showCreateForm, setShowCreateForm] = useState(false);
@@ -78,18 +87,6 @@ export const FieldHistoryTimeline = ({ fields, selectedField }: FieldHistoryTime
     health: String(fields.find((field) => field.id === selectedField)?.health ?? fields[0]?.health ?? 80),
     source: "Farmer log",
   });
-
-  useEffect(() => {
-    const refreshEntries = () => setEntries(getFieldHistoryEntries());
-
-    window.addEventListener(PHASE1_STORAGE_EVENT, refreshEntries);
-    window.addEventListener("focus", refreshEntries);
-
-    return () => {
-      window.removeEventListener(PHASE1_STORAGE_EVENT, refreshEntries);
-      window.removeEventListener("focus", refreshEntries);
-    };
-  }, []);
 
   useEffect(() => {
     if (selectedField) {

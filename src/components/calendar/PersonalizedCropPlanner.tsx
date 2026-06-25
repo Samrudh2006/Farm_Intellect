@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState, useSyncExternalStore } from "react";
 import { addDays, differenceInCalendarDays, format, parseISO } from "date-fns";
 import {
   CalendarDays,
@@ -171,29 +171,31 @@ const createPlanEntry = ({
   };
 };
 
+const cropPlansSubscribe = (onStoreChange: () => void) => {
+  window.addEventListener(PHASE1_STORAGE_EVENT, onStoreChange);
+  window.addEventListener("focus", onStoreChange);
+  return () => {
+    window.removeEventListener(PHASE1_STORAGE_EVENT, onStoreChange);
+    window.removeEventListener("focus", onStoreChange);
+  };
+};
+
 export const PersonalizedCropPlanner = () => {
   const { user } = useCurrentUser();
   const { toast } = useToast();
-  const [plans, setPlans] = useState<StoredCropEntry[]>(() => getCropPlans());
+  const plans = useSyncExternalStore(cropPlansSubscribe, getCropPlans);
   const [selectedCrop, setSelectedCrop] = useState("");
   const [fieldName, setFieldName] = useState(defaultFieldOptions[0]);
   const [plantingDate, setPlantingDate] = useState(defaultPlantingDate);
   const [notes, setNotes] = useState("");
+  const [currentDate, setCurrentDate] = useState<Date | null>(null);
 
   useEffect(() => {
-    const refreshPlans = () => setPlans(getCropPlans());
-
-    window.addEventListener(PHASE1_STORAGE_EVENT, refreshPlans);
-    window.addEventListener("focus", refreshPlans);
-
-    return () => {
-      window.removeEventListener(PHASE1_STORAGE_EVENT, refreshPlans);
-      window.removeEventListener("focus", refreshPlans);
-    };
+    setCurrentDate(new Date());
   }, []);
 
   const locationHint = user.location?.split(",")[0]?.trim() || "Punjab";
-  const currentSeason = getCurrentSeason(new Date().getMonth());
+  const currentSeason = getCurrentSeason(currentDate ? currentDate.getMonth() : 5);
 
   const recommendedCrops = useMemo(() => {
     const locationLower = locationHint.toLowerCase();
@@ -555,7 +557,7 @@ export const PersonalizedCropPlanner = () => {
 
                   <div className="mt-4 grid gap-3 md:grid-cols-2">
                     {plan.reminders.map((reminder) => {
-                      const daysAway = differenceInCalendarDays(parseISO(reminder.date), new Date());
+                      const daysAway = currentDate ? differenceInCalendarDays(parseISO(reminder.date), currentDate) : 0;
 
                       return (
                         <button

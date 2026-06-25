@@ -29,7 +29,7 @@ const WarRoom = () => {
   }, []);
 
   return (
-    <div className="min-h-screen bg-[#050505] text-zinc-300 overflow-hidden font-mono selection:bg-red-500/30">
+    <div className="min-h-screen bg-[#050505] text-white overflow-hidden font-mono selection:bg-red-950">
       {/* Header */}
       <header className="h-16 border-b border-red-900/30 flex items-center justify-between px-6 bg-black/50 backdrop-blur-md relative z-50">
         <div className="flex items-center gap-6">

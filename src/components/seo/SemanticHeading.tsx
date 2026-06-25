@@ -13,6 +13,12 @@ interface SemanticHeadingProps {
  * Ensures proper heading hierarchy (H1-H6) and includes anchor links for better navigation
  * Validates that headings follow SEO best practices
  */
+const getChildrenString = (children: React.ReactNode): string | undefined => {
+  if (typeof children === 'string') return children;
+  if (typeof children === 'number') return String(children);
+  return undefined;
+};
+
 export const SemanticHeading: React.FC<SemanticHeadingProps> = ({
   level,
   children,
@@ -21,7 +27,8 @@ export const SemanticHeading: React.FC<SemanticHeadingProps> = ({
   hideAnchor = false,
 }) => {
   const HeadingTag = `h${level}` as const;
-  const headingId = id || (typeof children === 'string' ? children.toLowerCase().replace(/\s+/g, '-') : undefined);
+  const childStr = getChildrenString(children);
+  const headingId = id || (childStr ? childStr.toLowerCase().replace(/\s+/g, '-') : undefined);
 
   // Base heading styles
   const baseStyles = {

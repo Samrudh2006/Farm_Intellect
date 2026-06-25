@@ -78,7 +78,15 @@ const getFarmCondition = (temp: number, humidity: number, wind: number, conditio
 const getMostCommon = (arr: string[]): string => {
   const counts: Record<string, number> = {};
   arr.forEach((v) => { counts[v] = (counts[v] || 0) + 1; });
-  return Object.entries(counts).sort((a, b) => b[1] - a[1])[0]?.[0] || arr[0];
+  let maxCount = -1;
+  let maxKey = arr[0];
+  for (const [key, count] of Object.entries(counts)) {
+    if (count > maxCount) {
+      maxCount = count;
+      maxKey = key;
+    }
+  }
+  return maxKey;
 };
 
 const Weather = () => {

@@ -107,7 +107,12 @@ const generateKeyRecord = async (): Promise<KeyRecord> => ({
 
 const getActiveKey = async (): Promise<{ active: KeyRecord; all: KeyRecord[] }> => {
   const all = await readAllKeys();
-  const newest = [...all].sort((a, b) => b.createdAt - a.createdAt)[0];
+  let newest = all[0];
+  for (let i = 1; i < all.length; i++) {
+    if (all[i].createdAt > newest.createdAt) {
+      newest = all[i];
+    }
+  }
   const rotateAfter = KEY_ROTATION_DAYS * 24 * 60 * 60 * 1000;
 
   if (!newest || Date.now() - newest.createdAt > rotateAfter) {

@@ -70,7 +70,11 @@ const ProtectedRoute = ({ children, allowedRoles }: { children: ReactNode; allow
   return <>{children}</>;
 };
 
-const renderPage = (Component: LazyPage) => (
+interface PageWrapperProps {
+  component: LazyPage;
+}
+
+const PageWrapper = ({ component: Component }: PageWrapperProps) => (
   <Suspense fallback={<RouteLoader />}>
     <PageTransition>
       <Component />
@@ -78,8 +82,15 @@ const renderPage = (Component: LazyPage) => (
   </Suspense>
 );
 
-const renderProtectedPage = (Component: LazyPage, allowedRoles?: AppRole[]) => (
-  <ProtectedRoute allowedRoles={allowedRoles}>{renderPage(Component)}</ProtectedRoute>
+interface ProtectedPageWrapperProps {
+  component: LazyPage;
+  allowedRoles?: AppRole[];
+}
+
+const ProtectedPageWrapper = ({ component, allowedRoles }: ProtectedPageWrapperProps) => (
+  <ProtectedRoute allowedRoles={allowedRoles}>
+    <PageWrapper component={component} />
+  </ProtectedRoute>
 );
 
 const RoutesWrapper = () => {
@@ -94,16 +105,16 @@ const RoutesWrapper = () => {
     <AnimatePresence mode="wait">
       <Routes location={location} key={location.pathname}>
         {publicRoutes.map((route) => (
-          <Route key={route.path} path={route.path} element={renderPage(route.component)} />
+          <Route key={route.path} path={route.path} element={<PageWrapper component={route.component} />} />
         ))}
         {protectedRoutes.map((route) => (
           <Route
             key={route.path}
             path={route.path}
-            element={renderProtectedPage(route.component, route.allowedRoles)}
+            element={<ProtectedPageWrapper component={route.component} allowedRoles={route.allowedRoles} />}
           />
         ))}
-        <Route path="*" element={renderPage(notFoundComponent)} />
+        <Route path="*" element={<PageWrapper component={notFoundComponent} />} />
       </Routes>
     </AnimatePresence>
   );

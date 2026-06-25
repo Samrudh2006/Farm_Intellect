@@ -87,7 +87,7 @@ serve(async (req) => {
     });
 
     if (!response.ok) {
-        throw new Error(\`Gemini API returned \${response.status}: \${await response.text()}\`);
+        throw new Error(`Gemini API returned ${response.status}: ${await response.text()}`);
     }
 
     const aiData = await response.json();
@@ -114,7 +114,7 @@ serve(async (req) => {
     }
 
     return new Response(
-      JSON.stringify({ ok: true, message: \`Successfully upserted \${schemes.length} schemes.\`, schemes: inserted }),
+      JSON.stringify({ ok: true, message: `Successfully upserted ${schemes.length} schemes.`, schemes: inserted }),
       { headers: { ...corsHeaders, "Content-Type": "application/json" } },
     );
   } catch (e) {

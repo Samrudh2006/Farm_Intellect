@@ -8,6 +8,14 @@ import { useLanguage } from '@/contexts/LanguageContext';
 import { cn } from '@/lib/utils';
 import { apiBaseUrl } from '@/lib/api';
 
+const getCookie = (name: string): string | null => {
+  if (typeof document === 'undefined') return null;
+  const value = `; ${document.cookie}`;
+  const parts = value.split(`; ${name}=`);
+  if (parts.length === 2) return parts.pop()?.split(';').shift() || null;
+  return null;
+};
+
 interface VoiceInteraction {
   id: string;
   transcription: string;
@@ -83,7 +91,7 @@ export const EnhancedVoiceAgent = ({
   // Load interaction history
   const loadInteractionHistory = async () => {
     try {
-      const token = localStorage.getItem('authToken');
+      const token = getCookie('authToken');
       if (!token) return;
 
       const response = await fetch(`${apiBaseUrl}/api/voice/history?limit=20&language=${selectedLanguage}`, {
@@ -163,7 +171,7 @@ export const EnhancedVoiceAgent = ({
       reader.onload = async () => {
         const base64Audio = (reader.result as string).split(',')[1];
 
-        const token = localStorage.getItem('authToken');
+        const token = getCookie('authToken');
         const response = await fetch(`${apiBaseUrl}/api/voice/process`, {
           method: 'POST',
           headers: {

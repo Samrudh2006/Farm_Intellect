@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { motion } from "framer-motion";
 
 interface TypewriterProps {
@@ -10,10 +10,10 @@ interface TypewriterProps {
 export const Typewriter = ({ text, speed = 30, className = "" }: TypewriterProps) => {
   const [displayedText, setDisplayedText] = useState("");
   const [isTyping, setIsTyping] = useState(true);
-  const [prevText, setPrevText] = useState(text);
+  const prevTextRef = useRef(text);
 
-  if (text !== prevText) {
-    setPrevText(text);
+  if (text !== prevTextRef.current) {
+    prevTextRef.current = text;
     setDisplayedText("");
     setIsTyping(true);
   }

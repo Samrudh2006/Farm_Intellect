@@ -113,7 +113,7 @@ export const ProfileSetup = ({ userRole, onComplete }: ProfileSetupProps) => {
     onComplete(profileData);
   };
 
-  const renderBasicInfo = () => (
+  const getBasicInfoFields = () => (
     <div className="space-y-4">
       <div className="space-y-2">
         <Label htmlFor="displayName">Display Name *</Label>
@@ -184,7 +184,7 @@ export const ProfileSetup = ({ userRole, onComplete }: ProfileSetupProps) => {
     </div>
   );
 
-  const renderRoleSpecificFields = () => {
+  const getRoleSpecificFields = () => {
     switch (userRole) {
       case 'farmer':
         return (
@@ -378,7 +378,7 @@ export const ProfileSetup = ({ userRole, onComplete }: ProfileSetupProps) => {
         {step === 1 ? (
           <div className="space-y-6">
             <h3 className="text-lg font-semibold">Basic Information</h3>
-            {renderBasicInfo()}
+            {getBasicInfoFields()}
             <Button onClick={handleNext} className="w-full">
               Next
             </Button>
@@ -388,7 +388,7 @@ export const ProfileSetup = ({ userRole, onComplete }: ProfileSetupProps) => {
             <h3 className="text-lg font-semibold">
               {userRole.charAt(0).toUpperCase() + userRole.slice(1)} Details
             </h3>
-            {renderRoleSpecificFields()}
+            {getRoleSpecificFields()}
             <div className="flex gap-2">
               <Button variant="outline" onClick={() => setStep(1)} className="flex-1">
                 Back

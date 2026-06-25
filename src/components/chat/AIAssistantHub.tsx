@@ -220,7 +220,7 @@ export const AIAssistantHub = () => {
   ];
 
   // ─── Chat Messages Renderer ───
-  const renderMessages = () => (
+  const getMessagesList = () => (
     <div className="flex-1 overflow-y-auto p-4 space-y-4">
       {messages.map((message, index) => (
         <div
@@ -276,7 +276,7 @@ export const AIAssistantHub = () => {
   );
 
   // ─── Input Bar ───
-  const renderInputBar = () => (
+  const getInputBar = () => (
     <div className="p-4 border-t">
       {uploadedImage && (
         <div className="pb-2">
@@ -388,7 +388,7 @@ export const AIAssistantHub = () => {
       </CardHeader>
 
       <div className="flex-1 flex flex-col overflow-hidden">
-        {renderMessages()}
+        {getMessagesList()}
         {messages.length === 1 && (
           <div className="p-3 border-t bg-muted/30">
             <p className="text-xs font-medium mb-2">{t('ai.quick_questions') || "Quick Questions"}:</p>
@@ -399,7 +399,7 @@ export const AIAssistantHub = () => {
             </div>
           </div>
         )}
-        {renderInputBar()}
+        {getInputBar()}
       </div>
     </Card>
   );

@@ -1,0 +1,1350 @@
+﻿[1mReact Doctor[22m [2mv0.5.8[22m
+
+[90m  [39m
+
+  [33mΓÜá[39m [33mBugs: State mutated in place[39m
+    [36mLearn more: https://react.doctor/docs/rules/react-doctor/no-direct-state-mutation[39m
+    Your screen won't update because you change "fabricCanvas"
+    in place.
+[2m    ΓåÆ Call the setter with a brand new value instead:[22m
+[2m    `setItems([...items, newItem])`, `setItems(items.filter(x[22m
+[2m    => x !== target))`, or `setItems(items.toSorted(...))`.[22m
+[2m    React only redraws when the value is new, so changing it in[22m
+[2m    place does nothing.[22m
+
+[90m    src/components/features/InteractiveFieldDesigner.tsx:130[39m
+
+  [33mΓÜá[39m [33mBugs: Array index used as a key[39m [90m├ù78[39m
+    [36mLearn more: https://react.doctor/docs/rules/react-doctor/no-array-index-as-key[39m
+    Your users can see & submit the wrong data when this list
+    reorders or filters, so use a stable id like
+    `key={item.id}`, not the array index "idx".
+[2m    ΓåÆ Use a stable id from the item, like `key={item.id}` or[22m
+[2m    `key={item.slug}`. Index keys break when the list reorders[22m
+[2m    or filters.[22m
+
+[90m    src/components/ai/AIFeatureDiagnostics.tsx:105[39m
+
+[90m    src/components/ai/CropRecommendationEngine.tsx:371[39m
+
+[90m    src/components/ai/CropRecommendationEngine.tsx:426[39m
+
+[90m    src/components/ai/CropRecommendationEngine.tsx:441[39m
+
+[90m    src/components/ai/CropRecommendationEngine.tsx:491[39m
+
+[90m    src/components/ai/CropRecommendationEngine.tsx:506[39m
+
+[90m    src/components/ai/SmartChatbot.tsx:416[39m
+
+[90m    src/components/ai/SmartChatbot.tsx:441[39m
+
+[90m    src/components/analytics/YieldPredictor.tsx:314[39m
+
+[90m    src/components/analytics/YieldPredictor.tsx:374[39m
+
+[90m    src/components/analytics/YieldPredictor.tsx:422[39m
+
+[90m    src/components/calendar/CropCalendar.tsx:520[39m
+
+[90m    src/components/calendar/CropCalendar.tsx:539[39m
+
+[90m    src/components/chat/AIAssistantHub.tsx:397[39m
+
+[90m    src/components/chat/AIChatbot.tsx:228[39m
+
+[90m    src/components/chat/EnhancedAIChatbot.tsx:346[39m
+
+[90m    src/components/dashboard/CropStatusWidget.tsx:70[39m
+
+[90m    src/components/dashboard/RoleDashboard.tsx:144[39m
+
+[90m    src/components/dashboard/RoleDashboard.tsx:215[39m
+
+[90m    src/components/dashboard/WeatherWidget.tsx:136[39m
+
+[90m    src/components/features/AdvancedFeaturesShowcase.tsx:206[39m
+
+[90m    src/components/features/CarbonFootprintCalculator.tsx:377[39m
+
+[90m    src/components/features/CarbonFootprintCalculator.tsx:424[39m
+
+[90m    src/components/features/CarbonFootprintCalculator.tsx:497[39m
+
+[90m    src/components/features/CropRotationOptimizer.tsx:307[39m
+
+[90m    src/components/features/CropRotationOptimizer.tsx:345[39m
+
+[90m    src/components/features/CropRotationOptimizer.tsx:390[39m
+
+[90m    src/components/features/CropRotationOptimizer.tsx:418[39m
+
+[90m    src/components/features/CropRotationOptimizer.tsx:445[39m
+
+[90m    src/components/features/CropRotationOptimizer.tsx:465[39m
+
+[90m    src/components/features/FarmerCollaborationHub.tsx:392[39m
+
+[90m    src/components/features/FarmerCollaborationHub.tsx:419[39m
+
+[90m    src/components/features/FarmerCollaborationHub.tsx:509[39m
+
+[90m    src/components/features/MarketPricePredictor.tsx:371[39m
+
+[90m    src/components/features/MarketPricePredictor.tsx:464[39m
+
+[90m    src/components/features/MultiLanguageVoiceAssistant.tsx:257[39m
+
+[90m    src/components/features/MultiLanguageVoiceAssistant.tsx:319[39m
+
+[90m    src/components/features/SmartIrrigationCalculator.tsx:399[39m
+
+[90m    src/components/features/WeatherMarketAPI.tsx:164[39m
+
+[90m    src/components/features/WeatherMarketAPI.tsx:188[39m
+
+[90m    src/components/home/FloatingAIAssistant.tsx:343[39m
+
+[90m    src/components/notifications/NotificationCenter.tsx:214[39m
+
+[90m    src/components/punjab/PunjabSpecific.tsx:124[39m
+
+[90m    src/components/punjab/PunjabSpecific.tsx:158[39m
+
+[90m    src/components/punjab/PunjabSpecific.tsx:185[39m
+
+[90m    src/components/punjab/PunjabSpecific.tsx:217[39m
+
+[90m    src/pages/AICropScanner.tsx:464[39m
+
+[90m    src/pages/AICropScanner.tsx:484[39m
+
+[90m    src/pages/AICropScanner.tsx:501[39m
+
+[90m    src/pages/AICropScanner.tsx:511[39m
+
+[90m    src/pages/Analytics.tsx:139[39m
+
+[90m    src/pages/Dashboard.tsx:128[39m
+
+[90m    src/pages/Dashboard.tsx:164[39m
+
+[90m    src/pages/Dashboard.tsx:280[39m
+
+[90m    src/pages/Farmers.tsx:227[39m
+
+[90m    src/pages/FieldMap.tsx:349[39m
+
+[90m    src/pages/FieldMap.tsx:424[39m
+
+[90m    src/pages/FieldMap.tsx:438[39m
+
+[90m    src/pages/FieldMap.tsx:494[39m
+
+[90m    src/pages/Index.tsx:330[39m
+
+[90m    src/pages/Index.tsx:410[39m
+
+[90m    src/pages/Index.tsx:455[39m
+
+[90m    src/pages/Index.tsx:482[39m
+
+[90m    src/pages/Login.tsx:685[39m
+
+[90m    src/pages/Login.tsx:813[39m
+
+[90m    src/pages/Merchants.tsx:244[39m
+
+[90m    src/pages/Merchants.tsx:255[39m
+
+[90m    src/pages/Merchants.tsx:285[39m
+
+[90m    src/pages/Polls.tsx:266[39m
+
+[90m    src/pages/Weather.tsx:333[39m
+
+[90m    src/pages/Weather.tsx:354[39m
+
+[90m    src/pages/Weather.tsx:386[39m
+
+[90m    src/pages/admin/intelligence/CommandCenter.tsx:66[39m
+
+[90m    src/pages/admin/intelligence/Mission2030.tsx:52[39m
+
+[90m    src/pages/expert/ExpertConsultations.tsx:169[39m
+
+[90m    src/pages/expert/ExpertKnowledgeHub.tsx:272[39m
+
+[90m    src/pages/merchant/MerchantMarketPrices.tsx:116[39m
+
+[90m    src/pages/merchant/MerchantOrders.tsx:202[39m
+
+  [33mΓÜá[39m [33mBugs: Time or random value in JSX[39m [90m├ù2[39m
+    [36mLearn more: https://react.doctor/docs/rules/react-doctor/rendering-hydration-mismatch-time[39m
+    This can cause a hydration mismatch because new Date()
+    reached from JSX gives a different value on the server than
+    in the browser. Move it into useEffect+useState to run only
+    in the browser, or add suppressHydrationWarning to the
+    parent if it's on purpose.
+[2m    ΓåÆ Move time or random values into useEffect+useState so[22m
+[2m    they only run in the browser, or add[22m
+[2m    suppressHydrationWarning to the parent if it's intentional[22m
+
+[90m    src/components/calendar/PersonalizedCropPlanner.tsx:558[39m
+
+[90m    src/components/features/CropCalendarReminder.tsx:224[39m
+
+  [33mΓÜá[39m [33mBugs: Sequential independent awaits[39m [90m├ù6[39m
+    [36mLearn more: https://react.doctor/docs/rules/react-doctor/server-sequential-independent-await[39m
+    This await doesn't use the previous result, so your users
+    wait twice as long for nothing.
+[2m    ΓåÆ These two awaits don't depend on each other. Wrap them in[22m
+[2m    `Promise.all([...])` so they run at the same time.[22m
+
+[90m    backend/src/routes/farm.js:15[39m
+
+[90m    backend/src/routes/farm.js:26[39m
+
+[90m    backend/src/routes/market.js:10[39m
+
+[90m    backend/src/routes/market.js:16[39m
+
+[90m    backend/src/routes/polls.js:26[39m
+
+[90m    backend/src/services/notificationService.js:110[39m
+
+  [33mΓÜá[39m [33mPerformance: Independent awaits run sequentially[39m [90m├ù2[39m
+    [36mLearn more: https://react.doctor/docs/rules/react-doctor/async-parallel[39m
+    These 5 sequential await statements run one after another
+    even though they look independent, so the page waits longer
+    than it needs to. Run them together with Promise.all()
+    instead
+[2m    ΓåÆ Use `const [a, b] = await Promise.all([fetchA(),[22m
+[2m    fetchB()])` so independent calls run at the same time[22m
+
+[90m    backend/prisma/seed.js:195[39m
+
+[90m    backend/src/routes/notifications.js:24[39m
+
+  [33mΓÜá[39m [33mBugs: Derived state stored in an effect[39m
+    [36mLearn more: https://react.doctor/docs/rules/react-doctor/no-derived-state-effect[39m
+    You pay an extra render for state you can derive from other
+    values.
+[2m    ΓåÆ Work out derived values while rendering: `const x =[22m
+[2m    fn(dep)`. To reset a component's state when a prop changes,[22m
+[2m    give it a key prop: `<Component key={prop} />`. See[22m
+[2m    https://react.dev/learn/you-might-not-need-an-effect[22m
+
+[90m    src/components/ui/location-selector.tsx:20[39m
+
+  [33mΓÜá[39m [33mPerformance: await inside a loop[39m [90m├ù24[39m
+    [36mLearn more: https://react.doctor/docs/rules/react-doctor/async-await-in-loop[39m
+    This makes the forΓÇªof loop slow because each await runs one
+    after another, so collect the independent calls & run them
+    together with `await Promise.all(items.map(...))`
+[2m    ΓåÆ Collect the items, then use `await[22m
+[2m    Promise.all(items.map(...))` so independent work runs at[22m
+[2m    the same time[22m
+
+[90m    backend/prisma/seed.js:36[39m
+
+[90m    backend/prisma/seed.js:61[39m
+
+[90m    backend/prisma/seed.js:96[39m
+
+[90m    backend/prisma/seed.js:125[39m
+
+[90m    backend/prisma/seed.js:150[39m
+
+[90m    backend/prisma/seed.js:176[39m
+
+[90m    backend/src/jobs/ingestion.js:47[39m
+
+[90m    backend/src/jobs/ingestion.js:84[39m
+
+[90m    backend/src/routes/ai.js:140[39m
+
+[90m    backend/src/routes/calendar.js:72[39m
+
+[90m    backend/src/services/inferenceClient.js:25[39m
+
+[90m    backend/src/services/notificationService.js:135[39m
+
+[90m    backend/src/services/sarvam.js:355[39m
+
+[90m    src/lib/aiStream.ts:108[39m
+
+[90m    src/lib/offlineSync.ts:53[39m
+
+[90m    src/pages/Login.tsx:216[39m
+
+[90m    src/pages/admin/AdminSms.tsx:340[39m
+
+[90m    supabase/functions/generate-alerts/index.ts:82[39m
+
+[90m    supabase/functions/generate-alerts/index.ts:167[39m
+
+[90m    supabase/functions/generate-alerts/index.ts:219[39m
+
+[90m    supabase/functions/sms-dispatcher/index.ts:245[39m
+
+[90m    supabase/functions/sms-dispatcher/index.ts:292[39m
+
+[90m    supabase/functions/sync-mandi-prices/index.ts:36[39m
+
+[90m    supabase/functions/sync-mandi-prices/index.ts:55[39m
+
+  [33mΓÜá[39m [33mMaintainability: Component rendered by inline function call[39m [90m├ù8[39m
+    [36mLearn more: https://react.doctor/docs/rules/react-doctor/no-render-in-render[39m
+    Your users lose state because "renderPage()" builds UI from
+    an inline call that React remounts, so pull it into its own
+    component instead.
+[2m    ΓåÆ Make it a named component so React preserves its identity[22m
+[2m    and does not remount its state.[22m
+
+[90m    src/App.tsx:82[39m
+
+[90m    src/App.tsx:97[39m
+
+[90m    src/App.tsx:103-106[39m
+
+[90m    src/components/auth/ProfileSetup.tsx:381[39m
+
+[90m    src/components/auth/ProfileSetup.tsx:391[39m
+
+[90m    src/components/chat/AIAssistantHub.tsx:391[39m
+
+[90m    src/components/chat/AIAssistantHub.tsx:402[39m
+
+  [33mΓÜá[39m [33mPerformance: Heavy library loaded eagerly[39m [90m├ù4[39m
+    [36mLearn more: https://react.doctor/docs/rules/react-doctor/prefer-dynamic-import[39m
+    "recharts" ships extra code to your users up front & slows
+    page load. Load it on demand with React.lazy() or
+    next/dynamic.
+[2m    ΓåÆ Load it only when needed: `const Component = dynamic(()[22m
+[2m    => import('library'), { ssr: false })` from next/dynamic,[22m
+[2m    or React.lazy().[22m
+
+[90m    src/components/analytics/EnhancedAnalytics.tsx:8[39m
+
+[90m    src/components/analytics/YieldPredictor.tsx:10[39m
+
+[90m    src/components/features/MarketPricePredictor.tsx:2[39m
+
+[90m    src/components/ui/chart.tsx:2[39m
+
+  [33mΓÜá[39m [33mBugs: Hand-rolled external store subscription[39m [90m├ù3[39m
+    [36mLearn more: https://react.doctor/docs/rules/react-doctor/prefer-use-sync-external-store[39m
+    Your users can see stale or torn values because useState
+    "plans" syncs an outside store through a useEffect.
+[2m    ΓåÆ Replace the `useState(getSnapshot())` + `useEffect(() =>[22m
+[2m    store.subscribe(() => setSnapshot(getSnapshot())))` pair[22m
+[2m    with `useSyncExternalStore(store.subscribe, getSnapshot)`.[22m
+[2m    The hook gets this right during concurrent rendering and on[22m
+[2m    the server; the hand-rolled version doesn't.[22m
+
+[90m    src/components/calendar/PersonalizedCropPlanner.tsx:177[39m
+
+[90m    src/components/dashboard/FarmerPhaseOneOverview.tsx:17[39m
+
+[90m    src/components/features/FieldHistoryTimeline.tsx:68[39m
+
+  [33mΓÜá[39m [33mBugs: Effects chained together[39m [90m├ù5[39m
+    [36mLearn more: https://react.doctor/docs/rules/react-doctor/no-effect-chain[39m
+    Your screen redraws several times from a single action
+    because one useEffect changes "messages", which sets off
+    this one.
+[2m    ΓåÆ Compute as much as possible during render (e.g. `const[22m
+[2m    isGameOver = round > 5`) and write all related state inside[22m
+[2m    the event handler that originally fires the chain. Each[22m
+[2m    effect link adds an extra render and makes the code rigid[22m
+[2m    as requirements evolve[22m
+
+[90m    src/components/chat/AIAssistantHub.tsx:71[39m
+
+[90m    src/components/chat/AIChatbot.tsx:59[39m
+
+[90m    src/components/chat/EnhancedAIChatbot.tsx:81[39m
+
+[90m    src/components/features/WeatherMarketAPI.tsx:92[39m
+
+[90m    src/pages/Weather.tsx:222[39m
+
+  [33mΓÜá[39m [33mBugs: Prop derived into useState[39m [90m├ù2[39m
+    [36mLearn more: https://react.doctor/docs/rules/react-doctor/no-derived-useState[39m
+    Your users see a stale value when prop "animationData"
+    changes because useState copies it once.
+[2m    ΓåÆ Compute the value inline so prop changes do not leave[22m
+[2m    `useState` holding a stale copy.[22m
+
+[90m    src/components/ui/lottie-animation.tsx:27[39m
+
+[90m    src/components/ui/typewriter.tsx:13[39m
+
+  [33mΓÜá[39m [33mPerformance: setState reads a stale value[39m
+    [36mLearn more: https://react.doctor/docs/rules/react-doctor/rerender-functional-setstate[39m
+    You can lose this update because setResendTimer(resendTimer
+    - ...) reads a stale value.
+[2m    ΓåÆ Use the callback form: `setState(prev => prev + 1)` to[22m
+[2m    always read the latest value[22m
+
+[90m    src/pages/Login.tsx:99[39m
+
+  [33mΓÜá[39m [33mBugs: Data fetching inside an effect[39m [90m├ù3[39m
+    [36mLearn more: https://react.doctor/docs/rules/react-doctor/no-fetch-in-effect[39m
+    fetch() inside useEffect can race, double-fire, or leak.
+    Use a data-fetching layer or Server Component instead.
+[2m    ΓåÆ Use a data-fetching layer or Server Component so fetches[22m
+[2m    do not race, double-fire, or leak from `useEffect`.[22m
+
+[90m    src/components/ui/lottie-animation.tsx:29[39m
+
+[90m    src/components/voice/VoiceCommandSuggestions.tsx:24[39m
+
+[90m    src/pages/expert/ExpertConsultations.tsx:81[39m
+
+  [33mΓÜá[39m [33mPerformance: sort() to find min or max[39m [90m├ù2[39m
+    [36mLearn more: https://react.doctor/docs/rules/react-doctor/js-min-max-loop[39m
+    This is slow because array.sort()[0] sorts the whole list
+    just to grab the smallest or largest, so use
+    Math.min(...array) instead
+[2m    ΓåÆ Use `Math.min(...array)` or `Math.max(...array)` instead[22m
+[2m    of sorting the whole list just to read the first or last[22m
+[2m    item[22m
+
+[90m    src/lib/biometricAuth.ts:110[39m
+
+[90m    src/pages/Weather.tsx:81[39m
+
+  [33mΓÜá[39m [33mBugs: Multiple setState calls in one effect[39m [90m├ù2[39m
+    [36mLearn more: https://react.doctor/docs/rules/react-doctor/no-cascading-set-state[39m
+    3 setState calls in one useEffect redraw your screen each
+    time they run together.
+[2m    ΓåÆ Combine related updates in `useReducer` so one effect[22m
+[2m    does not redraw the screen once per `setState` call.[22m
+
+[90m    src/components/notifications/NotificationCenter.tsx:67[39m
+
+[90m    src/components/pwa/InstallPrompt.tsx:14[39m
+
+  [33mΓÜá[39m [33mBugs: Parent kept in sync with a callback effect[39m
+    [36mLearn more: https://react.doctor/docs/rules/react-doctor/no-prop-callback-in-effect[39m
+    Your parent re-renders on every local state change because
+    this useEffect calls the prop "setApi" just to stay in sync.
+[2m    ΓåÆ Move the shared state into a Provider so both sides read[22m
+[2m    the same value. Then you don't need a useEffect to keep[22m
+[2m    them in sync.[22m
+
+[90m    src/components/ui/carousel.tsx:88[39m
+
+  [33mΓÜá[39m [33mPerformance: Array lookup inside a loop[39m [90m├ù7[39m
+    [36mLearn more: https://react.doctor/docs/rules/react-doctor/js-set-map-lookups[39m
+    This scales poorly because `array.includes()` inside a loop
+    scans the whole list every time. Use a Set for
+    constant-time lookups.
+[2m    ΓåÆ Use a `Set` or `Map` when you check for the same items[22m
+[2m    over and over. `Array.includes`/`find` scans the whole list[22m
+[2m    each time[22m
+
+[90m    backend/src/services/cv.js:209[39m
+
+[90m    backend/src/services/cv.js:456[39m
+
+[90m    backend/src/services/ml.js:497[39m
+
+[90m    src/components/features/CropRotationOptimizer.tsx:121-122[39m
+
+[90m    src/components/features/CropRotationOptimizer.tsx:133[39m
+
+[90m    src/lib/aiStream.ts:113[39m
+
+  [33mΓÜá[39m [33mPerformance: Full Framer Motion import[39m [90m├ù16[39m
+    [36mLearn more: https://react.doctor/docs/rules/react-doctor/use-lazy-motion[39m
+    Importing "motion" ships about 30 kb of extra code and
+    slows page load. Use "m" with LazyMotion instead.
+[2m    ΓåÆ Use `import { LazyMotion, m } from "framer-motion"` with[22m
+[2m    `domAnimation` features. Saves about 30kb.[22m
+
+[90m    src/components/dashboard/SmartInsights.tsx:2[39m
+
+[90m    src/components/home/FloatingAIAssistant.tsx:2[39m
+
+[90m    src/components/home/ScrollReveal.tsx:1[39m
+
+[90m    src/components/layout/PageTransition.tsx:1[39m
+
+[90m    src/components/pwa/InstallPrompt.tsx:2[39m
+
+[90m    src/components/ui/lottie-success-overlay.tsx:3[39m
+
+[90m    src/components/ui/scroll-reveal.tsx:1[39m
+
+[90m    src/components/ui/tilt-card.tsx:2[39m
+
+[90m    src/components/ui/typewriter.tsx:2[39m
+
+[90m    src/components/voice/VoiceCommandSuggestions.tsx:2[39m
+
+[90m    src/pages/Index.tsx:3[39m
+
+[90m    src/pages/SmsRegister.tsx:4[39m
+
+[90m    src/pages/admin/intelligence/CommandCenter.tsx:2[39m
+
+[90m    src/pages/admin/intelligence/FutureHeadlines.tsx:2[39m
+
+[90m    src/pages/admin/intelligence/Mission2030.tsx:2[39m
+
+[90m    src/pages/admin/intelligence/WarRoom.tsx:2[39m
+
+  [33mΓÜá[39m [33mPerformance: State only used in handlers[39m [90m├ù14[39m
+    [36mLearn more: https://react.doctor/docs/rules/react-doctor/rerender-state-only-in-handlers[39m
+    Each update to "refreshTick" redraws your component for
+    nothing because this useState is set but never shown on
+    screen.
+[2m    ΓåÆ Use useRef instead of useState when the value is only set[22m
+[2m    and never shown on screen. `ref.current = ...` updates it[22m
+[2m    without redrawing the component.[22m
+
+[90m    src/components/features/AlertEnginePanel.tsx:36[39m
+
+[90m    src/components/features/FarmerCollaborationHub.tsx:52-53[39m
+
+[90m    src/components/features/InteractiveFieldDesigner.tsx:22-24[39m
+
+[90m    src/components/features/WeatherMarketAPI.tsx:24[39m
+
+[90m    src/components/home/FloatingAIAssistant.tsx:58[39m
+
+[90m    src/components/ui/typewriter.tsx:13[39m
+
+[90m    src/components/ui/voice-input.tsx:74[39m
+
+[90m    src/pages/FieldMap.tsx:124[39m
+
+[90m    src/pages/Login.tsx:43[39m
+
+[90m    src/pages/Login.tsx:51[39m
+
+[90m    src/pages/Schemes.tsx:302[39m
+
+[90m    src/pages/expert/ExpertConsultations.tsx:50[39m
+
+  [33mΓÜá[39m [33mPerformance: Listener re-subscribes on every handler change[39m
+    [36mLearn more: https://react.doctor/docs/rules/react-doctor/advanced-event-handler-refs[39m
+    useEffect re-adds the "onSelect" listener every time the
+    handler changes.
+[2m    ΓåÆ Store the handler in a ref and have the listener read[22m
+[2m    `handlerRef.current()`. The subscription stays put while[22m
+[2m    the latest handler still runs.[22m
+
+[90m    src/components/ui/carousel.tsx:91[39m
+
+  [33mΓÜá[39m [33mPerformance: Repeated localStorage reads[39m [90m├ù5[39m
+    [36mLearn more: https://react.doctor/docs/rules/react-doctor/js-cache-storage[39m
+    This is slow because localStorage.getItem("cropReminders")
+    runs several times & re-parses the data each call, so read
+    it once & reuse the value
+[2m    ΓåÆ Read `localStorage`/`sessionStorage` once and reuse the[22m
+[2m    value. Every read has to parse the data again, which is slow[22m
+
+[90m    src/components/features/CropCalendarReminder.tsx:58[39m
+
+[90m    src/components/features/EnhancedVoiceAgent.tsx:166[39m
+
+[90m    src/hooks/useDashboardData.ts:193[39m
+
+[90m    src/hooks/useVoiceCommands.ts:44[39m
+
+[90m    src/lib/authUtils.ts:185[39m
+
+  [33mΓÜá[39m [33mPerformance: Empty default prop breaks memo[39m [90m├ù2[39m
+    [36mLearn more: https://react.doctor/docs/rules/react-doctor/rerender-memo-with-default-value[39m
+    This keeps redrawing children that compare props because
+    default prop value [] makes a brand new array every render,
+    so move it to a constant at the top of the file
+[2m    ΓåÆ Move it to the top of the file: `const EMPTY_ITEMS:[22m
+[2m    Item[] = []`, then use that as the default value[22m
+
+[90m    src/components/ui/voice-form-input.tsx:30-31[39m
+
+  [33mΓÜá[39m [33mBugs: Effect used as an event handler[39m
+    [36mLearn more: https://react.doctor/docs/rules/react-doctor/no-effect-event-handler[39m
+    This useEffect is simulating an event handler, which costs
+    an extra render & runs late.
+[2m    ΓåÆ Move event logic into the handler that starts it so the[22m
+[2m    side effect does not run late after an extra render.[22m
+
+[90m    src/components/ui/lottie-animation.tsx:29[39m
+
+  [33mΓÜá[39m [33mPerformance: State initializer runs on every render[39m
+    [36mLearn more: https://react.doctor/docs/rules/react-doctor/rerender-lazy-state-init[39m
+    useState(getQueuedCount()) re-runs getQueuedCount() on
+    every render & throws the result away.
+[2m    ΓåÆ Wrap expensive initial state in an arrow function so the[22m
+[2m    initializer does not rerun and get thrown away on every[22m
+[2m    render.[22m
+
+[90m    src/hooks/useOfflineSyncStatus.ts:5[39m
+
+  [33mΓÜá[39m [33mMaintainability: Static value rebuilt every render[39m [90m├ù68[39m
+    [36mLearn more: https://react.doctor/docs/rules/react-doctor/prefer-module-scope-static-value[39m
+    `demandColors` inside `CropRecommendationEngine` uses no
+    local state but is rebuilt every render, so it looks new
+    each time & breaks memoized children. Move it to the top of
+    the file, outside the component.
+[2m    ΓåÆ Move the value above the component, at the top of the[22m
+[2m    file. It doesn't use local state, so rebuilding it each[22m
+[2m    update is wasted and makes it look new every time.[22m
+
+[90m    src/components/ai/CropRecommendationEngine.tsx:202[39m
+
+[90m    src/components/analytics/YieldPredictor.tsx:130[39m
+
+[90m    src/components/auth/ProfileSetup.tsx:50-51[39m
+
+[90m    src/components/calendar/CropCalendar.tsx:66[39m
+
+[90m    src/components/calendar/CropCalendar.tsx:71[39m
+
+[90m    src/components/calendar/CropCalendar.tsx:84[39m
+
+[90m    src/components/chat/AIChatbot.tsx:137[39m
+
+[90m    src/components/documents/DocumentUpload.tsx:65[39m
+
+[90m    src/components/features/AdvancedFeaturesShowcase.tsx:26[39m
+
+[90m    src/components/features/CarbonFootprintCalculator.tsx:51[39m
+
+[90m    src/components/features/CropCalendarReminder.tsx:134[39m
+
+[90m    src/components/features/CropRotationOptimizer.tsx:53[39m
+
+[90m    src/components/features/CropRotationOptimizer.tsx:64[39m
+
+[90m    src/components/features/FarmerCollaborationHub.tsx:55[39m
+
+[90m    src/components/features/FarmerCollaborationHub.tsx:109[39m
+
+[90m    src/components/features/InteractiveFieldDesigner.tsx:27[39m
+
+[90m    src/components/features/KnowledgeHub.tsx:13[39m
+
+[90m    src/components/features/KnowledgeHub.tsx:32[39m
+
+[90m    src/components/features/KnowledgeHub.tsx:42[39m
+
+[90m    src/components/features/KnowledgeHub.tsx:53[39m
+
+[90m    src/components/features/MarketPricePredictor.tsx:47[39m
+
+[90m    src/components/features/MultiLanguageVoiceAssistant.tsx:38[39m
+
+[90m    src/components/features/MultiLanguageVoiceAssistant.tsx:49[39m
+
+[90m    src/components/features/MultiLanguageVoiceAssistant.tsx:70[39m
+
+[90m    src/components/features/SmartIrrigationCalculator.tsx:59[39m
+
+[90m    src/components/features/SmartIrrigationCalculator.tsx:67[39m
+
+[90m    src/components/features/SmartIrrigationCalculator.tsx:73[39m
+
+[90m    src/components/features/YieldProfitEstimator.tsx:23[39m
+
+[90m    src/components/forum/CommunityForum.tsx:69[39m
+
+[90m    src/components/forum/CommunityForum.tsx:80[39m
+
+[90m    src/components/forum/CommunityForum.tsx:115[39m
+
+[90m    src/components/home/ScrollReveal.tsx:20[39m
+
+[90m    src/components/seo/SemanticHeading.tsx:27[39m
+
+[90m    src/components/ui/voice-input.tsx:175[39m
+
+[90m    src/pages/AICropScanner.tsx:78[39m
+
+[90m    src/pages/AICropScanner.tsx:85[39m
+
+[90m    src/pages/Advisory.tsx:121[39m
+
+[90m    src/pages/Analytics.tsx:28[39m
+
+[90m    src/pages/Analytics.tsx:33[39m
+
+[90m    src/pages/Analytics.tsx:64[39m
+
+[90m    src/pages/Analytics.tsx:71[39m
+
+[90m    src/pages/Dashboard.tsx:44[39m
+
+[90m    src/pages/Dashboard.tsx:49[39m
+
+[90m    src/pages/Dashboard.tsx:83[39m
+
+[90m    src/pages/Dashboard.tsx:89[39m
+
+[90m    src/pages/Dashboard.tsx:95[39m
+
+[90m    src/pages/Farmers.tsx:25[39m
+
+[90m    src/pages/Farmers.tsx:30[39m
+
+[90m    src/pages/Forum.tsx:11[39m
+
+[90m    src/pages/Index.tsx:57[39m
+
+[90m    src/pages/Merchants.tsx:134[39m
+
+[90m    src/pages/Merchants.tsx:139[39m
+
+[90m    src/pages/Merchants.tsx:145[39m
+
+[90m    src/pages/Polls.tsx:135[39m
+
+[90m    src/pages/Polls.tsx:140[39m
+
+[90m    src/pages/Polls.tsx:147[39m
+
+[90m    src/pages/Polls.tsx:154[39m
+
+[90m    src/pages/Users.tsx:30[39m
+
+[90m    src/pages/Users.tsx:35[39m
+
+[90m    src/pages/admin/AdminAnalytics.tsx:9[39m
+
+[90m    src/pages/admin/AdminNotifications.tsx:9[39m
+
+[90m    src/pages/admin/AdminSettings.tsx:26[39m
+
+[90m    src/pages/expert/ExpertAIAdvisory.tsx:10[39m
+
+[90m    src/pages/expert/ExpertAICropScanner.tsx:9[39m
+
+[90m    src/pages/expert/ExpertNotifications.tsx:9[39m
+
+[90m    src/pages/merchant/MerchantFarmers.tsx:57[39m
+
+[90m    src/pages/merchant/MerchantMarketPrices.tsx:38[39m
+
+  [33mΓÜá[39m [33mPerformance: Ref initializer runs on every render[39m [90m├ù4[39m
+    [36mLearn more: https://react.doctor/docs/rules/react-doctor/rerender-lazy-ref-init[39m
+    useRef(new WeakMap()) rebuilds this value on every render &
+    throws it away.
+[2m    ΓåÆ Initialize the ref lazily so expensive values are not[22m
+[2m    rebuilt and discarded on every render.[22m
+
+[90m    src/contexts/LanguageContext.tsx:30-31[39m
+
+[90m    src/hooks/usePushNotifications.tsx:32[39m
+
+[90m    src/hooks/useVoiceCommands.ts:19[39m
+
+  [33mΓÜá[39m [33mPerformance: await before an early-return guard[39m
+    [36mLearn more: https://react.doctor/docs/rules/react-doctor/async-defer-await[39m
+    This await blocks the function before an early-return that
+    doesn't use the awaited value, so the skip path waits for
+    nothing. Move the await below the guard so it only runs
+    when you need the data
+[2m    ΓåÆ Move the `await` below the early-return guard so the skip[22m
+[2m    path stays fast and avoids unnecessary async work.[22m
+
+[90m    supabase/functions/verify-otp/index.ts:73[39m
+
+  [33mΓÜá[39m [33mPerformance: Intl formatter rebuilt each call[39m
+    [36mLearn more: https://react.doctor/docs/rules/react-doctor/js-hoist-intl[39m
+    This is slow because new Intl.Segmenter() rebuilds on every
+    call inside a function, so move it to the top of the file,
+    or wrap it in useMemo
+[2m    ΓåÆ Move `new Intl.NumberFormat(...)` to the top of the file[22m
+[2m    or wrap it in `useMemo`. Building one is slow, so don't[22m
+[2m    redo it on every call[22m
+
+[90m    supabase/functions/sms-dispatcher/index.ts:60[39m
+
+  [33mΓÜá[39m [33mPerformance: Spread copy before sort()[39m [90m├ù3[39m
+    [36mLearn more: https://react.doctor/docs/rules/react-doctor/js-tosorted-immutable[39m
+    This wastes work because [...array].sort() copies the array
+    just to sort it, so use array.toSorted() to sort without
+    the extra copy (ES2023)
+[2m    ΓåÆ Use `array.toSorted()` (ES2023) instead of[22m
+[2m    `[...array].sort()` so you sort without copying the array[22m
+[2m    first[22m
+
+[90m    src/components/features/GeoPersonalizationPanel.tsx:30[39m
+
+[90m    src/lib/biometricAuth.ts:110[39m
+
+[90m    src/pages/Schemes.tsx:402[39m
+
+  [33mΓÜá[39m [33mPerformance: Permanent will-change wastes GPU[39m
+    [36mLearn more: https://react.doctor/docs/rules/react-doctor/no-permanent-will-change[39m
+    This wastes GPU memory because will-change is left on all
+    the time, so add it right before the animation & remove it
+    when the animation ends
+[2m    ΓåÆ Add will-change when the animation starts[22m
+[2m    (`onMouseEnter`) and remove it when it ends[22m
+[2m    (`onAnimationEnd`). Leaving it on all the time wastes GPU[22m
+[2m    memory and can slow things down[22m
+
+[90m    src/components/home/AnimatedHero.tsx:184[39m
+
+  [33mΓÜá[39m [33mAccessibility: Gray text on colored background[39m
+    [36mLearn more: https://react.doctor/docs/rules/react-doctor/no-gray-on-colored-background[39m
+    Your users see washed-out gray text (text-zinc-300) on a
+    colored background (bg-red-500), so use white or a darker
+    shade of the background color.
+[2m    ΓåÆ Use white or near-white text, or a darker shade of the[22m
+[2m    background color. Gray text on colored backgrounds looks[22m
+[2m    washed out.[22m
+
+[90m    src/pages/admin/intelligence/WarRoom.tsx:32[39m
+
+  [33mΓÜá[39m [33mMaintainability: Pure function rebuilt every render[39m [90m├ù78[39m
+    [36mLearn more: https://react.doctor/docs/rules/react-doctor/prefer-module-scope-pure-function[39m
+    `getStatusIcon` inside `AIFeatureDiagnostics` uses no local
+    state but is rebuilt on every render, so it wastes work &
+    breaks memoized children. Move it to the top of the file,
+    outside the component.
+[2m    ΓåÆ Move the function above the component, at the top of the[22m
+[2m    file. It doesn't use local state, so rebuilding it each[22m
+[2m    update is wasted work.[22m
+
+[90m    src/components/ai/AIFeatureDiagnostics.tsx:30[39m
+
+[90m    src/components/ai/SmartChatbot.tsx:54[39m
+
+[90m    src/components/ai/VoiceImageQuery.tsx:56[39m
+
+[90m    src/components/ai/VoiceImageQuery.tsx:140[39m
+
+[90m    src/components/ai/VoiceImageQuery.tsx:167[39m
+
+[90m    src/components/ai/VoiceImageQuery.tsx:295[39m
+
+[90m    src/components/ai/VoiceImageQuery.tsx:305[39m
+
+[90m    src/components/analytics/EnhancedAnalytics.tsx:34[39m
+
+[90m    src/components/calendar/CropCalendar.tsx:156[39m
+
+[90m    src/components/calendar/CropCalendar.tsx:172[39m
+
+[90m    src/components/chat/AIAssistantHub.tsx:172[39m
+
+[90m    src/components/chat/AIChatbot.tsx:132[39m
+
+[90m    src/components/crops/SeasonalCropGuide.tsx:38[39m
+
+[90m    src/components/crops/SeasonalCropGuide.tsx:47[39m
+
+[90m    src/components/crops/SeasonalCropGuide.tsx:56[39m
+
+[90m    src/components/dashboard/RoleDashboard.tsx:93[39m
+
+[90m    src/components/dashboard/RoleDashboard.tsx:102[39m
+
+[90m    src/components/dashboard/RoleDashboard.tsx:111[39m
+
+[90m    src/components/documents/DocumentUpload.tsx:147[39m
+
+[90m    src/components/documents/DocumentUpload.tsx:198[39m
+
+[90m    src/components/documents/DocumentUpload.tsx:206[39m
+
+[90m    src/components/features/AICropDiseaseScanner.tsx:99[39m
+
+[90m    src/components/features/AdvancedFeaturesShowcase.tsx:101[39m
+
+[90m    src/components/features/CarbonFootprintCalculator.tsx:167[39m
+
+[90m    src/components/features/CarbonFootprintCalculator.tsx:174[39m
+
+[90m    src/components/features/CropRotationOptimizer.tsx:163[39m
+
+[90m    src/components/features/CropRotationOptimizer.tsx:169[39m
+
+[90m    src/components/features/CropRotationOptimizer.tsx:175[39m
+
+[90m    src/components/features/FarmerCollaborationHub.tsx:133[39m
+
+[90m    src/components/features/FarmerCollaborationHub.tsx:143[39m
+
+[90m    src/components/features/FarmerCollaborationHub.tsx:157[39m
+
+[90m    src/components/features/FarmerCollaborationHub.tsx:161[39m
+
+[90m    src/components/features/MarketPricePredictor.tsx:105[39m
+
+[90m    src/components/features/MarketPricePredictor.tsx:154[39m
+
+[90m    src/components/features/MarketPricePredictor.tsx:163[39m
+
+[90m    src/components/features/SmartIrrigationCalculator.tsx:171[39m
+
+[90m    src/components/features/SmartIrrigationCalculator.tsx:180[39m
+
+[90m    src/components/features/WeatherMarketAPI.tsx:99[39m
+
+[90m    src/components/forum/CommunityForum.tsx:167[39m
+
+[90m    src/components/forum/CommunityForum.tsx:187[39m
+
+[90m    src/components/forum/CommunityForum.tsx:202[39m
+
+[90m    src/components/notifications/EnhancedNotifications.tsx:98[39m
+
+[90m    src/components/notifications/EnhancedNotifications.tsx:115[39m
+
+[90m    src/components/notifications/EnhancedNotifications.tsx:162[39m
+
+[90m    src/components/notifications/NotificationCenter.tsx:103[39m
+
+[90m    src/components/notifications/NotificationCenter.tsx:117-120[39m
+
+[90m    src/components/notifications/NotificationCenter.tsx:130[39m
+
+[90m    src/components/seo/OptimizedImage.tsx:53[39m
+
+[90m    src/contexts/AuthContext.tsx:378[39m
+
+[90m    src/pages/Advisory.tsx:127[39m
+
+[90m    src/pages/Analytics.tsx:78[39m
+
+[90m    src/pages/Analytics.tsx:87[39m
+
+[90m    src/pages/Crops.tsx:77[39m
+
+[90m    src/pages/Crops.tsx:86[39m
+
+[90m    src/pages/FieldMap.tsx:126[39m
+
+[90m    src/pages/Login.tsx:367[39m
+
+[90m    src/pages/Polls.tsx:160[39m
+
+[90m    src/pages/Sensors.tsx:115[39m
+
+[90m    src/pages/Sensors.tsx:124[39m
+
+[90m    src/pages/Sensors.tsx:133[39m
+
+[90m    src/pages/Sensors.tsx:139[39m
+
+[90m    src/pages/Sensors.tsx:143[39m
+
+[90m    src/pages/Users.tsx:86[39m
+
+[90m    src/pages/Users.tsx:96[39m
+
+[90m    src/pages/Users.tsx:106[39m
+
+[90m    src/pages/Weather.tsx:231[39m
+
+[90m    src/pages/admin/AdminAuditLog.tsx:43[39m
+
+[90m    src/pages/admin/AdminUsers.tsx:164[39m
+
+[90m    src/pages/admin/AdminUsers.tsx:174[39m
+
+[90m    src/pages/expert/ExpertConsultations.tsx:133[39m
+
+[90m    src/pages/expert/ExpertConsultations.tsx:142[39m
+
+[90m    src/pages/merchant/MerchantFarmers.tsx:88[39m
+
+[90m    src/pages/merchant/MerchantOrders.tsx:149[39m
+
+[90m    src/utils/accessibilityHelpers.ts:57[39m
+
+[90m    src/utils/accessibilityHelpers.ts:83[39m
+
+[90m    src/utils/accessibilityHelpers.ts:99[39m
+
+[90m    src/utils/accessibilityHelpers.ts:103[39m
+
+  [33mΓÜá[39m [33mMaintainability: Large component is hard to read and change[39m [90m├ù35[39m
+    [36mLearn more: https://react.doctor/docs/rules/react-doctor/no-giant-component[39m
+    Component "CropRecommendationEngine" is 470 lines long,
+    which is hard to read & change. Split it into a few smaller
+    components.
+[2m    ΓåÆ Pull each section into its own component so the parent is[22m
+[2m    easier to read, test, and change.[22m
+
+[90m    src/components/ai/CropRecommendationEngine.tsx:53[39m
+
+[90m    src/components/ai/SmartChatbot.tsx:36[39m
+
+[90m    src/components/ai/VoiceImageQuery.tsx:34[39m
+
+[90m    src/components/analytics/YieldPredictor.tsx:38[39m
+
+[90m    src/components/auth/ProfileSetup.tsx:18[39m
+
+[90m    src/components/calendar/CropCalendar.tsx:46[39m
+
+[90m    src/components/calendar/PersonalizedCropPlanner.tsx:174[39m
+
+[90m    src/components/chat/AIAssistantHub.tsx:46[39m
+
+[90m    src/components/chat/EnhancedAIChatbot.tsx:61[39m
+
+[90m    src/components/documents/DocumentUpload.tsx:38[39m
+
+[90m    src/components/features/CarbonFootprintCalculator.tsx:41[39m
+
+[90m    src/components/features/CropCalendarReminder.tsx:16[39m
+
+[90m    src/components/features/CropRotationOptimizer.tsx:43[39m
+
+[90m    src/components/features/EnhancedVoiceAgent.tsx:56[39m
+
+[90m    src/components/features/FarmerCollaborationHub.tsx:49[39m
+
+[90m    src/components/features/FieldHistoryTimeline.tsx:66[39m
+
+[90m    src/components/features/KnowledgeHub.tsx:10[39m
+
+[90m    src/components/features/MarketPricePredictor.tsx:40[39m
+
+[90m    src/components/features/MultiLanguageVoiceAssistant.tsx:29[39m
+
+[90m    src/components/features/SmartIrrigationCalculator.tsx:41[39m
+
+[90m    src/components/forum/CommunityForum.tsx:53[39m
+
+[90m    src/components/home/FloatingAIAssistant.tsx:49[39m
+
+[90m    src/components/notifications/EnhancedNotifications.tsx:33[39m
+
+[90m    src/contexts/AuthContext.tsx:51[39m
+
+[90m    src/pages/AICropScanner.tsx:68[39m
+
+[90m    src/pages/Analytics.tsx:25[39m
+
+[90m    src/pages/FieldMap.tsx:117[39m
+
+[90m    src/pages/Index.tsx:45[39m
+
+[90m    src/pages/Login.tsx:29[39m
+
+[90m    src/pages/Polls.tsx:122[39m
+
+[90m    src/pages/Schemes.tsx:287[39m
+
+[90m    src/pages/Settings.tsx:43[39m
+
+[90m    src/pages/Users.tsx:26[39m
+
+[90m    src/pages/Weather.tsx:84[39m
+
+[90m    src/pages/admin/AdminSms.tsx:137[39m
+
+  [33mΓÜá[39m [33mPerformance: useMemo on a cheap value[39m
+    [36mLearn more: https://react.doctor/docs/rules/react-doctor/no-usememo-simple-expression[39m
+    This costs more than it saves because useMemo is wrapping a
+    value that's already cheap, so remove the useMemo
+[2m    ΓåÆ Remove the useMemo. Property reads, math, and ternaries[22m
+[2m    are already fast, so wrapping them doesn't help[22m
+
+[90m    src/components/ui/sidebar.tsx:535[39m
+
+  [33mΓÜá[39m [33mPerformance: .map().filter(Boolean) loops twice[39m [90m├ù3[39m
+    [36mLearn more: https://react.doctor/docs/rules/react-doctor/js-flatmap-filter[39m
+    This loops over your list twice because
+    .map().filter(Boolean) makes two passes, so use .flatMap()
+    to change & drop items in one pass
+[2m    ΓåÆ Use `.flatMap(item => condition ? [value] : [])` to[22m
+[2m    change and drop items in one pass, instead of building a[22m
+[2m    throwaway array in between[22m
+
+[90m    src/components/forum/CommunityForum.tsx:159[39m
+
+[90m    src/pages/admin/AdminSms.tsx:248[39m
+
+[90m    src/pages/expert/ExpertKnowledgeHub.tsx:123[39m
+
+  [33mΓÜá[39m [33mPerformance: Chained array iterations[39m [90m├ù28[39m
+    [36mLearn more: https://react.doctor/docs/rules/react-doctor/js-combine-iterations[39m
+    This loops over your list twice because .filter().map()
+    makes two passes, so do it in one pass with .reduce() or a
+    for...of loop
+[2m    ΓåÆ Combine `.map().filter()` style chains into one pass with[22m
+[2m    `.reduce()` or a `for...of` loop, so you only loop over the[22m
+[2m    list once[22m
+
+[90m    backend/src/routes/chat.js:56[39m
+
+[90m    backend/src/routes/polls.js:47[39m
+
+[90m    backend/src/services/ml.js:601[39m
+
+[90m    backend/src/services/nlp.js:71[39m
+
+[90m    public/service-worker.js:35[39m
+
+[90m    public/sw.js:15[39m
+
+[90m    src/components/auth/ProfileSetup.tsx:223[39m
+
+[90m    src/components/auth/ProfileSetup.tsx:279[39m
+
+[90m    src/components/chat/AIAssistantHub.tsx:113[39m
+
+[90m    src/components/chat/AIChatbot.tsx:82[39m
+
+[90m    src/components/chat/EnhancedAIChatbot.tsx:149[39m
+
+[90m    src/components/features/FieldHistoryTimeline.tsx:107[39m
+
+[90m    src/components/notifications/NotificationCenter.tsx:125[39m
+
+[90m    src/config/aiConfig.ts:53[39m
+
+[90m    src/data/cropRecommendations.ts:686[39m
+
+[90m    src/data/mandiPrices.ts:539[39m
+
+[90m    src/hooks/useHeadingStructure.ts:102[39m
+
+[90m    src/lib/phase1-storage.ts:229[39m
+
+[90m    src/pages/Polls.tsx:311[39m
+
+[90m    src/pages/Polls.tsx:397[39m
+
+[90m    src/pages/Schemes.tsx:418[39m
+
+[90m    src/pages/Schemes.tsx:434[39m
+
+[90m    src/pages/Schemes.tsx:566[39m
+
+[90m    src/pages/Users.tsx:295[39m
+
+[90m    src/pages/Users.tsx:323[39m
+
+[90m    src/pages/Users.tsx:351[39m
+
+[90m    src/pages/admin/AdminSms.tsx:319[39m
+
+  [33mΓÜá[39m [33mBugs: Unversioned localStorage key[39m [90m├ù26[39m
+    [36mLearn more: https://react.doctor/docs/rules/react-doctor/client-localstorage-no-version[39m
+    localStorage.setItem("cropReminders", JSON.stringify(...))
+    has no version, so changing the data shape later crashes
+    your users' saved sessions. Add one to the key (e.g.
+    "cropReminders:v1").
+[2m    ΓåÆ Put a version in the storage key (e.g. "myKey:v1"). If[22m
+[2m    you change the data shape later, old saved data can be[22m
+[2m    ignored instead of crashing the app.[22m
+
+[90m    src/components/features/CropCalendarReminder.tsx:104[39m
+
+[90m    src/components/features/CropCalendarReminder.tsx:117[39m
+
+[90m    src/components/features/CropCalendarReminder.tsx:130[39m
+
+[90m    src/components/features/DigitalDiary.tsx:59[39m
+
+[90m    src/components/features/DigitalDiary.tsx:79[39m
+
+[90m    src/components/notifications/EnhancedNotifications.tsx:389[39m
+
+[90m    src/hooks/useDashboardData.ts:115[39m
+
+[90m    src/hooks/useDashboardData.ts:206[39m
+
+[90m    src/hooks/useDashboardData.ts:242[39m
+
+[90m    src/hooks/useDashboardData.ts:275[39m
+
+[90m    src/lib/api.ts:58[39m
+
+[90m    src/lib/api.ts:63[39m
+
+[90m    src/lib/seoMonitoring.ts:221-222[39m
+
+[90m    src/pages/admin/AdminUsers.tsx:74[39m
+
+[90m    src/pages/admin/AdminUsers.tsx:121[39m
+
+[90m    src/pages/expert/ExpertConsultations.tsx:59[39m
+
+[90m    src/pages/expert/ExpertConsultations.tsx:88[39m
+
+[90m    src/pages/expert/ExpertConsultations.tsx:113[39m
+
+[90m    src/pages/expert/ExpertKnowledgeHub.tsx:82[39m
+
+[90m    src/pages/expert/ExpertKnowledgeHub.tsx:146[39m
+
+[90m    src/pages/expert/ExpertKnowledgeHub.tsx:176[39m
+
+[90m    src/pages/expert/ExpertKnowledgeHub.tsx:193[39m
+
+[90m    src/pages/merchant/MerchantOrders.tsx:71[39m
+
+[90m    src/pages/merchant/MerchantOrders.tsx:112[39m
+
+[90m    src/pages/merchant/MerchantOrders.tsx:139[39m
+
+  [33mΓÜá[39m [33mMaintainability: Children type checked at runtime[39m
+    [36mLearn more: https://react.doctor/docs/rules/react-doctor/no-polymorphic-children[39m
+    Your users hit inconsistent behavior because `typeof
+    children === "string"` makes this component switch on what
+    callers pass, so add clear subcomponents like
+    `<Button.Text>` instead.
+[2m    ΓåÆ Add clear subcomponents like `<Button.Text>` and[22m
+[2m    `<Button.Icon>` so callers don't have to check `typeof[22m
+[2m    children`.[22m
+
+[90m    src/components/seo/SemanticHeading.tsx:24[39m
+
+  [33mΓÜá[39m [33mBugs: Many related useState calls[39m [90m├ù35[39m
+    [36mLearn more: https://react.doctor/docs/rules/react-doctor/prefer-useReducer[39m
+    5 useState calls in "CropRecommendationEngine" can each
+    trigger a separate render.
+[2m    ΓåÆ Group related state in `useReducer` so one logical update[22m
+[2m    does not fan out into separate renders.[22m
+
+[90m    src/components/ai/CropRecommendationEngine.tsx:53[39m
+
+[90m    src/components/ai/SmartChatbot.tsx:36[39m
+
+[90m    src/components/ai/VoiceImageQuery.tsx:34[39m
+
+[90m    src/components/analytics/YieldPredictor.tsx:38[39m
+
+[90m    src/components/calendar/CropCalendar.tsx:46[39m
+
+[90m    src/components/calendar/PersonalizedCropPlanner.tsx:174[39m
+
+[90m    src/components/chat/AIAssistantHub.tsx:46[39m
+
+[90m    src/components/chat/AIChatbot.tsx:34[39m
+
+[90m    src/components/chat/EnhancedAIChatbot.tsx:61[39m
+
+[90m    src/components/consultations/FarmerConsultationForm.tsx:17[39m
+
+[90m    src/components/documents/DocumentUpload.tsx:38[39m
+
+[90m    src/components/features/AICropDiseaseScanner.tsx:30[39m
+
+[90m    src/components/features/CarbonFootprintCalculator.tsx:41[39m
+
+[90m    src/components/features/CropRotationOptimizer.tsx:43[39m
+
+[90m    src/components/features/EnhancedVoiceAgent.tsx:59[39m
+
+[90m    src/components/features/FieldHistoryTimeline.tsx:66[39m
+
+[90m    src/components/features/MarketPricePredictor.tsx:40[39m
+
+[90m    src/components/features/MultiLanguageVoiceAssistant.tsx:29[39m
+
+[90m    src/components/features/SmartIrrigationCalculator.tsx:41[39m
+
+[90m    src/components/features/WeatherMarketAPI.tsx:16[39m
+
+[90m    src/components/forum/CommunityForum.tsx:53[39m
+
+[90m    src/components/home/FloatingAIAssistant.tsx:49[39m
+
+[90m    src/pages/AICropScanner.tsx:68[39m
+
+[90m    src/pages/FieldMap.tsx:117[39m
+
+[90m    src/pages/Login.tsx:29[39m
+
+[90m    src/pages/ResetPassword.tsx:12[39m
+
+[90m    src/pages/Schemes.tsx:287[39m
+
+[90m    src/pages/Settings.tsx:43[39m
+
+[90m    src/pages/Weather.tsx:84[39m
+
+[90m    src/pages/admin/AdminAuditLog.tsx:15[39m
+
+[90m    src/pages/admin/AdminSms.tsx:137[39m
+
+[90m    src/pages/admin/AdminUsers.tsx:59[39m
+
+[90m    src/pages/expert/ExpertConsultations.tsx:43[39m
+
+[90m    src/pages/expert/ExpertKnowledgeHub.tsx:59[39m
+
+[90m    src/pages/merchant/MerchantOrders.tsx:55[39m
+
+  [33mΓÜá[39m [33mPerformance: Bouncy easing animation[39m [90m├ù6[39m
+    [36mLearn more: https://react.doctor/docs/rules/react-doctor/no-inline-bounce-easing[39m
+    Your users see a dated, tacky animate-bounce, so use a
+    subtle ease-out transform for a smoother finish.
+[2m    ΓåÆ Use `cubic-bezier(0.16, 1, 0.3, 1)` (ease-out-expo) for a[22m
+[2m    natural finish. Real objects don't bounce.[22m
+
+[90m    src/components/ai/SmartChatbot.tsx:487-489[39m
+
+[90m    src/components/home/FloatingAIAssistant.tsx:376-378[39m
+
+  [33mΓÜá[39m [33mPerformance: Animating scale from zero[39m [90m├ù2[39m
+    [36mLearn more: https://react.doctor/docs/rules/react-doctor/no-scale-from-zero[39m
+    This looks abrupt to your users because scale: 0 pops the
+    element in from a single point, so use scale: 0.95 with
+    opacity: 0 for a smoother entrance
+[2m    ΓåÆ Use `initial={{ scale: 0.95, opacity: 0 }}`. Elements[22m
+[2m    should gently shrink and fade, not vanish into a point[22m
+
+[90m    src/components/home/FloatingAIAssistant.tsx:257[39m
+
+[90m    src/pages/Index.tsx:217[39m
+
+  [33mΓÜá[39m [33mSecurity: Auth token in web storage[39m
+    [36mLearn more: https://react.doctor/docs/rules/react-doctor/auth-token-in-web-storage[39m
+    Storing an auth token in `localStorage`/`sessionStorage`
+    exposes it to any XSS on the page: JavaScript can read web
+    storage and exfiltrate the token. Keep tokens in an
+    `HttpOnly`, `Secure`, `SameSite` cookie instead.
+[2m    ΓåÆ Don't persist auth tokens (JWTs, access/refresh tokens,[22m
+[2m    secrets) in `localStorage`/`sessionStorage`; they're[22m
+[2m    readable by any XSS. Use an `HttpOnly` cookie set by the[22m
+[2m    server.[22m
+
+[90m    src/services/voiceService.ts:221[39m
+
+
+[2m  ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ[22m
+
+  [1mAll 487 issues[22m
+
+  [1mSecurity[22m [2m>[22m [33m[2m1 warning[22m[39m
+  [1mBugs[22m [2m>[22m [33m[2m166 warnings[22m[39m
+  [1mPerformance[22m [2m>[22m [33m[2m129 warnings[22m[39m
+  [1mAccessibility[22m [2m>[22m [33m[2m1 warning[22m[39m
+  [1mMaintainability[22m [2m>[22m [33m[2m190 warnings[22m[39m
+
+  [33mΓöîΓöÇΓöÇΓöÇΓöÇΓöÇΓöÉ[39m  [33m53[39m [2m/ 100[22m [33mCritical[39m
+  [33mΓöé ΓÇó ΓÇó Γöé[39m  [33mΓûêΓûêΓûêΓûêΓûêΓûêΓûêΓûêΓûêΓûêΓûêΓûêΓûêΓûêΓûêΓûêΓûêΓûêΓûêΓûêΓûêΓûêΓûêΓûêΓûêΓûêΓûê[39m[2mΓûæΓûæΓûæΓûæΓûæΓûæΓûæΓûæΓûæΓûæΓûæΓûæΓûæΓûæΓûæΓûæΓûæΓûæΓûæΓûæΓûæΓûæΓûæ[22m
+  [33mΓöé  ΓöÇ  Γöé[39m  React Doctor [2m(https://react.doctor)[22m
+  [33mΓööΓöÇΓöÇΓöÇΓöÇΓöÇΓöÿ[39m
+
+[90m  Full diagnostics written to C:\Users\HP\AppData\Local\Temp\react-doctor-d521cb9d-c671-40b7-8298-786d2d170fc9[39m
+
+[2m  ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ[22m
+
+  [1mShare:[22m [36mhttps://react.doctor/share?p=vite_react_shadcn_ts&s=53&w=487&f=139[39m
+[2m  Tell others how you did on socials[22m
+
+  [1mDocs:[22m [36mhttps://react.doctor/docs[39m
+[2m  Learn more about fixing issues, setting up CI/CD, and[22m
+[2m  configuring rules with a config file[22m
+
+  [1mGitHub:[22m [36mhttps://github.com/millionco/react-doctor[39m
+[2m  Report issues and star the repository![22m
+

@@ -22,7 +22,7 @@ async function evaluateAI(prompt: string, expectedSchemaKey: string) {
   const resultText = data.candidates?.[0]?.content?.parts?.[0]?.text;
   const parsed = JSON.parse(resultText);
   
-  return parsed.hasOwnProperty(expectedSchemaKey);
+  return Object.prototype.hasOwnProperty.call(parsed, expectedSchemaKey);
 }
 
 Deno.test("AI Evaluates: Scheme Scraping JSON Schema Adherence", async () => {

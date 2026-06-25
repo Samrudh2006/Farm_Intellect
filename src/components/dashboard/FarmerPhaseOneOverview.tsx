@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState, useSyncExternalStore } from "react";
 import { useNavigate } from "react-router-dom";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -9,24 +9,21 @@ import { PHASE1_STORAGE_EVENT, getPhase1Summary } from "@/lib/phase1-storage";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { CheckCircle2, Download, Globe2, History, Leaf, ShieldCheck, Wifi, WifiOff } from "lucide-react";
 
+const phase1Subscribe = (onStoreChange: () => void) => {
+  window.addEventListener(PHASE1_STORAGE_EVENT, onStoreChange);
+  window.addEventListener("focus", onStoreChange);
+  return () => {
+    window.removeEventListener(PHASE1_STORAGE_EVENT, onStoreChange);
+    window.removeEventListener("focus", onStoreChange);
+  };
+};
+
 export const FarmerPhaseOneOverview = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
   const { t } = useLanguage();
   const { isOnline, isInstalled, canInstall, installApp } = usePwaStatus();
-  const [summary, setSummary] = useState(() => getPhase1Summary());
-
-  useEffect(() => {
-    const refreshSummary = () => setSummary(getPhase1Summary());
-
-    window.addEventListener(PHASE1_STORAGE_EVENT, refreshSummary);
-    window.addEventListener("focus", refreshSummary);
-
-    return () => {
-      window.removeEventListener(PHASE1_STORAGE_EVENT, refreshSummary);
-      window.removeEventListener("focus", refreshSummary);
-    };
-  }, []);
+  const summary = useSyncExternalStore(phase1Subscribe, getPhase1Summary);
 
   const phaseCards = useMemo(
     () => [

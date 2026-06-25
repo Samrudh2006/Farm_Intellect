@@ -3,6 +3,30 @@
  * Handles communication with the backend voice processing API
  */
 
+const getCookie = (name: string): string | null => {
+  if (typeof document === 'undefined') return null;
+  const value = `; ${document.cookie}`;
+  const parts = value.split(`; ${name}=`);
+  if (parts.length === 2) return parts.pop()?.split(';').shift() || null;
+  return null;
+};
+
+const setCookie = (name: string, value: string, days = 7) => {
+  if (typeof document === 'undefined') return;
+  let expires = "";
+  if (days) {
+    const date = new Date();
+    date.setTime(date.getTime() + (days * 24 * 60 * 60 * 1000));
+    expires = `; expires=${date.toUTCString()}`;
+  }
+  document.cookie = `${name}=${value || ""}${expires}; path=/; SameSite=Lax; Secure`;
+};
+
+const removeCookie = (name: string) => {
+  if (typeof document === 'undefined') return;
+  document.cookie = `${name}=; Max-Age=-99999999; path=/; SameSite=Lax; Secure`;
+};
+
 const API_BASE = '/api/voice';
 
 export interface VoiceProcessRequest {
@@ -23,6 +47,7 @@ export interface VoiceStreamRequest {
   audioChunks: string[];
   language: string;
   mimeType?: string;
+  isFinal?: boolean;
 }
 
 export interface VoiceInteractionHistory {
@@ -40,7 +65,7 @@ class VoiceService {
   private authToken: string | null = null;
 
   constructor() {
-    this.authToken = typeof window !== 'undefined' ? localStorage.getItem('authToken') : null;
+    this.authToken = typeof window !== 'undefined' ? getCookie('authToken') : null;
   }
 
   /**
@@ -218,9 +243,9 @@ class VoiceService {
     this.authToken = token;
     if (typeof window !== 'undefined') {
       if (token) {
-        localStorage.setItem('authToken', token);
+        setCookie('authToken', token);
       } else {
-        localStorage.removeItem('authToken');
+        removeCookie('authToken');
       }
     }
   }

@@ -399,7 +399,7 @@ const Schemes = () => {
   );
 
   const prioritizedSchemes = useMemo(() => {
-    return [...filteredSchemes].sort((left, right) => {
+    return filteredSchemes.toSorted((left, right) => {
       const leftMatch = matchedSchemeSet.has(left.id) ? 1 : 0;
       const rightMatch = matchedSchemeSet.has(right.id) ? 1 : 0;
       const leftScore = recommendationMap.get(left.id)?.score ?? 0;

@@ -17,6 +17,12 @@ interface LottieAnimationProps {
   className?: string;
 }
 
+const fetchLottieJson = async (url: string) => {
+  const res = await fetch(url);
+  if (!res.ok) throw new Error("Failed to load Lottie");
+  return res.json();
+};
+
 export const LottieAnimation: React.FC<LottieAnimationProps> = ({
   url,
   animationData,
@@ -24,35 +30,41 @@ export const LottieAnimation: React.FC<LottieAnimationProps> = ({
   autoplay = true,
   className,
 }) => {
-  const [data, setData] = useState<any>(animationData);
+  const [fetchedData, setFetchedData] = useState<any>(null);
+  const [fetchFailed, setFetchFailed] = useState(false);
   
   useEffect(() => {
-    if (url && !animationData) {
-      fetch(url)
-        .then((res) => {
-          if (!res.ok) throw new Error("Failed to load Lottie");
-          return res.json();
-        })
-        .then((json) => setData(json))
-        .catch((err) => {
-          console.error("Error loading Lottie animation from", url, err);
-          // Set to a boolean false so we know it failed
-          setData(false); 
-        });
-    }
+    if (!url || animationData) return;
+    
+    setFetchedData(null);
+    setFetchFailed(false);
+    let active = true;
+
+    fetchLottieJson(url)
+      .then((json) => {
+        if (active) setFetchedData(json);
+      })
+      .catch((err) => {
+        console.error("Error loading Lottie animation from", url, err);
+        if (active) setFetchFailed(true);
+      });
+
+    return () => {
+      active = false;
+    };
   }, [url, animationData]);
 
+  const activeAnimationData = animationData || fetchedData;
+
   // Fallback UI while loading or if it fails
-  if (data === undefined) {
+  if (!activeAnimationData) {
+    if (fetchFailed) {
+      return (
+        <div className={`flex items-center justify-center animate-spin rounded-full border-2 border-primary border-t-transparent ${className}`} />
+      );
+    }
     return <div className={`animate-pulse bg-primary/20 rounded-full ${className}`} />;
   }
-  
-  // If fetch fails, return a generic spinner
-  if (data === false) {
-    return (
-      <div className={`flex items-center justify-center animate-spin rounded-full border-2 border-primary border-t-transparent ${className}`} />
-    );
-  }
 
-  return <Lottie animationData={data} loop={loop} autoplay={autoplay} className={className} />;
+  return <Lottie animationData={activeAnimationData} loop={loop} autoplay={autoplay} className={className} />;
 };

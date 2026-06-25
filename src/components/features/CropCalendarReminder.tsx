@@ -22,8 +22,12 @@ export const CropCalendarReminder = () => {
     date: ""
   });
   const [notificationsEnabled, setNotificationsEnabled] = useState(false);
+  const [minDate, setMinDate] = useState("");
 
   useEffect(() => {
+    // Set min date on client
+    setMinDate(new Date().toISOString().split('T')[0]);
+
     // Load reminders from localStorage
     const savedReminders = localStorage.getItem('cropReminders');
     if (savedReminders) {
@@ -221,7 +225,7 @@ export const CropCalendarReminder = () => {
                 value={newReminder.date}
                 onChange={(e) => setNewReminder(prev => ({ ...prev, date: e.target.value }))}
                 className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
-                min={new Date().toISOString().split('T')[0]}
+                min={minDate}
               />
             </div>
             <Button onClick={addReminder} className="w-full">

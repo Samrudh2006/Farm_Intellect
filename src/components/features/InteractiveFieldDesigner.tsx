@@ -19,10 +19,13 @@ import { toast } from "sonner";
 
 export const InteractiveFieldDesigner = () => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
-  const [fabricCanvas, setFabricCanvas] = useState<FabricCanvas | null>(null);
+  const fabricCanvasRef = useRef<FabricCanvas | null>(null);
+  const [isCanvasReady, setIsCanvasReady] = useState(false);
   const [activeTool, setActiveTool] = useState<"select" | "crop" | "irrigation" | "building" | "polygon">("select");
   const [polygonPoints, setPolygonPoints] = useState<Array<{ x: number; y: number }>>([]);
   const [selectedCropType, setSelectedCropType] = useState("wheat");
+
+  const fabricCanvas = fabricCanvasRef.current;
 
   const cropColors = {
     wheat: "#F4A460",
@@ -41,11 +44,14 @@ export const InteractiveFieldDesigner = () => {
       backgroundColor: "#8FBC8F",
     });
 
-    setFabricCanvas(canvas);
+    fabricCanvasRef.current = canvas;
+    setIsCanvasReady(true);
     toast("Field Designer Ready! Start planning your farm layout!");
 
     return () => {
       canvas.dispose();
+      fabricCanvasRef.current = null;
+      setIsCanvasReady(false);
     };
   }, []);
 
