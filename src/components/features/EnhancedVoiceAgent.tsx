@@ -6,15 +6,7 @@ import { Card } from '@/components/ui/card';
 import { Mic, MicOff, Volume2, Copy, Trash2, RefreshCw } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { cn } from '@/lib/utils';
-import { apiBaseUrl } from '@/lib/api';
-
-const getCookie = (name: string): string | null => {
-  if (typeof document === 'undefined') return null;
-  const value = `; ${document.cookie}`;
-  const parts = value.split(`; ${name}=`);
-  if (parts.length === 2) return parts.pop()?.split(';').shift() || null;
-  return null;
-};
+import { apiFetch } from '@/lib/api';
 
 interface VoiceInteraction {
   id: string;
@@ -91,17 +83,10 @@ export const EnhancedVoiceAgent = ({
   // Load interaction history
   const loadInteractionHistory = async () => {
     try {
-      const token = getCookie('authToken');
-      if (!token) return;
-
-      const response = await fetch(`${apiBaseUrl}/api/voice/history?limit=20&language=${selectedLanguage}`, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-
-      if (response.ok) {
-        const data = await response.json();
-        setInteractions(data.interactions || []);
-      }
+      const data = await apiFetch<{ interactions: VoiceInteraction[] }>(
+        `/api/voice/history?limit=20&language=${selectedLanguage}`
+      );
+      setInteractions(data.interactions || []);
     } catch (err) {
       console.error('[v0] Failed to load history:', err);
     }
@@ -171,13 +156,8 @@ export const EnhancedVoiceAgent = ({
       reader.onload = async () => {
         const base64Audio = (reader.result as string).split(',')[1];
 
-        const token = getCookie('authToken');
-        const response = await fetch(`${apiBaseUrl}/api/voice/process`, {
+        const data = await apiFetch<any>('/api/voice/process', {
           method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            Authorization: `Bearer ${token}`,
-          },
           body: JSON.stringify({
             audioBuffer: base64Audio,
             language: selectedLanguage.split('-')[0],
@@ -186,11 +166,6 @@ export const EnhancedVoiceAgent = ({
           }),
         });
 
-        if (!response.ok) {
-          throw new Error('Failed to process voice');
-        }
-
-        const data = await response.json();
         console.log('[v0] Voice processing response:', data);
 
         setCurrentTranscription(data.transcription);

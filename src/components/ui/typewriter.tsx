@@ -12,11 +12,11 @@ export const Typewriter = ({ text, speed = 30, className = "" }: TypewriterProps
   const [isTyping, setIsTyping] = useState(true);
   const prevTextRef = useRef(text);
 
-  if (text !== prevTextRef.current) {
+  useEffect(() => {
     prevTextRef.current = text;
     setDisplayedText("");
     setIsTyping(true);
-  }
+  }, [text]);
 
   useEffect(() => {
     let i = 0;
@@ -36,7 +36,7 @@ export const Typewriter = ({ text, speed = 30, className = "" }: TypewriterProps
 
   return (
     <span className={className}>
-      {displayedText}
+      {text === prevTextRef.current ? displayedText : ""}
       {isTyping && (
         <motion.span
           animate={{ opacity: [1, 0] }}

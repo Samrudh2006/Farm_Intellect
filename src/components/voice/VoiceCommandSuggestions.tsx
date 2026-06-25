@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
 import { Zap, Command } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { apiFetch } from '@/lib/api';
 
 interface VoiceCommandSuggestionsProps {
   currentRoute: string;
@@ -13,17 +14,10 @@ interface VoiceCommandSuggestionsProps {
  * Context-aware voice command suggestions
  * Shows relevant commands based on current page
  */
-const fetchSuggestionsApi = async (currentRoute: string, token: string | null) => {
-  const response = await fetch(
-    `/api/commands/suggestions?currentRoute=${encodeURIComponent(currentRoute)}`,
-    {
-      headers: {
-        'Authorization': `Bearer ${token || ''}`,
-      },
-    }
+const fetchSuggestionsApi = async (currentRoute: string) => {
+  return apiFetch<{ suggestions: string[] }>(
+    `/api/commands/suggestions?currentRoute=${encodeURIComponent(currentRoute)}`
   );
-  if (!response.ok) throw new Error("Failed to fetch suggestions");
-  return response.json();
 };
 
 export const VoiceCommandSuggestions: React.FC<VoiceCommandSuggestionsProps> = ({
@@ -38,8 +32,7 @@ export const VoiceCommandSuggestions: React.FC<VoiceCommandSuggestionsProps> = (
     let active = true;
     const fetchSuggestions = async () => {
       try {
-        const token = localStorage.getItem('token');
-        const data = await fetchSuggestionsApi(currentRoute, token);
+        const data = await fetchSuggestionsApi(currentRoute);
         if (active) {
           setSuggestions(data.suggestions || []);
         }

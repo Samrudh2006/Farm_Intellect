@@ -18,10 +18,10 @@ export const LocationSelector = ({ value, onChange, placeholder = "Search city o
   const wrapperRef = useRef<HTMLDivElement>(null);
 
   const prevValueRef = useRef(value);
-  if (value !== prevValueRef.current) {
+  useEffect(() => {
     prevValueRef.current = value;
     setQuery(value || "");
-  }
+  }, [value]);
 
   useEffect(() => {
     const handleClickOutside = (e: MouseEvent) => {
@@ -70,7 +70,7 @@ export const LocationSelector = ({ value, onChange, placeholder = "Search city o
       <Input
         placeholder={placeholder}
         className="pl-10"
-        value={query}
+        value={value === prevValueRef.current ? query : (value || "")}
         onChange={(e) => handleInputChange(e.target.value)}
         onFocus={() => { if (query.length >= 2) { setResults(searchLocations(query)); setIsOpen(true); } }}
         onKeyDown={handleKeyDown}

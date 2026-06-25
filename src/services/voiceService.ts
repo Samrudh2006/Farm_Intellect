@@ -1,31 +1,4 @@
-/**
- * Voice Service Client
- * Handles communication with the backend voice processing API
- */
-
-const getCookie = (name: string): string | null => {
-  if (typeof document === 'undefined') return null;
-  const value = `; ${document.cookie}`;
-  const parts = value.split(`; ${name}=`);
-  if (parts.length === 2) return parts.pop()?.split(';').shift() || null;
-  return null;
-};
-
-const setCookie = (name: string, value: string, days = 7) => {
-  if (typeof document === 'undefined') return;
-  let expires = "";
-  if (days) {
-    const date = new Date();
-    date.setTime(date.getTime() + (days * 24 * 60 * 60 * 1000));
-    expires = `; expires=${date.toUTCString()}`;
-  }
-  document.cookie = `${name}=${value || ""}${expires}; path=/; SameSite=Lax; Secure`;
-};
-
-const removeCookie = (name: string) => {
-  if (typeof document === 'undefined') return;
-  document.cookie = `${name}=; Max-Age=-99999999; path=/; SameSite=Lax; Secure`;
-};
+import { apiFetch } from '@/lib/api';
 
 const API_BASE = '/api/voice';
 
@@ -62,39 +35,15 @@ export interface VoiceInteractionHistory {
 }
 
 class VoiceService {
-  private authToken: string | null = null;
-
-  constructor() {
-    this.authToken = typeof window !== 'undefined' ? getCookie('authToken') : null;
-  }
-
-  /**
-   * Get authorization headers
-   */
-  private getHeaders(): HeadersInit {
-    return {
-      'Content-Type': 'application/json',
-      ...(this.authToken && { Authorization: `Bearer ${this.authToken}` }),
-    };
-  }
-
   /**
    * Process single audio buffer and get response
    */
   async processAudio(request: VoiceProcessRequest): Promise<VoiceProcessResponse> {
     try {
-      const response = await fetch(`${API_BASE}/process`, {
+      return await apiFetch<VoiceProcessResponse>(`${API_BASE}/process`, {
         method: 'POST',
-        headers: this.getHeaders(),
         body: JSON.stringify(request),
       });
-
-      if (!response.ok) {
-        const error = await response.json();
-        throw new Error(error.error || 'Failed to process audio');
-      }
-
-      return await response.json();
     } catch (error) {
       console.error('[v0] Voice processing error:', error);
       throw error;
@@ -106,18 +55,10 @@ class VoiceService {
    */
   async processAudioStream(request: VoiceStreamRequest): Promise<VoiceProcessResponse> {
     try {
-      const response = await fetch(`${API_BASE}/process-stream`, {
+      return await apiFetch<VoiceProcessResponse>(`${API_BASE}/process-stream`, {
         method: 'POST',
-        headers: this.getHeaders(),
         body: JSON.stringify(request),
       });
-
-      if (!response.ok) {
-        const error = await response.json();
-        throw new Error(error.error || 'Failed to process audio stream');
-      }
-
-      return await response.json();
     } catch (error) {
       console.error('[v0] Voice stream processing error:', error);
       throw error;
@@ -138,15 +79,7 @@ class VoiceService {
         params.append('language', language);
       }
 
-      const response = await fetch(`${API_BASE}/history?${params}`, {
-        headers: this.getHeaders(),
-      });
-
-      if (!response.ok) {
-        throw new Error('Failed to fetch history');
-      }
-
-      return await response.json();
+      return await apiFetch<VoiceInteractionHistory>(`${API_BASE}/history?${params}`);
     } catch (error) {
       console.error('[v0] Failed to fetch history:', error);
       throw error;
@@ -237,17 +170,10 @@ class VoiceService {
   }
 
   /**
-   * Set auth token (for manual updates)
+   * Set auth token (deprecated)
    */
   setAuthToken(token: string | null) {
-    this.authToken = token;
-    if (typeof window !== 'undefined') {
-      if (token) {
-        setCookie('authToken', token);
-      } else {
-        removeCookie('authToken');
-      }
-    }
+    // Deprecated: Auth token is automatically handled by the Supabase session in apiFetch
   }
 }
 
