@@ -38,7 +38,8 @@
       "no-inline-bounce-easing",
       "no-scale-from-zero",
       "rendering-hydration-no-flicker",
-      "no-polymorphic-children"
+      "no-polymorphic-children",
+      "js-tosorted-immutable"
     ]
   }
 }
