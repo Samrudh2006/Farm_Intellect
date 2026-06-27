@@ -7,7 +7,6 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { AshokaChakra } from "@/components/ui/ashoka-chakra";
-import { FloatingAIAssistant } from "@/components/home/FloatingAIAssistant";
 import { ScrollReveal, CountUp, ParallaxFloat } from "@/components/home/ScrollReveal";
 import { LanguageSelector } from "@/components/ui/language-selector";
 import { useLanguage } from "@/contexts/LanguageContext";
@@ -206,7 +205,7 @@ const Index = () => {
             width={1920}
             height={1080}
           />
-          <div className="absolute inset-0 bg-gradient-to-b from-background/10 via-transparent to-background/20" />
+          <div className="absolute inset-0 bg-gradient-to-b from-background/80 via-background/60 to-background/90" />
           <div className="absolute inset-0 bg-gradient-to-r from-primary/10 via-transparent to-accent/10" />
         </div>
 
@@ -526,9 +525,6 @@ const Index = () => {
         </div>
         <div className="tricolor-bar h-1.5 mt-8" />
       </footer>
-
-      {/* Floating AI Assistant */}
-      <FloatingAIAssistant />
 
       {/* Demo Audio Modal */}
       <Dialog open={demoOpen} onOpenChange={(open) => {
