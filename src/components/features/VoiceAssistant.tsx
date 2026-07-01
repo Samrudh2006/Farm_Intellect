@@ -1,5 +1,5 @@
-import { MultiLanguageVoiceAssistant } from "@/components/features/MultiLanguageVoiceAssistant";
+import { HumanVoiceAgent } from "@/components/features/HumanVoiceAgent";
 
 export const VoiceAssistant = () => {
-  return <MultiLanguageVoiceAssistant />;
+  return <HumanVoiceAgent />;
 };

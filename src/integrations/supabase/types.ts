@@ -377,6 +377,7 @@ export type Database = {
           id: string
           location: string | null
           phone: string | null
+          preferred_voice: string
           updated_at: string
           user_id: string
         }
@@ -388,6 +389,7 @@ export type Database = {
           id?: string
           location?: string | null
           phone?: string | null
+          preferred_voice?: string
           updated_at?: string
           user_id: string
         }
@@ -399,6 +401,7 @@ export type Database = {
           id?: string
           location?: string | null
           phone?: string | null
+          preferred_voice?: string
           updated_at?: string
           user_id?: string
         }
@@ -612,6 +615,33 @@ export type Database = {
           priority?: string | null
           status?: string | null
           title?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      voice_conversations: {
+        Row: {
+          created_at: string
+          id: string
+          language: string
+          messages: Json
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          language?: string
+          messages?: Json
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          language?: string
+          messages?: Json
+          updated_at?: string
           user_id?: string
         }
         Relationships: []
