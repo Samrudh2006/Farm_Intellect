@@ -57,7 +57,6 @@ const AdminNotifications = lazy(() => import("@/pages/admin/AdminNotifications")
 const AdminChat = lazy(() => import("@/pages/admin/AdminChat"));
 const AdminAuditLog = lazy(() => import("@/pages/admin/AdminAuditLog"));
 const AdminSms = lazy(() => import("@/pages/admin/AdminSms"));
-const VoiceConsole = lazy(() => import("@/pages/VoiceConsole"));
 const SmsRegister = lazy(() => import("@/pages/SmsRegister"));
 
 // Intelligence Center
@@ -95,11 +94,6 @@ export const protectedRoutes: ProtectedRouteConfig[] = [
   { path: "/farmer/features", component: FarmFeatures, allowedRoles: ["farmer"] },
   { path: "/farmer/knowledge", component: FarmerKnowledgeHub, allowedRoles: ["farmer"] },
   { path: "/farmer/profile", component: Profile, allowedRoles: ["farmer"] },
-  { path: "/farmer/voice-console", component: VoiceConsole, allowedRoles: ["farmer"] },
-  { path: "/expert/voice-console", component: VoiceConsole, allowedRoles: ["expert"] },
-  { path: "/merchant/voice-console", component: VoiceConsole, allowedRoles: ["merchant"] },
-  { path: "/admin/voice-console", component: VoiceConsole, allowedRoles: ["admin"] },
-  { path: "/voice-console", component: VoiceConsole },
 
   { path: "/merchant/dashboard", component: MerchantDashboardPage, allowedRoles: ["merchant"] },
   { path: "/merchant/farmers", component: MerchantFarmers, allowedRoles: ["merchant"] },
