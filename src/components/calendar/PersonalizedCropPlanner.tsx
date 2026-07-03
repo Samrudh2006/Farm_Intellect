@@ -290,7 +290,7 @@ export const PersonalizedCropPlanner = () => {
 
   const deletePlan = (planId: string) => {
     const updatedPlans = plans.filter((plan) => plan.id !== planId);
-    setPlans(updatedPlans);
+    saveCropPlans(updatedPlans);
     saveCropPlans(updatedPlans);
 
     toast({
