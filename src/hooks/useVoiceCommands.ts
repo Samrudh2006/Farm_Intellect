@@ -21,7 +21,7 @@ export const useVoiceCommands = () => {
   // Initialize command executor context
   useEffect(() => {
     const context: CommandExecutionContext = {
-      userId: user?.id || 0,
+      userId: user?.id || '0',
       currentRoute: location.pathname,
       language: localStorage.getItem('language') || 'en',
       role: (profile?.role as any) || 'guest',
