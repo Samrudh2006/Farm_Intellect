@@ -100,7 +100,7 @@ export const generateTableOfContents = (): Array<{
   const minLevel = Math.min(...headings.map((h) => h.level));
 
   return headings
-    .filter((h) => h.id) // Only include headings with IDs
+    .filter((h): h is { level: number; text: string; id: string } => Boolean(h.id))
     .map((h) => ({
       ...h,
       indent: h.level - minLevel,
