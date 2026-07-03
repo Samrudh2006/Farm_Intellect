@@ -284,7 +284,7 @@ export const PersonalizedCropPlanner = () => {
       };
     });
 
-    setPlans(updatedPlans);
+    saveCropPlans(updatedPlans);
     saveCropPlans(updatedPlans);
   };
 
