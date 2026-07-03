@@ -132,7 +132,7 @@ export function useHumanVoiceAgent(opts: Options = {}) {
       const res = await fetch(url, {
         method: "POST",
         headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
-        body: JSON.stringify({ text, voice: opts.voice || "alloy", region: opts.region || "India" }),
+        body: JSON.stringify({ text, voice: opts.voice || "alloy", region: opts.region || "India", language: opts.language || "en" }),
         signal: ac.signal,
       });
       if (!res.ok || !res.body) throw new Error(`TTS ${res.status}`);
