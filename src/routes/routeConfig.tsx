@@ -57,6 +57,7 @@ const AdminNotifications = lazy(() => import("@/pages/admin/AdminNotifications")
 const AdminChat = lazy(() => import("@/pages/admin/AdminChat"));
 const AdminAuditLog = lazy(() => import("@/pages/admin/AdminAuditLog"));
 const AdminSms = lazy(() => import("@/pages/admin/AdminSms"));
+const VoiceConsole = lazy(() => import("@/pages/VoiceConsole"));
 const SmsRegister = lazy(() => import("@/pages/SmsRegister"));
 
 // Intelligence Center
