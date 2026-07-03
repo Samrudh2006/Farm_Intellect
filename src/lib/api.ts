@@ -5,24 +5,17 @@ const configuredBaseUrl = import.meta.env.VITE_API_BASE_URL as string | undefine
 
 // Determine API base URL based on environment
 const getApiBaseUrl = (): string => {
-  // If explicitly configured, use that
+  // If explicitly configured via env var, use that (e.g., external backend URL)
   if (configuredBaseUrl) {
     return configuredBaseUrl.replace(/\/$/, "");
   }
   
-  // In development, use localhost:3001
+  // In development, use localhost:3001 (local Express backend)
   if (import.meta.env.DEV) {
     return "http://localhost:3001";
   }
   
-  // In production, use relative URLs to go through same origin (Vercel will proxy API routes)
-  // Or use the current domain's /api path
-  if (typeof window !== "undefined") {
-    const origin = window.location.origin;
-    return `${origin}/api`;
-  }
-  
-  // Fallback for SSR or other contexts
+  // In production (Vercel), use /api (backend runs on same Vercel project)
   return "/api";
 };
 

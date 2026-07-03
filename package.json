@@ -4,15 +4,19 @@
   "version": "0.0.0",
   "type": "module",
   "scripts": {
-    "dev": "vite",
+    "dev": "concurrently \"npm run dev:frontend\" \"npm run dev:backend\"",
+    "dev:frontend": "vite",
+    "dev:backend": "npm --prefix backend run dev",
     "setup:db": "node scripts/setup-db.js",
-    "build": "vite build",
+    "build": "vite build && npm --prefix backend run build",
     "build:dev": "vite build --mode development",
+    "build:backend": "npm --prefix backend run build",
     "test": "vitest run",
     "test:watch": "vitest",
     "test:coverage": "vitest run --coverage",
     "lint": "eslint .",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "start": "npm --prefix backend run start"
   },
   "dependencies": {
     "@capacitor/cli": "^8.2.0",
@@ -95,6 +99,7 @@
     "@vitejs/plugin-react-swc": "^3.11.0",
     "@vitest/coverage-v8": "^2.1.0",
     "autoprefixer": "^10.4.21",
+    "concurrently": "^10.0.3",
     "eslint": "^9.32.0",
     "eslint-plugin-react-hooks": "^5.2.0",
     "eslint-plugin-react-refresh": "^0.4.20",

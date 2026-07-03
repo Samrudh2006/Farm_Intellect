@@ -1,4 +1,18 @@
 {
+  "buildCommand": "npm run build",
+  "outputDirectory": "dist",
+  "devCommand": "npm run dev",
+  "installCommand": "npm install && npm install --prefix backend",
+  "env": {
+    "NODE_ENV": "production"
+  },
+  "functions": {
+    "backend/**": {
+      "runtime": "nodejs20.x",
+      "memory": 3008,
+      "maxDuration": 30
+    }
+  },
   "headers": [
     {
       "source": "/(.*)",
@@ -129,8 +143,13 @@
   ],
   "rewrites": [
     {
+      "source": "/api/(.*)",
+      "destination": "/backend/src/server.js"
+    },
+    {
       "source": "/(.*)",
       "destination": "/index.html"
     }
-  ]
+  ],
+  "regions": ["iad1"]
 }
