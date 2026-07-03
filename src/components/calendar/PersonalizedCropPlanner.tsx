@@ -263,7 +263,6 @@ export const PersonalizedCropPlanner = () => {
     });
 
     saveCropPlans([plan, ...plans]);
-    setPlans((currentPlans) => [plan, ...currentPlans]);
     setSelectedCrop("");
     setNotes("");
 
