@@ -30,7 +30,7 @@ export const TurnstileWidget = ({
   return (
     <div className="flex justify-center my-4">
       <Turnstile
-        ref={turnstileRef}
+        {...({ ref: turnstileRef } as any)}
         sitekey={siteKey}
         onSuccess={onVerify}
         onError={onError}
