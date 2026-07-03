@@ -45,7 +45,7 @@ export class CoreWebVitalsMonitor {
         const lcpObserver = new PerformanceObserver((entryList) => {
           const entries = entryList.getEntries();
           const lastEntry = entries[entries.length - 1];
-          this.metrics.LCP = Math.round(lastEntry.renderTime || lastEntry.loadTime);
+          this.metrics.LCP = Math.round((lastEntry as any).renderTime || (lastEntry as any).loadTime);
           this.notifyCallbacks();
         });
         lcpObserver.observe({ entryTypes: ["largest-contentful-paint"] });

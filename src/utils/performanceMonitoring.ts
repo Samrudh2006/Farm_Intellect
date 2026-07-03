@@ -32,7 +32,7 @@ export const initCoreWebVitalsMonitoring = (callback: (metrics: PerformanceMetri
       const lcpObserver = new PerformanceObserver((list) => {
         const entries = list.getEntries();
         const lastEntry = entries[entries.length - 1];
-        vitals.LCP = Math.round(lastEntry.renderTime || lastEntry.loadTime);
+        vitals.LCP = Math.round((lastEntry as any).renderTime || (lastEntry as any).loadTime);
       });
       lcpObserver.observe({ entryTypes: ['largest-contentful-paint'] });
     } catch (e) {
