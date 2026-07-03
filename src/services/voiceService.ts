@@ -166,7 +166,7 @@ class VoiceService {
     const hasGetUserMedia =
       navigator.mediaDevices && navigator.mediaDevices.getUserMedia;
 
-    return hasMediaRecorder && hasAudioContext && hasGetUserMedia;
+    return Boolean(hasMediaRecorder && hasAudioContext && hasGetUserMedia);
   }
 
   /**
