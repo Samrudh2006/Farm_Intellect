@@ -48,6 +48,8 @@ Deno.serve(async (req) => {
     const text: string = String(body.text || "").slice(0, 4000);
     const voice: string = ALLOWED_VOICES.has(body.voice) ? body.voice : "alloy";
     const region: string = String(body.region || "India");
+    const language: string = String(body.language || "en");
+    const style: string = String(body.style || "warm"); // warm | calm | energetic
 
     if (!text.trim()) {
       return new Response(JSON.stringify({ error: "Empty text" }), {
@@ -55,7 +57,36 @@ Deno.serve(async (req) => {
       });
     }
 
-    const instructions = `Speak as a warm, unhurried Indian farming friend from ${region}. Use natural pauses, contractions, gentle inflection. Never sound like a text-to-speech robot. Match the emotion of the words. Slight regional warmth in the accent, but stay clear and easy to understand.`;
+    const LANG_HINTS: Record<string, string> = {
+      en: "Speak clear Indian English with a gentle rural warmth.",
+      hi: "हिंदी में बोलिए, धीरे और गर्मजोशी से, जैसे कोई अपना बात कर रहा हो।",
+      bn: "বাংলায় বলুন, স্বাভাবিক গ্রামীণ উষ্ণতার সাথে।",
+      te: "తెలుగులో మృదువుగా, స్నేహపూర్వకంగా మాట్లాడండి.",
+      ta: "தமிழில் அமைதியாக, நண்பர் போல பேசுங்கள்.",
+      mr: "मराठीत सहज, आपुलकीने बोला.",
+      gu: "ગુજરાતીમાં હૂંફથી અને સહજ રીતે બોલો.",
+      kn: "ಕನ್ನಡದಲ್ಲಿ ನಿಧಾನವಾಗಿ, ಆತ್ಮೀಯವಾಗಿ ಮಾತನಾಡಿ.",
+      ml: "മലയാളത്തിൽ ശാന്തമായി, സൗഹൃദപൂർവ്വം സംസാരിക്കുക.",
+      pa: "ਪੰਜਾਬੀ ਵਿੱਚ ਖੁੱਲ੍ਹਦਿਲੀ ਅਤੇ ਆਪਣੇਪਣ ਨਾਲ ਗੱਲ ਕਰੋ.",
+      or: "ଓଡ଼ିଆରେ ସ୍ୱାଭାବିକ ଓ ସ୍ନେହପୂର୍ଣ୍ଣ ଭାବରେ କୁହନ୍ତୁ.",
+      as: "অসমীয়াত মৃদুকৈ, বন্ধুৰ দৰে কওক.",
+      ur: "اردو میں نرم اور دوستانہ لہجے میں بات کیجیے۔",
+    };
+
+    const styleHint =
+      style === "energetic"
+        ? "Slightly upbeat pace, bright energy, still natural."
+        : style === "calm"
+        ? "Slow, low, reassuring cadence with generous pauses."
+        : "Warm, unhurried, friendly cadence.";
+
+    const instructions = [
+      `You are a real human friend from ${region}, not a voice assistant.`,
+      LANG_HINTS[language] || LANG_HINTS.en,
+      styleHint,
+      "Use natural breath, contractions, gentle inflection, small pauses.",
+      "Never sound robotic. Match emotion to the words.",
+    ].join(" ");
 
     const resp = await fetch("https://ai.gateway.lovable.dev/v1/audio/speech", {
       method: "POST",
