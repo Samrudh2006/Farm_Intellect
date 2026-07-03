@@ -48,7 +48,7 @@ export const useCurrentUser = (): {
       role: user.role,
       email: updates.email ?? profile?.email ?? authUser.email ?? "",
       phone: updates.phone ?? profile?.phone_number ?? "",
-      location: updates.location ?? (profile ? `${profile.district || ""}${profile.district && profile.state ? ", " : ""}${profile.state || ""}` : "") ?? "",
+      location: updates.location ?? (profile ? `${profile.district || ""}${profile.district && profile.state ? ", " : ""}${profile.state || ""}` : ""),
     };
 
     if (!hasSupabaseEnv) {
