@@ -3,7 +3,30 @@ import { buildOfflineUrl, enqueueOfflineRequest } from "@/lib/offlineSync";
 
 const configuredBaseUrl = import.meta.env.VITE_API_BASE_URL as string | undefined;
 
-export const apiBaseUrl = (configuredBaseUrl || "http://localhost:3001").replace(/\/$/, "");
+// Determine API base URL based on environment
+const getApiBaseUrl = (): string => {
+  // If explicitly configured, use that
+  if (configuredBaseUrl) {
+    return configuredBaseUrl.replace(/\/$/, "");
+  }
+  
+  // In development, use localhost:3001
+  if (import.meta.env.DEV) {
+    return "http://localhost:3001";
+  }
+  
+  // In production, use relative URLs to go through same origin (Vercel will proxy API routes)
+  // Or use the current domain's /api path
+  if (typeof window !== "undefined") {
+    const origin = window.location.origin;
+    return `${origin}/api`;
+  }
+  
+  // Fallback for SSR or other contexts
+  return "/api";
+};
+
+export const apiBaseUrl = getApiBaseUrl();
 
 export class ApiError extends Error {
   status: number;

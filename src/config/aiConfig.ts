@@ -4,10 +4,31 @@
  */
 
 const configuredBaseUrl = import.meta.env.VITE_API_BASE_URL as string | undefined;
-const defaultApiBaseUrl = "http://localhost:3001";
+
+// Determine API base URL based on environment
+const getApiBaseUrl = (): string => {
+  // If explicitly configured, use that
+  if (configuredBaseUrl) {
+    return configuredBaseUrl.replace(/\/$/, "");
+  }
+  
+  // In development, use localhost:3001
+  if (import.meta.env.DEV) {
+    return "http://localhost:3001";
+  }
+  
+  // In production, use relative URLs
+  if (typeof window !== "undefined") {
+    const origin = window.location.origin;
+    return `${origin}/api`;
+  }
+  
+  // Fallback for SSR or other contexts
+  return "/api";
+};
 
 export const AI_CONFIG = {
-  API_BASE_URL: (configuredBaseUrl || defaultApiBaseUrl).replace(/\/$/, ""),
+  API_BASE_URL: getApiBaseUrl(),
   FEATURES: {
     CHAT_AI: true,
     DISEASE_DETECTION: true,
@@ -36,7 +57,7 @@ export const AI_CONFIG = {
   },
 };
 
-if (import.meta.env.PROD && AI_CONFIG.API_BASE_URL.startsWith("http://")) {
+if (import.meta.env.PROD && AI_CONFIG.API_BASE_URL.startsWith("http://") && !AI_CONFIG.API_BASE_URL.startsWith("http://localhost")) {
   console.warn("[v0] Set VITE_API_BASE_URL to an https:// URL in production.");
 }
 
