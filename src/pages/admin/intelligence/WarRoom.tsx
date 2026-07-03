@@ -62,7 +62,7 @@ const WarRoom = () => {
             <div className="flex-1 overflow-hidden relative">
               <AnimatePresence>
                 {alerts.map((alert, i) => (
-                  <motion.layout
+                  <motion.div
                     key={alert.time + alert.msg}
                     initial={{ opacity: 0, x: -20 }}
                     animate={{ opacity: 1, x: 0 }}
@@ -80,7 +80,7 @@ const WarRoom = () => {
                       <span>{alert.loc}</span>
                     </div>
                     <p>{alert.msg}</p>
-                  </motion.layout>
+                  </motion.div>
                 ))}
               </AnimatePresence>
             </div>
