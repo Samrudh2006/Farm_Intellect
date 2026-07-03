@@ -88,7 +88,7 @@ export default defineConfig(({ mode }) => ({
     react(),
     {
       name: "robots-policy-meta",
-      transformIndexHtml(html) {
+      transformIndexHtml(html: string) {
         if (!html.includes("%ROBOTS_POLICY%")) {
           throw new Error("Missing %ROBOTS_POLICY% placeholder in index.html.");
         }
