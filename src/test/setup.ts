@@ -44,14 +44,14 @@ Object.defineProperty(window, 'matchMedia', {
 });
 
 // Mock IntersectionObserver
-global.IntersectionObserver = vi.fn().mockImplementation(() => ({
+(globalThis as any).IntersectionObserver = vi.fn().mockImplementation(() => ({
   observe: vi.fn(),
   unobserve: vi.fn(),
   disconnect: vi.fn(),
 }));
 
 // Mock fetch for API calls (override per test as needed)
-global.fetch = vi.fn(() =>
+(globalThis as any).fetch = vi.fn(() =>
   Promise.resolve({
     json: () => Promise.resolve({}),
     text: () => Promise.resolve(''),

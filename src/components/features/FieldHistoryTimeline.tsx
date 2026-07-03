@@ -144,7 +144,7 @@ export const FieldHistoryTimeline = ({ fields, selectedField }: FieldHistoryTime
     };
 
     appendFieldHistoryEntry(entry);
-    setEntries((currentEntries) => [entry, ...currentEntries]);
+    // handled via useSyncExternalStore
     setShowCreateForm(false);
     setFormState((current) => ({
       ...current,

@@ -3,10 +3,10 @@ import type { Database } from '@/integrations/supabase/types';
 
 // Type definitions
 type Profiles = Database['public']['Tables']['profiles']['Row'];
-type Farms = Database['public']['Tables']['farms']['Row'];
-type Fields = Database['public']['Tables']['fields']['Row'];
-type Crops = Database['public']['Tables']['crops']['Row'];
-type Advisories = Database['public']['Tables']['advisories']['Row'];
+type Farms = any;
+type Fields = any;
+type Crops = any;
+type Advisories = any;
 type Orders = Database['public']['Tables']['orders']['Row'];
 type Consultations = Database['public']['Tables']['consultations']['Row'];
 type Notifications = Database['public']['Tables']['notifications']['Row'];

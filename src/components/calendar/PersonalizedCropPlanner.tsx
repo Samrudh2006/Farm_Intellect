@@ -263,7 +263,6 @@ export const PersonalizedCropPlanner = () => {
     });
 
     saveCropPlans([plan, ...plans]);
-    setPlans((currentPlans) => [plan, ...currentPlans]);
     setSelectedCrop("");
     setNotes("");
 
@@ -285,13 +284,13 @@ export const PersonalizedCropPlanner = () => {
       };
     });
 
-    setPlans(updatedPlans);
+    saveCropPlans(updatedPlans);
     saveCropPlans(updatedPlans);
   };
 
   const deletePlan = (planId: string) => {
     const updatedPlans = plans.filter((plan) => plan.id !== planId);
-    setPlans(updatedPlans);
+    saveCropPlans(updatedPlans);
     saveCropPlans(updatedPlans);
 
     toast({

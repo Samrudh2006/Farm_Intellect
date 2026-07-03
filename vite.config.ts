@@ -4,9 +4,25 @@ import path from "path";
 import { componentTagger } from "lovable-tagger";
 import { visualizer } from "rollup-plugin-visualizer";
 
-// Map environment variables from Vercel integration to Vite naming convention
-const SUPABASE_URL = process.env.SUPABASE_URL || process.env.NEXT_PUBLIC_SUPABASE_URL || '';
-const SUPABASE_ANON_KEY = process.env.SUPABASE_ANON_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || '';
+// Vercel parity: prefer VITE_* env vars (what the client actually reads),
+// fall back to Vercel/Next-style names. Only inject via `define` when we
+// actually have a value — otherwise Vite's own import.meta.env from .env
+// wins at build time.
+const SUPABASE_URL =
+  process.env.VITE_SUPABASE_URL ||
+  process.env.SUPABASE_URL ||
+  process.env.NEXT_PUBLIC_SUPABASE_URL ||
+  '';
+const SUPABASE_ANON_KEY =
+  process.env.VITE_SUPABASE_PUBLISHABLE_KEY ||
+  process.env.VITE_SUPABASE_ANON_KEY ||
+  process.env.SUPABASE_ANON_KEY ||
+  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ||
+  '';
+const SUPABASE_PROJECT_ID =
+  process.env.VITE_SUPABASE_PROJECT_ID ||
+  process.env.SUPABASE_PROJECT_ID ||
+  '';
 
 const vendorChunkGroups: Array<[string, string[]]> = [
   ["react-vendor", ["react", "react-dom"]],
@@ -72,7 +88,7 @@ export default defineConfig(({ mode }) => ({
     react(),
     {
       name: "robots-policy-meta",
-      transformIndexHtml(html) {
+      transformIndexHtml(html: string) {
         if (!html.includes("%ROBOTS_POLICY%")) {
           throw new Error("Missing %ROBOTS_POLICY% placeholder in index.html.");
         }

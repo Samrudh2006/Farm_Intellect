@@ -304,7 +304,7 @@ export const checkEmailExists = async (email: string): Promise<boolean> => {
 };
 
 // Session timeout handler
-let sessionTimeoutId: NodeJS.Timeout | null = null;
+let sessionTimeoutId: ReturnType<typeof setTimeout> | null = null;
 
 export const setSessionTimeout = (milliseconds: number = 30 * 60 * 1000) => {
   if (sessionTimeoutId) clearTimeout(sessionTimeoutId);

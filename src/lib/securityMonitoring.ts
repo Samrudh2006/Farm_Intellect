@@ -16,7 +16,7 @@ class ErrorLogger {
   private static instance: ErrorLogger;
   private errorQueue: ErrorLog[] = [];
   private maxQueueSize = 50;
-  private flushInterval: NodeJS.Timeout | null = null;
+  private flushInterval: ReturnType<typeof setTimeout> | null = null;
 
   private constructor() {
     this.startAutoFlush();

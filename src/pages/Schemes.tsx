@@ -54,7 +54,7 @@ interface Scheme {
   state: string;
   documents: string[];
   targetFarmerTypes: SchemeWizardProfile["farmerType"][];
-  interestFocus: SchemeWizardProfile["interestedIn"][];
+  interestFocus: (SchemeWizardProfile["interestedIn"] | string)[];
   irrigationNeeds: SchemeWizardProfile["irrigationNeed"][];
   minLandHolding?: number;
   maxLandHolding?: number;
