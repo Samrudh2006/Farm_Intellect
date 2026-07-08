@@ -81,8 +81,11 @@ const readFromStorage = <T,>(key: string, fallback: T): T => {
   return getSecureItem<T>(key, fallback);
 };
 
+let cachedSummary: any = null;
+
 const writeToStorage = <T,>(key: string, value: T) => {
   setSecureItem(key, value);
+  cachedSummary = null;
   window.dispatchEvent(new Event(PHASE1_STORAGE_EVENT));
 };
 
@@ -219,12 +222,14 @@ export const restoreDismissedAlerts = () => {
 };
 
 export const getPhase1Summary = () => {
+  if (cachedSummary) return cachedSummary;
+
   const plans = getCropPlans();
   const fieldEvents = getFieldHistoryEntries();
   const schemeState = getSchemeWizardState();
   const expertBookings = getExpertBookings();
 
-  return {
+  cachedSummary = {
     cropPlans: plans.length,
     openTasks: plans.flatMap((plan) => plan.reminders).filter((reminder) => !reminder.completed).length,
     fieldEvents: fieldEvents.length,
@@ -232,4 +237,5 @@ export const getPhase1Summary = () => {
     lastWizardRun: schemeState.lastUpdated,
     expertBookings: expertBookings.length,
   };
+  return cachedSummary;
 };
