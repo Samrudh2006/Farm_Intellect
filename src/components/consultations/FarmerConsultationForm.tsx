@@ -23,11 +23,12 @@ export const FarmerConsultationForm = ({ onSubmitted }: { onSubmitted?: () => vo
   const [priority, setPriority] = useState("medium");
   const [submitting, setSubmitting] = useState(false);
   const [captchaToken, setCaptchaToken] = useState<string | null>(null);
+  const siteKey = import.meta.env.VITE_TURNSTILE_SITE_KEY || import.meta.env.VITE_CLOUDFLARE_TURNSTILE_SITE_KEY;
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!user?.id || !title.trim() || !description.trim()) return;
-    if (!captchaToken) {
+    if (siteKey && !captchaToken) {
       toast({ title: "Verification required", description: "Please complete the CAPTCHA", variant: "destructive" });
       return;
     }
@@ -98,19 +99,21 @@ export const FarmerConsultationForm = ({ onSubmitted }: { onSubmitted?: () => vo
           </div>
 
           {/* Turnstile CAPTCHA for bot prevention */}
-          <div className="flex justify-center py-2">
-            <Turnstile
-              sitekey={import.meta.env.VITE_TURNSTILE_SITE_KEY || ""}
-              onSuccess={(token) => setCaptchaToken(token)}
-              onError={() => {
-                setCaptchaToken(null);
-                toast({ title: "CAPTCHA failed", description: "Please try again", variant: "destructive" });
-              }}
-              theme="light"
-            />
-          </div>
+          {siteKey && (
+            <div className="flex justify-center py-2">
+              <Turnstile
+                sitekey={siteKey}
+                onSuccess={(token) => setCaptchaToken(token)}
+                onError={() => {
+                  setCaptchaToken(null);
+                  toast({ title: "CAPTCHA failed", description: "Please try again", variant: "destructive" });
+                }}
+                theme="light"
+              />
+            </div>
+          )}
 
-          <Button type="submit" disabled={submitting || !captchaToken} className="w-full">
+          <Button type="submit" disabled={submitting || (Boolean(siteKey) && !captchaToken)} className="w-full">
             <Send className="h-4 w-4 mr-2" />
             {submitting ? "Submitting…" : "Submit to Expert Queue"}
           </Button>
