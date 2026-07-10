@@ -42,10 +42,7 @@
     "uuid": "^14.0.0",
     "winston": "^3.11.0"
   },
-  "overrides": {
-    "uuid": "$uuid",
-    "@opentelemetry/core": "^2.8.0"
-  },
+
   "devDependencies": {
     "cross-env": "^10.1.0",
     "nodemon": "^3.0.2",
