@@ -1,0 +1,11 @@
+{
+  "applinks": {
+    "apps": [],
+    "details": [
+      {
+        "appID": "com.farm-intellect.app",
+        "paths": ["/", "/farmer/*", "/merchant/*", "/expert/*"]
+      }
+    ]
+  }
+}

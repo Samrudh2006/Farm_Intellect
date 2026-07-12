@@ -1,0 +1,30 @@
+# Farm Intellect Platform - Security Policy
+# RFC 9116 Compliant - Updated 2026-05-15
+
+# Primary security contact
+Contact: mailto:security@farm-intellect.dev
+
+# Preferred languages for security reports
+Preferred-Languages: en, hi
+
+# Policy pages
+Policy: https://farm-intellect-65.lovable.app/security-policy
+Acknowledgments: https://farm-intellect-65.lovable.app/security-acknowledgments
+
+# Canonical URL for this file
+Canonical: https://farm-intellect-65.lovable.app/.well-known/security.txt
+
+# Expiration date - update annually
+Expires: 2027-05-15T23:59:59.000Z
+
+# Hardware security keys supported (future)
+# Hiring: https://farm-intellect-65.lovable.app/careers
+
+# Key security commitments:
+# - End-to-end TLS encryption (HSTS preload)
+# - Content Security Policy (CSP) enforcement
+# - Row-Level Security (RLS) on all database tables
+# - Automatic dependency scanning via Dependabot
+# - Regular security audits (quarterly)
+# - Responsible vulnerability disclosure program
+# - No unpatched critical CVEs in dependencies

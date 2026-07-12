@@ -1,0 +1,422 @@
+[
+    {
+        "merged": "C:\\Users\\HP\\.gradle\\daemon\\8.14.3\\com.farmintellect.app-debug-28:\\layout_activity_main.xml.flat",
+        "source": "C:\\Users\\HP\\.gradle\\daemon\\8.14.3\\com.farmintellect.app-main-30:\\layout\\activity_main.xml"
+    },
+    {
+        "merged": "C:\\Users\\HP\\.gradle\\daemon\\8.14.3\\com.farmintellect.app-debug-28:\\drawable-night_splash.png.flat",
+        "source": "C:\\Users\\HP\\.gradle\\daemon\\8.14.3\\com.farmintellect.app-main-30:\\drawable-night\\splash.png"
+    },
+    {
+        "merged": "com.farmintellect.app-debug-28:/drawable-land-night-ldpi_splash.png.flat",
+        "source": "com.farmintellect.app-main-30:/drawable-land-night-ldpi/splash.png"
+    },
+    {
+        "merged": "C:\\Users\\HP\\.gradle\\daemon\\8.14.3\\com.farmintellect.app-debug-28:\\mipmap-xxxhdpi_ic_launcher_foreground.png.flat",
+        "source": "C:\\Users\\HP\\.gradle\\daemon\\8.14.3\\com.farmintellect.app-main-30:\\mipmap-xxxhdpi\\ic_launcher_foreground.png"
+    },
+    {
+        "merged": "C:\\Users\\HP\\.gradle\\daemon\\8.14.3\\com.farmintellect.app-debug-28:\\drawable-port-xxhdpi_splash.png.flat",
+        "source": "C:\\Users\\HP\\.gradle\\daemon\\8.14.3\\com.farmintellect.app-main-30:\\drawable-port-xxhdpi\\splash.png"
+    },
+    {
+        "merged": "C:\\Users\\HP\\.gradle\\daemon\\8.14.3\\com.farmintellect.app-debug-28:\\drawable-land-night-xxhdpi_splash.png.flat",
+        "source": "C:\\Users\\HP\\.gradle\\daemon\\8.14.3\\com.farmintellect.app-main-30:\\drawable-land-night-xxhdpi\\splash.png"
+    },
+    {
+        "merged": "C:\\Users\\HP\\.gradle\\daemon\\8.14.3\\com.farmintellect.app-debug-28:\\drawable-v24_ic_launcher_foreground.xml.flat",
+        "source": "C:\\Users\\HP\\.gradle\\daemon\\8.14.3\\com.farmintellect.app-main-30:\\drawable-v24\\ic_launcher_foreground.xml"
+    },
+    {
+        "merged": "com.farmintellect.app-debug-28:/mipmap-ldpi_ic_launcher_round.png.flat",
+        "source": "com.farmintellect.app-main-30:/mipmap-ldpi/ic_launcher_round.png"
+    },
+    {
+        "merged": "C:\\Users\\HP\\.gradle\\daemon\\8.14.3\\com.farmintellect.app-debug-28:\\mipmap-anydpi-v26_ic_launcher_round.xml.flat",
+        "source": "C:\\Users\\HP\\.gradle\\daemon\\8.14.3\\com.farmintellect.app-main-30:\\mipmap-anydpi-v26\\ic_launcher_round.xml"
+    },
+    {
+        "merged": "C:\\Users\\HP\\.gradle\\daemon\\8.14.3\\com.farmintellect.app-debug-28:\\mipmap-xhdpi_ic_launcher_round.png.flat",
+        "source": "C:\\Users\\HP\\.gradle\\daemon\\8.14.3\\com.farmintellect.app-main-30:\\mipmap-xhdpi\\ic_launcher_round.png"
+    },
+    {
+        "merged": "C:\\Users\\HP\\.gradle\\daemon\\8.14.3\\com.farmintellect.app-debug-28:\\mipmap-ldpi_ic_launcher_round.png.flat",
+        "source": "C:\\Users\\HP\\.gradle\\daemon\\8.14.3\\com.farmintellect.app-main-30:\\mipmap-ldpi\\ic_launcher_round.png"
+    },
+    {
+        "merged": "C:\\Users\\HP\\.gradle\\daemon\\8.14.3\\com.farmintellect.app-debug-28:\\mipmap-mdpi_ic_launcher_foreground.png.flat",
+        "source": "C:\\Users\\HP\\.gradle\\daemon\\8.14.3\\com.farmintellect.app-main-30:\\mipmap-mdpi\\ic_launcher_foreground.png"
+    },
+    {
+        "merged": "com.farmintellect.app-debug-28:/mipmap-xxhdpi_ic_launcher.png.flat",
+        "source": "com.farmintellect.app-main-30:/mipmap-xxhdpi/ic_launcher.png"
+    },
+    {
+        "merged": "com.farmintellect.app-debug-28:/drawable-land-xhdpi_splash.png.flat",
+        "source": "com.farmintellect.app-main-30:/drawable-land-xhdpi/splash.png"
+    },
+    {
+        "merged": "C:\\Users\\HP\\.gradle\\daemon\\8.14.3\\com.farmintellect.app-debug-28:\\mipmap-xxhdpi_ic_launcher_foreground.png.flat",
+        "source": "C:\\Users\\HP\\.gradle\\daemon\\8.14.3\\com.farmintellect.app-main-30:\\mipmap-xxhdpi\\ic_launcher_foreground.png"
+    },
+    {
+        "merged": "C:\\Users\\HP\\.gradle\\daemon\\8.14.3\\com.farmintellect.app-debug-28:\\drawable-land-hdpi_splash.png.flat",
+        "source": "C:\\Users\\HP\\.gradle\\daemon\\8.14.3\\com.farmintellect.app-main-30:\\drawable-land-hdpi\\splash.png"
+    },
+    {
+        "merged": "com.farmintellect.app-debug-28:/layout_activity_main.xml.flat",
+        "source": "com.farmintellect.app-main-30:/layout/activity_main.xml"
+    },
+    {
+        "merged": "com.farmintellect.app-debug-28:/drawable-v24_ic_launcher_foreground.xml.flat",
+        "source": "com.farmintellect.app-main-30:/drawable-v24/ic_launcher_foreground.xml"
+    },
+    {
+        "merged": "C:\\Users\\HP\\.gradle\\daemon\\8.14.3\\com.farmintellect.app-debug-28:\\drawable-port-xhdpi_splash.png.flat",
+        "source": "C:\\Users\\HP\\.gradle\\daemon\\8.14.3\\com.farmintellect.app-main-30:\\drawable-port-xhdpi\\splash.png"
+    },
+    {
+        "merged": "com.farmintellect.app-debug-28:/mipmap-hdpi_ic_launcher.png.flat",
+        "source": "com.farmintellect.app-main-30:/mipmap-hdpi/ic_launcher.png"
+    },
+    {
+        "merged": "com.farmintellect.app-debug-28:/drawable-land-night-xxhdpi_splash.png.flat",
+        "source": "com.farmintellect.app-main-30:/drawable-land-night-xxhdpi/splash.png"
+    },
+    {
+        "merged": "C:\\Users\\HP\\.gradle\\daemon\\8.14.3\\com.farmintellect.app-debug-28:\\mipmap-xxhdpi_ic_launcher_round.png.flat",
+        "source": "C:\\Users\\HP\\.gradle\\daemon\\8.14.3\\com.farmintellect.app-main-30:\\mipmap-xxhdpi\\ic_launcher_round.png"
+    },
+    {
+        "merged": "C:\\Users\\HP\\.gradle\\daemon\\8.14.3\\com.farmintellect.app-debug-28:\\mipmap-ldpi_ic_launcher_foreground.png.flat",
+        "source": "C:\\Users\\HP\\.gradle\\daemon\\8.14.3\\com.farmintellect.app-main-30:\\mipmap-ldpi\\ic_launcher_foreground.png"
+    },
+    {
+        "merged": "com.farmintellect.app-debug-28:/drawable-land-ldpi_splash.png.flat",
+        "source": "com.farmintellect.app-main-30:/drawable-land-ldpi/splash.png"
+    },
+    {
+        "merged": "com.farmintellect.app-debug-28:/mipmap-xhdpi_ic_launcher.png.flat",
+        "source": "com.farmintellect.app-main-30:/mipmap-xhdpi/ic_launcher.png"
+    },
+    {
+        "merged": "com.farmintellect.app-debug-28:/drawable_splash.png.flat",
+        "source": "com.farmintellect.app-main-30:/drawable/splash.png"
+    },
+    {
+        "merged": "com.farmintellect.app-debug-28:/drawable-night_splash.png.flat",
+        "source": "com.farmintellect.app-main-30:/drawable-night/splash.png"
+    },
+    {
+        "merged": "C:\\Users\\HP\\.gradle\\daemon\\8.14.3\\com.farmintellect.app-debug-28:\\drawable-land-night-mdpi_splash.png.flat",
+        "source": "C:\\Users\\HP\\.gradle\\daemon\\8.14.3\\com.farmintellect.app-main-30:\\drawable-land-night-mdpi\\splash.png"
+    },
+    {
+        "merged": "com.farmintellect.app-debug-28:/drawable-land-night-mdpi_splash.png.flat",
+        "source": "com.farmintellect.app-main-30:/drawable-land-night-mdpi/splash.png"
+    },
+    {
+        "merged": "com.farmintellect.app-debug-28:/drawable-port-ldpi_splash.png.flat",
+        "source": "com.farmintellect.app-main-30:/drawable-port-ldpi/splash.png"
+    },
+    {
+        "merged": "com.farmintellect.app-debug-28:/mipmap-xxxhdpi_ic_launcher_round.png.flat",
+        "source": "com.farmintellect.app-main-30:/mipmap-xxxhdpi/ic_launcher_round.png"
+    },
+    {
+        "merged": "com.farmintellect.app-debug-28:/mipmap-hdpi_ic_launcher_foreground.png.flat",
+        "source": "com.farmintellect.app-main-30:/mipmap-hdpi/ic_launcher_foreground.png"
+    },
+    {
+        "merged": "C:\\Users\\HP\\.gradle\\daemon\\8.14.3\\com.farmintellect.app-debug-28:\\mipmap-xhdpi_ic_launcher_foreground.png.flat",
+        "source": "C:\\Users\\HP\\.gradle\\daemon\\8.14.3\\com.farmintellect.app-main-30:\\mipmap-xhdpi\\ic_launcher_foreground.png"
+    },
+    {
+        "merged": "C:\\Users\\HP\\.gradle\\daemon\\8.14.3\\com.farmintellect.app-debug-28:\\drawable-port-night-ldpi_splash.png.flat",
+        "source": "C:\\Users\\HP\\.gradle\\daemon\\8.14.3\\com.farmintellect.app-main-30:\\drawable-port-night-ldpi\\splash.png"
+    },
+    {
+        "merged": "C:\\Users\\HP\\.gradle\\daemon\\8.14.3\\com.farmintellect.app-debug-28:\\mipmap-mdpi_ic_launcher_round.png.flat",
+        "source": "C:\\Users\\HP\\.gradle\\daemon\\8.14.3\\com.farmintellect.app-main-30:\\mipmap-mdpi\\ic_launcher_round.png"
+    },
+    {
+        "merged": "com.farmintellect.app-debug-28:/drawable-land-mdpi_splash.png.flat",
+        "source": "com.farmintellect.app-main-30:/drawable-land-mdpi/splash.png"
+    },
+    {
+        "merged": "com.farmintellect.app-debug-28:/mipmap-hdpi_ic_launcher_round.png.flat",
+        "source": "com.farmintellect.app-main-30:/mipmap-hdpi/ic_launcher_round.png"
+    },
+    {
+        "merged": "com.farmintellect.app-debug-28:/drawable-port-night-xxxhdpi_splash.png.flat",
+        "source": "com.farmintellect.app-main-30:/drawable-port-night-xxxhdpi/splash.png"
+    },
+    {
+        "merged": "C:\\Users\\HP\\.gradle\\daemon\\8.14.3\\com.farmintellect.app-debug-28:\\mipmap-xhdpi_ic_launcher_background.png.flat",
+        "source": "C:\\Users\\HP\\.gradle\\daemon\\8.14.3\\com.farmintellect.app-main-30:\\mipmap-xhdpi\\ic_launcher_background.png"
+    },
+    {
+        "merged": "C:\\Users\\HP\\.gradle\\daemon\\8.14.3\\com.farmintellect.app-debug-28:\\drawable-port-xxxhdpi_splash.png.flat",
+        "source": "C:\\Users\\HP\\.gradle\\daemon\\8.14.3\\com.farmintellect.app-main-30:\\drawable-port-xxxhdpi\\splash.png"
+    },
+    {
+        "merged": "C:\\Users\\HP\\.gradle\\daemon\\8.14.3\\com.farmintellect.app-debug-28:\\drawable-land-xxxhdpi_splash.png.flat",
+        "source": "C:\\Users\\HP\\.gradle\\daemon\\8.14.3\\com.farmintellect.app-main-30:\\drawable-land-xxxhdpi\\splash.png"
+    },
+    {
+        "merged": "C:\\Users\\HP\\.gradle\\daemon\\8.14.3\\com.farmintellect.app-debug-28:\\drawable-land-night-ldpi_splash.png.flat",
+        "source": "C:\\Users\\HP\\.gradle\\daemon\\8.14.3\\com.farmintellect.app-main-30:\\drawable-land-night-ldpi\\splash.png"
+    },
+    {
+        "merged": "C:\\Users\\HP\\.gradle\\daemon\\8.14.3\\com.farmintellect.app-debug-28:\\mipmap-ldpi_ic_launcher.png.flat",
+        "source": "C:\\Users\\HP\\.gradle\\daemon\\8.14.3\\com.farmintellect.app-main-30:\\mipmap-ldpi\\ic_launcher.png"
+    },
+    {
+        "merged": "C:\\Users\\HP\\.gradle\\daemon\\8.14.3\\com.farmintellect.app-debug-28:\\drawable-port-ldpi_splash.png.flat",
+        "source": "C:\\Users\\HP\\.gradle\\daemon\\8.14.3\\com.farmintellect.app-main-30:\\drawable-port-ldpi\\splash.png"
+    },
+    {
+        "merged": "C:\\Users\\HP\\.gradle\\daemon\\8.14.3\\com.farmintellect.app-debug-28:\\mipmap-hdpi_ic_launcher_round.png.flat",
+        "source": "C:\\Users\\HP\\.gradle\\daemon\\8.14.3\\com.farmintellect.app-main-30:\\mipmap-hdpi\\ic_launcher_round.png"
+    },
+    {
+        "merged": "com.farmintellect.app-debug-28:/drawable-port-night-xhdpi_splash.png.flat",
+        "source": "com.farmintellect.app-main-30:/drawable-port-night-xhdpi/splash.png"
+    },
+    {
+        "merged": "com.farmintellect.app-debug-28:/drawable-port-night-ldpi_splash.png.flat",
+        "source": "com.farmintellect.app-main-30:/drawable-port-night-ldpi/splash.png"
+    },
+    {
+        "merged": "C:\\Users\\HP\\.gradle\\daemon\\8.14.3\\com.farmintellect.app-debug-28:\\drawable-port-night-mdpi_splash.png.flat",
+        "source": "C:\\Users\\HP\\.gradle\\daemon\\8.14.3\\com.farmintellect.app-main-30:\\drawable-port-night-mdpi\\splash.png"
+    },
+    {
+        "merged": "com.farmintellect.app-debug-28:/mipmap-xxxhdpi_ic_launcher_foreground.png.flat",
+        "source": "com.farmintellect.app-main-30:/mipmap-xxxhdpi/ic_launcher_foreground.png"
+    },
+    {
+        "merged": "C:\\Users\\HP\\.gradle\\daemon\\8.14.3\\com.farmintellect.app-debug-28:\\mipmap-ldpi_ic_launcher_background.png.flat",
+        "source": "C:\\Users\\HP\\.gradle\\daemon\\8.14.3\\com.farmintellect.app-main-30:\\mipmap-ldpi\\ic_launcher_background.png"
+    },
+    {
+        "merged": "com.farmintellect.app-debug-28:/xml_file_paths.xml.flat",
+        "source": "com.farmintellect.app-main-30:/xml/file_paths.xml"
+    },
+    {
+        "merged": "com.farmintellect.app-debug-28:/drawable-port-mdpi_splash.png.flat",
+        "source": "com.farmintellect.app-main-30:/drawable-port-mdpi/splash.png"
+    },
+    {
+        "merged": "C:\\Users\\HP\\.gradle\\daemon\\8.14.3\\com.farmintellect.app-debug-28:\\drawable-port-mdpi_splash.png.flat",
+        "source": "C:\\Users\\HP\\.gradle\\daemon\\8.14.3\\com.farmintellect.app-main-30:\\drawable-port-mdpi\\splash.png"
+    },
+    {
+        "merged": "com.farmintellect.app-debug-28:/drawable-land-night-xxxhdpi_splash.png.flat",
+        "source": "com.farmintellect.app-main-30:/drawable-land-night-xxxhdpi/splash.png"
+    },
+    {
+        "merged": "C:\\Users\\HP\\.gradle\\daemon\\8.14.3\\com.farmintellect.app-debug-28:\\mipmap-hdpi_ic_launcher.png.flat",
+        "source": "C:\\Users\\HP\\.gradle\\daemon\\8.14.3\\com.farmintellect.app-main-30:\\mipmap-hdpi\\ic_launcher.png"
+    },
+    {
+        "merged": "com.farmintellect.app-debug-28:/drawable-port-night-mdpi_splash.png.flat",
+        "source": "com.farmintellect.app-main-30:/drawable-port-night-mdpi/splash.png"
+    },
+    {
+        "merged": "C:\\Users\\HP\\.gradle\\daemon\\8.14.3\\com.farmintellect.app-debug-28:\\xml_file_paths.xml.flat",
+        "source": "C:\\Users\\HP\\.gradle\\daemon\\8.14.3\\com.farmintellect.app-main-30:\\xml\\file_paths.xml"
+    },
+    {
+        "merged": "C:\\Users\\HP\\.gradle\\daemon\\8.14.3\\com.farmintellect.app-debug-28:\\mipmap-mdpi_ic_launcher_background.png.flat",
+        "source": "C:\\Users\\HP\\.gradle\\daemon\\8.14.3\\com.farmintellect.app-main-30:\\mipmap-mdpi\\ic_launcher_background.png"
+    },
+    {
+        "merged": "C:\\Users\\HP\\.gradle\\daemon\\8.14.3\\com.farmintellect.app-debug-28:\\drawable-land-night-xxxhdpi_splash.png.flat",
+        "source": "C:\\Users\\HP\\.gradle\\daemon\\8.14.3\\com.farmintellect.app-main-30:\\drawable-land-night-xxxhdpi\\splash.png"
+    },
+    {
+        "merged": "C:\\Users\\HP\\.gradle\\daemon\\8.14.3\\com.farmintellect.app-debug-28:\\mipmap-xxxhdpi_ic_launcher_background.png.flat",
+        "source": "C:\\Users\\HP\\.gradle\\daemon\\8.14.3\\com.farmintellect.app-main-30:\\mipmap-xxxhdpi\\ic_launcher_background.png"
+    },
+    {
+        "merged": "C:\\Users\\HP\\.gradle\\daemon\\8.14.3\\com.farmintellect.app-debug-28:\\mipmap-xxxhdpi_ic_launcher.png.flat",
+        "source": "C:\\Users\\HP\\.gradle\\daemon\\8.14.3\\com.farmintellect.app-main-30:\\mipmap-xxxhdpi\\ic_launcher.png"
+    },
+    {
+        "merged": "com.farmintellect.app-debug-28:/drawable-port-night-xxhdpi_splash.png.flat",
+        "source": "com.farmintellect.app-main-30:/drawable-port-night-xxhdpi/splash.png"
+    },
+    {
+        "merged": "com.farmintellect.app-debug-28:/mipmap-mdpi_ic_launcher_foreground.png.flat",
+        "source": "com.farmintellect.app-main-30:/mipmap-mdpi/ic_launcher_foreground.png"
+    },
+    {
+        "merged": "C:\\Users\\HP\\.gradle\\daemon\\8.14.3\\com.farmintellect.app-debug-28:\\drawable-land-xxhdpi_splash.png.flat",
+        "source": "C:\\Users\\HP\\.gradle\\daemon\\8.14.3\\com.farmintellect.app-main-30:\\drawable-land-xxhdpi\\splash.png"
+    },
+    {
+        "merged": "C:\\Users\\HP\\.gradle\\daemon\\8.14.3\\com.farmintellect.app-debug-28:\\mipmap-mdpi_ic_launcher.png.flat",
+        "source": "C:\\Users\\HP\\.gradle\\daemon\\8.14.3\\com.farmintellect.app-main-30:\\mipmap-mdpi\\ic_launcher.png"
+    },
+    {
+        "merged": "C:\\Users\\HP\\.gradle\\daemon\\8.14.3\\com.farmintellect.app-debug-28:\\mipmap-xxhdpi_ic_launcher_background.png.flat",
+        "source": "C:\\Users\\HP\\.gradle\\daemon\\8.14.3\\com.farmintellect.app-main-30:\\mipmap-xxhdpi\\ic_launcher_background.png"
+    },
+    {
+        "merged": "C:\\Users\\HP\\.gradle\\daemon\\8.14.3\\com.farmintellect.app-debug-28:\\mipmap-xhdpi_ic_launcher.png.flat",
+        "source": "C:\\Users\\HP\\.gradle\\daemon\\8.14.3\\com.farmintellect.app-main-30:\\mipmap-xhdpi\\ic_launcher.png"
+    },
+    {
+        "merged": "C:\\Users\\HP\\.gradle\\daemon\\8.14.3\\com.farmintellect.app-debug-28:\\drawable-port-night-xxhdpi_splash.png.flat",
+        "source": "C:\\Users\\HP\\.gradle\\daemon\\8.14.3\\com.farmintellect.app-main-30:\\drawable-port-night-xxhdpi\\splash.png"
+    },
+    {
+        "merged": "com.farmintellect.app-debug-28:/mipmap-xxhdpi_ic_launcher_round.png.flat",
+        "source": "com.farmintellect.app-main-30:/mipmap-xxhdpi/ic_launcher_round.png"
+    },
+    {
+        "merged": "C:\\Users\\HP\\.gradle\\daemon\\8.14.3\\com.farmintellect.app-debug-28:\\drawable-land-night-xhdpi_splash.png.flat",
+        "source": "C:\\Users\\HP\\.gradle\\daemon\\8.14.3\\com.farmintellect.app-main-30:\\drawable-land-night-xhdpi\\splash.png"
+    },
+    {
+        "merged": "com.farmintellect.app-debug-28:/mipmap-ldpi_ic_launcher_foreground.png.flat",
+        "source": "com.farmintellect.app-main-30:/mipmap-ldpi/ic_launcher_foreground.png"
+    },
+    {
+        "merged": "com.farmintellect.app-debug-28:/drawable-port-xxxhdpi_splash.png.flat",
+        "source": "com.farmintellect.app-main-30:/drawable-port-xxxhdpi/splash.png"
+    },
+    {
+        "merged": "C:\\Users\\HP\\.gradle\\daemon\\8.14.3\\com.farmintellect.app-debug-28:\\mipmap-anydpi-v26_ic_launcher.xml.flat",
+        "source": "C:\\Users\\HP\\.gradle\\daemon\\8.14.3\\com.farmintellect.app-main-30:\\mipmap-anydpi-v26\\ic_launcher.xml"
+    },
+    {
+        "merged": "com.farmintellect.app-debug-28:/mipmap-xxxhdpi_ic_launcher.png.flat",
+        "source": "com.farmintellect.app-main-30:/mipmap-xxxhdpi/ic_launcher.png"
+    },
+    {
+        "merged": "com.farmintellect.app-debug-28:/drawable-land-xxhdpi_splash.png.flat",
+        "source": "com.farmintellect.app-main-30:/drawable-land-xxhdpi/splash.png"
+    },
+    {
+        "merged": "com.farmintellect.app-debug-28:/mipmap-xxhdpi_ic_launcher_foreground.png.flat",
+        "source": "com.farmintellect.app-main-30:/mipmap-xxhdpi/ic_launcher_foreground.png"
+    },
+    {
+        "merged": "C:\\Users\\HP\\.gradle\\daemon\\8.14.3\\com.farmintellect.app-debug-28:\\drawable-land-mdpi_splash.png.flat",
+        "source": "C:\\Users\\HP\\.gradle\\daemon\\8.14.3\\com.farmintellect.app-main-30:\\drawable-land-mdpi\\splash.png"
+    },
+    {
+        "merged": "C:\\Users\\HP\\.gradle\\daemon\\8.14.3\\com.farmintellect.app-debug-28:\\drawable-land-night-hdpi_splash.png.flat",
+        "source": "C:\\Users\\HP\\.gradle\\daemon\\8.14.3\\com.farmintellect.app-main-30:\\drawable-land-night-hdpi\\splash.png"
+    },
+    {
+        "merged": "com.farmintellect.app-debug-28:/drawable-land-night-hdpi_splash.png.flat",
+        "source": "com.farmintellect.app-main-30:/drawable-land-night-hdpi/splash.png"
+    },
+    {
+        "merged": "C:\\Users\\HP\\.gradle\\daemon\\8.14.3\\com.farmintellect.app-debug-28:\\drawable-land-ldpi_splash.png.flat",
+        "source": "C:\\Users\\HP\\.gradle\\daemon\\8.14.3\\com.farmintellect.app-main-30:\\drawable-land-ldpi\\splash.png"
+    },
+    {
+        "merged": "com.farmintellect.app-debug-28:/drawable_ic_launcher_background.xml.flat",
+        "source": "com.farmintellect.app-main-30:/drawable/ic_launcher_background.xml"
+    },
+    {
+        "merged": "C:\\Users\\HP\\.gradle\\daemon\\8.14.3\\com.farmintellect.app-debug-28:\\mipmap-xxxhdpi_ic_launcher_round.png.flat",
+        "source": "C:\\Users\\HP\\.gradle\\daemon\\8.14.3\\com.farmintellect.app-main-30:\\mipmap-xxxhdpi\\ic_launcher_round.png"
+    },
+    {
+        "merged": "com.farmintellect.app-debug-28:/drawable-land-hdpi_splash.png.flat",
+        "source": "com.farmintellect.app-main-30:/drawable-land-hdpi/splash.png"
+    },
+    {
+        "merged": "C:\\Users\\HP\\.gradle\\daemon\\8.14.3\\com.farmintellect.app-debug-28:\\mipmap-hdpi_ic_launcher_background.png.flat",
+        "source": "C:\\Users\\HP\\.gradle\\daemon\\8.14.3\\com.farmintellect.app-main-30:\\mipmap-hdpi\\ic_launcher_background.png"
+    },
+    {
+        "merged": "C:\\Users\\HP\\.gradle\\daemon\\8.14.3\\com.farmintellect.app-debug-28:\\mipmap-xxhdpi_ic_launcher.png.flat",
+        "source": "C:\\Users\\HP\\.gradle\\daemon\\8.14.3\\com.farmintellect.app-main-30:\\mipmap-xxhdpi\\ic_launcher.png"
+    },
+    {
+        "merged": "C:\\Users\\HP\\.gradle\\daemon\\8.14.3\\com.farmintellect.app-debug-28:\\drawable-land-xhdpi_splash.png.flat",
+        "source": "C:\\Users\\HP\\.gradle\\daemon\\8.14.3\\com.farmintellect.app-main-30:\\drawable-land-xhdpi\\splash.png"
+    },
+    {
+        "merged": "C:\\Users\\HP\\.gradle\\daemon\\8.14.3\\com.farmintellect.app-debug-28:\\drawable-port-night-xxxhdpi_splash.png.flat",
+        "source": "C:\\Users\\HP\\.gradle\\daemon\\8.14.3\\com.farmintellect.app-main-30:\\drawable-port-night-xxxhdpi\\splash.png"
+    },
+    {
+        "merged": "C:\\Users\\HP\\.gradle\\daemon\\8.14.3\\com.farmintellect.app-debug-28:\\xml_config.xml.flat",
+        "source": "C:\\Users\\HP\\.gradle\\daemon\\8.14.3\\com.farmintellect.app-main-30:\\xml\\config.xml"
+    },
+    {
+        "merged": "com.farmintellect.app-debug-28:/drawable-port-xxhdpi_splash.png.flat",
+        "source": "com.farmintellect.app-main-30:/drawable-port-xxhdpi/splash.png"
+    },
+    {
+        "merged": "com.farmintellect.app-debug-28:/drawable-land-xxxhdpi_splash.png.flat",
+        "source": "com.farmintellect.app-main-30:/drawable-land-xxxhdpi/splash.png"
+    },
+    {
+        "merged": "com.farmintellect.app-debug-28:/drawable-port-hdpi_splash.png.flat",
+        "source": "com.farmintellect.app-main-30:/drawable-port-hdpi/splash.png"
+    },
+    {
+        "merged": "C:\\Users\\HP\\.gradle\\daemon\\8.14.3\\com.farmintellect.app-debug-28:\\drawable-port-night-xhdpi_splash.png.flat",
+        "source": "C:\\Users\\HP\\.gradle\\daemon\\8.14.3\\com.farmintellect.app-main-30:\\drawable-port-night-xhdpi\\splash.png"
+    },
+    {
+        "merged": "com.farmintellect.app-debug-28:/drawable-land-night-xhdpi_splash.png.flat",
+        "source": "com.farmintellect.app-main-30:/drawable-land-night-xhdpi/splash.png"
+    },
+    {
+        "merged": "com.farmintellect.app-debug-28:/mipmap-xhdpi_ic_launcher_foreground.png.flat",
+        "source": "com.farmintellect.app-main-30:/mipmap-xhdpi/ic_launcher_foreground.png"
+    },
+    {
+        "merged": "C:\\Users\\HP\\.gradle\\daemon\\8.14.3\\com.farmintellect.app-debug-28:\\mipmap-hdpi_ic_launcher_foreground.png.flat",
+        "source": "C:\\Users\\HP\\.gradle\\daemon\\8.14.3\\com.farmintellect.app-main-30:\\mipmap-hdpi\\ic_launcher_foreground.png"
+    },
+    {
+        "merged": "C:\\Users\\HP\\.gradle\\daemon\\8.14.3\\com.farmintellect.app-debug-28:\\drawable_ic_launcher_background.xml.flat",
+        "source": "C:\\Users\\HP\\.gradle\\daemon\\8.14.3\\com.farmintellect.app-main-30:\\drawable\\ic_launcher_background.xml"
+    },
+    {
+        "merged": "com.farmintellect.app-debug-28:/drawable-port-xhdpi_splash.png.flat",
+        "source": "com.farmintellect.app-main-30:/drawable-port-xhdpi/splash.png"
+    },
+    {
+        "merged": "com.farmintellect.app-debug-28:/mipmap-ldpi_ic_launcher.png.flat",
+        "source": "com.farmintellect.app-main-30:/mipmap-ldpi/ic_launcher.png"
+    },
+    {
+        "merged": "C:\\Users\\HP\\.gradle\\daemon\\8.14.3\\com.farmintellect.app-debug-28:\\drawable_splash.png.flat",
+        "source": "C:\\Users\\HP\\.gradle\\daemon\\8.14.3\\com.farmintellect.app-main-30:\\drawable\\splash.png"
+    },
+    {
+        "merged": "com.farmintellect.app-debug-28:/mipmap-mdpi_ic_launcher.png.flat",
+        "source": "com.farmintellect.app-main-30:/mipmap-mdpi/ic_launcher.png"
+    },
+    {
+        "merged": "com.farmintellect.app-debug-28:/mipmap-xhdpi_ic_launcher_round.png.flat",
+        "source": "com.farmintellect.app-main-30:/mipmap-xhdpi/ic_launcher_round.png"
+    },
+    {
+        "merged": "C:\\Users\\HP\\.gradle\\daemon\\8.14.3\\com.farmintellect.app-debug-28:\\drawable-port-night-hdpi_splash.png.flat",
+        "source": "C:\\Users\\HP\\.gradle\\daemon\\8.14.3\\com.farmintellect.app-main-30:\\drawable-port-night-hdpi\\splash.png"
+    },
+    {
+        "merged": "C:\\Users\\HP\\.gradle\\daemon\\8.14.3\\com.farmintellect.app-debug-28:\\drawable-port-hdpi_splash.png.flat",
+        "source": "C:\\Users\\HP\\.gradle\\daemon\\8.14.3\\com.farmintellect.app-main-30:\\drawable-port-hdpi\\splash.png"
+    },
+    {
+        "merged": "com.farmintellect.app-debug-28:/mipmap-mdpi_ic_launcher_round.png.flat",
+        "source": "com.farmintellect.app-main-30:/mipmap-mdpi/ic_launcher_round.png"
+    },
+    {
+        "merged": "com.farmintellect.app-debug-28:/drawable-port-night-hdpi_splash.png.flat",
+        "source": "com.farmintellect.app-main-30:/drawable-port-night-hdpi/splash.png"
+    }
+]

@@ -1,0 +1,11 @@
+<!-- farm-intellect ads.txt for publisher verification -->
+<!-- This file is used to verify publisher identity and ad inventory -->
+
+google.com, pub-xxxxxxxxxxxxxxxx, DIRECT, f08c47fec0942fa0
+facebook.com, 1234567890, DIRECT, c3e20eec3f02d268
+openx.com, 537144986, DIRECT, 6a698e4da38d0fac
+rubicon.com, 12345, DIRECT, 0bfd66d529a55807
+appnexus.com, 12345, RESELLER
+pubmatic.com, 12345, RESELLER, 5d62403b186f2cab
+criteo.com, 12345, DIRECT, bf7bd3b7fb000677
+amazon.com, 12345, DIRECT

@@ -1,0 +1,19 @@
+<lint-module
+    format="1"
+    dir="C:\Users\HP\farm-intellect-65-2\android\app"
+    name=":app"
+    type="APP"
+    maven="android:app:unspecified"
+    agpVersion="8.13.0"
+    buildFolder="build"
+    bootClassPath="C:\Users\HP\AppData\Local\Android\Sdk\platforms\android-36\android.jar;C:\Users\HP\AppData\Local\Android\Sdk\build-tools\35.0.0\core-lambda-stubs.jar"
+    javaSourceLevel="21"
+    compileTarget="android-36"
+    neverShrinking="true">
+  <lintOptions
+      abortOnError="true"
+      absolutePaths="true"
+      checkReleaseBuilds="true"
+      explainIssues="true"/>
+  <variant name="release"/>
+</lint-module>

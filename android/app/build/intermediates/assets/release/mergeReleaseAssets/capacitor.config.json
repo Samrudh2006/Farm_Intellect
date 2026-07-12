@@ -1,0 +1,9 @@
+{
+	"appId": "com.farmintellect.app",
+	"appName": "farm-intellect-65",
+	"webDir": "dist",
+	"server": {
+		"url": "https://2871fc76-04d4-4429-976b-62885e5f683c.lovableproject.com?forceHideBadge=true",
+		"cleartext": true
+	}
+}
