@@ -1,13 +1,16 @@
-import React, { createContext, useContext, useState, useEffect, useMemo, useRef, ReactNode } from 'react';
+import React, { createContext, useContext, useState, useEffect, useMemo, useRef, ReactNode, useCallback } from 'react';
 import { Language, languageOptions, isRTL, getScriptFontFamily } from '@/i18n/languages';
 import { translations } from '@/i18n/translations';
+import i18n, { loadLanguageResources } from '@/i18n';
+import { useAuth } from '@/contexts/AuthContext';
+import { hasSupabaseEnv, supabase } from '@/integrations/supabase/client';
 
 export type { Language };
 export { languageOptions, isRTL };
 
 interface LanguageContextType {
   language: Language;
-  setLanguage: (lang: Language) => void;
+  setLanguage: (lang: Language) => Promise<void>;
   t: (key: string) => string;
   isRTL: boolean;
 }
@@ -27,12 +30,24 @@ interface LanguageProviderProps {
 }
 
 export const LanguageProvider: React.FC<LanguageProviderProps> = ({ children }) => {
+  const { user, profile, refreshProfile } = useAuth();
   const nodeOriginalTextRef = useRef(new WeakMap<Text, string>());
   const elementOriginalAttrsRef = useRef(new WeakMap<Element, Partial<Record<'placeholder' | 'title' | 'aria-label', string>>>());
   const [language, setLanguageState] = useState<Language>(() => {
     const saved = localStorage.getItem('app-language');
     return languageOptions.some((option) => option.code === saved) ? (saved as Language) : 'en';
   });
+  const isHydratedRef = useRef(false);
+
+  const setLanguage = useCallback(async (lang: Language) => {
+    if (!languageOptions.some((option) => option.code === lang)) return;
+    setLanguageState(lang);
+    localStorage.setItem('app-language', lang);
+    await loadLanguageResources(lang);
+    if (i18n.language !== lang) {
+      await i18n.changeLanguage(lang);
+    }
+  }, []);
 
   const localePhraseMaps = useMemo(() => {
     const enMap = translations.en;
@@ -82,15 +97,46 @@ export const LanguageProvider: React.FC<LanguageProviderProps> = ({ children }) 
     }
   }, [language]);
 
-  const setLanguage = (lang: Language) => {
-    setLanguageState(lang);
-    localStorage.setItem('app-language', lang);
+  const t = (key: string): string => {
+    const i18nValue = i18n.t(key);
+    if (i18nValue && i18nValue !== key) return i18nValue;
+    const translation = translations[language];
+    return translation[key] || translations.en[key] || key;
   };
 
-  const t = (key: string): string => {
-    const translation = translations[language];
-    return translation[key] || translations['en'][key] || key;
-  };
+  useEffect(() => {
+    const bootstrap = async () => {
+      await loadLanguageResources(language);
+      if (i18n.language !== language) {
+        await i18n.changeLanguage(language);
+      }
+      isHydratedRef.current = true;
+    };
+    bootstrap();
+  }, [language]);
+
+  useEffect(() => {
+    if (!profile?.language_preference) return;
+    const profileLanguage = profile.language_preference as Language;
+    if (!languageOptions.some((option) => option.code === profileLanguage)) return;
+    if (profileLanguage === language) return;
+    void setLanguage(profileLanguage);
+  }, [profile?.language_preference, language, setLanguage]);
+
+  useEffect(() => {
+    if (!isHydratedRef.current || !user || !hasSupabaseEnv) return;
+    if (profile?.language_preference === language) return;
+    const persist = async () => {
+      const { error } = await supabase
+        .from('profiles')
+        .update({ language_preference: language })
+        .eq('user_id', user.id);
+      if (!error) {
+        await refreshProfile();
+      }
+    };
+    persist();
+  }, [language, profile?.language_preference, refreshProfile, user]);
 
   useEffect(() => {
     const { enToCurrent, currentToEn, enNormalizedSet } = localePhraseMaps;

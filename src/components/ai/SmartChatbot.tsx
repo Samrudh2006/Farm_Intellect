@@ -20,6 +20,7 @@ import { useToast } from "@/hooks/use-toast";
 import { searchKCCQueries, getQueriesByCategory } from "@/data/kisanCallCenter";
 import { searchDiseases, getDiseasesByCrop } from "@/data/cropDiseases";
 import { streamChat, type AiMessage } from "@/lib/aiStream";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 interface Message {
   id: string;
@@ -35,6 +36,7 @@ interface Message {
 
 export const SmartChatbot = () => {
   const { toast } = useToast();
+  const { language } = useLanguage();
   const [messages, setMessages] = useState<Message[]>([
     {
       id: '1',
@@ -241,6 +243,7 @@ export const SmartChatbot = () => {
       await streamChat({
         messages: aiMessages,
         mode,
+        language,
         onDelta: (text) => {
           aiContent += text;
           aiSucceeded = true;

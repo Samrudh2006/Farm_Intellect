@@ -5,6 +5,7 @@ const CHAT_URL = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/chat`;
 export async function streamChat({
   messages,
   mode = "chat",
+  language = "en",
   imageBase64,
   imageMimeType,
   onDelta,
@@ -13,6 +14,7 @@ export async function streamChat({
 }: {
   messages: AiMessage[];
   mode?: "chat" | "disease" | "recommendation" | "yield" | "vision";
+  language?: string;
   imageBase64?: string;
   imageMimeType?: string;
   onDelta: (text: string) => void;
@@ -61,7 +63,7 @@ export async function streamChat({
     const { data: { session } } = await supabase.auth.getSession();
     const token = session?.access_token || import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY;
 
-    const body: Record<string, unknown> = { messages, mode };
+    const body: Record<string, unknown> = { messages, mode, language };
     if (imageBase64) {
       body.imageBase64 = imageBase64;
       body.imageMimeType = imageMimeType || "image/jpeg";
@@ -164,14 +166,17 @@ export async function streamChat({
 export async function invokeAI({
   messages,
   mode = "chat",
+  language = "en",
 }: {
   messages: AiMessage[];
   mode?: "chat" | "disease" | "recommendation" | "yield";
+  language?: string;
 }): Promise<string> {
   let result = "";
   await streamChat({
     messages,
     mode,
+    language,
     onDelta: (t) => { result += t; },
     onDone: () => {},
     onError: (err) => { throw new Error(err); },

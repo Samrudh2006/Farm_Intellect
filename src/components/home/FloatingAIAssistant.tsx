@@ -200,14 +200,32 @@ export const FloatingAIAssistant = () => {
     // Add language instruction if not English
     if (language !== "en") {
       const langNames: Record<string, string> = {
-        hi: "Hindi", bn: "Bengali", te: "Telugu", ta: "Tamil",
-        pa: "Punjabi", mr: "Marathi", gu: "Gujarati", kn: "Kannada",
-        ml: "Malayalam", or: "Odia", ur: "Urdu",
+        hi: "Hindi",
+        te: "Telugu",
+        ta: "Tamil",
+        kn: "Kannada",
+        ml: "Malayalam",
+        mr: "Marathi",
+        gu: "Gujarati",
+        bn: "Bengali",
+        pa: "Punjabi",
+        or: "Odia",
+        as: "Assamese",
+        ur: "Urdu",
+        kok: "Konkani",
+        sa: "Sanskrit",
+        mai: "Maithili",
+        doi: "Dogri",
+        ks: "Kashmiri",
+        mni: "Manipuri (Meitei)",
+        ne: "Nepali",
+        brx: "Bodo",
+        sat: "Santali",
       };
-      const langName = langNames[language] || "Hindi";
+      const langName = langNames[language] || "English";
       aiMessages.unshift({
         role: "system",
-        content: `Respond primarily in ${langName}. Use Devanagari/native script. Include English technical terms where helpful.`,
+        content: `Always answer ONLY in ${langName}. Never mix English unless absolutely necessary for technical identifiers.`,
       });
     }
 
@@ -216,6 +234,7 @@ export const FloatingAIAssistant = () => {
     await streamChat({
       messages: aiMessages,
       mode: "chat",
+      language,
       onDelta: (chunk) => {
         assistantContent += chunk;
         setMessages((prev) => {

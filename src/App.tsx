@@ -132,8 +132,8 @@ const App = () => {
   return (
     <QueryClientProvider client={queryClient}>
       <AppErrorBoundary>
-        <LanguageProvider>
-          <AuthProvider>
+        <AuthProvider>
+          <LanguageProvider>
             <TooltipProvider>
               <Toaster />
               <Sonner />
@@ -147,8 +147,8 @@ const App = () => {
                 <LottieSuccessOverlay />
               </BrowserRouter>
             </TooltipProvider>
-          </AuthProvider>
-        </LanguageProvider>
+          </LanguageProvider>
+        </AuthProvider>
       </AppErrorBoundary>
     </QueryClientProvider>
   );

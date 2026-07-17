@@ -100,6 +100,7 @@ export const AIChatbot = () => {
     await streamChat({
       messages: history,
       mode: "chat",
+      language,
       onDelta: upsertAssistant,
       onDone: () => {
         // Replace streaming id with permanent id

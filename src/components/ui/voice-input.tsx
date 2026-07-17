@@ -4,6 +4,7 @@ import { Mic, MicOff } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { LottieAnimation, LOTTIE_URLS } from "@/components/ui/lottie-animation";
+import { speechLocaleMap } from "@/i18n/speechLocales";
 // Extend Window interface for SpeechRecognition
 interface SpeechRecognitionInstance extends EventTarget {
   continuous: boolean;
@@ -25,33 +26,6 @@ declare global {
     webkitSpeechRecognition: new () => SpeechRecognitionInstance;
   }
 }
-
-// Map app language codes to Web Speech API language codes
-const languageToSpeechCode: Record<string, string> = {
-  en: "en-IN",
-  hi: "hi-IN",
-  bn: "bn-IN",
-  te: "te-IN",
-  ta: "ta-IN",
-  mr: "mr-IN",
-  gu: "gu-IN",
-  kn: "kn-IN",
-  ml: "ml-IN",
-  pa: "pa-IN",
-  or: "or-IN",
-  as: "as-IN",
-  ur: "ur-IN",
-  sa: "sa-IN",
-  ne: "ne-NP",
-  sd: "sd-IN",
-  ks: "ks-IN",
-  kok: "kok-IN",
-  doi: "doi-IN",
-  mai: "mai-IN",
-  mni: "mni-IN",
-  sat: "sat-IN",
-  brx: "brx-IN",
-};
 
 interface VoiceInputProps {
   onTranscript: (text: string) => void;
@@ -99,7 +73,7 @@ export const VoiceInput = ({
   // Update language when it changes
   useEffect(() => {
     if (recognitionRef.current) {
-      recognitionRef.current.lang = languageToSpeechCode[language] || "en-IN";
+      recognitionRef.current.lang = speechLocaleMap[language] || "en-IN";
     }
   }, [language]);
 
@@ -107,7 +81,7 @@ export const VoiceInput = ({
     if (!recognitionRef.current || isListening) return;
 
     setError(null);
-    recognitionRef.current.lang = languageToSpeechCode[language] || "en-IN";
+    recognitionRef.current.lang = speechLocaleMap[language] || "en-IN";
 
     recognitionRef.current.onstart = () => {
       setIsListening(true);
