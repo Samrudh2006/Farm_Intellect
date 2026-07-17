@@ -21,6 +21,7 @@ import {
 } from "lucide-react";
 import { streamChat, type AiMessage } from "@/lib/aiStream";
 import { loadDiseaseModel, classifyBase64Image, isModelReady, type DiseaseDetectionResult } from "@/lib/diseaseModel";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 interface DetectionResult {
   type: 'disease' | 'pest' | 'nutrient' | 'healthy';
@@ -32,6 +33,7 @@ interface DetectionResult {
 }
 
 export const VoiceImageQuery = () => {
+  const { language } = useLanguage();
   const [isRecording, setIsRecording] = useState(false);
   const [recordingTime, setRecordingTime] = useState(0);
   const [uploadedImage, setUploadedImage] = useState<string | null>(null);
@@ -117,6 +119,7 @@ export const VoiceImageQuery = () => {
       await streamChat({
         messages,
         mode: 'disease',
+        language,
         onDelta: (text) => { aiContent += text; },
         onDone: () => {
           const result = parseAiDiseaseResponse(aiContent);
@@ -266,6 +269,7 @@ export const VoiceImageQuery = () => {
       await streamChat({
         messages,
         mode: 'chat',
+        language,
         onDelta: (text) => {
           content += text;
           setVoiceResponse(content);

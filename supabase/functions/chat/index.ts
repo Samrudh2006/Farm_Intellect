@@ -33,7 +33,7 @@ serve(async (req) => {
       });
     }
 
-    const { messages, mode, imageBase64, imageMimeType } = await req.json();
+    const { messages, mode, imageBase64, imageMimeType, language = "en" } = await req.json();
 
     const GEMINI_API_KEY = Deno.env.get("GEMINI_API_KEY");
     const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
@@ -88,7 +88,12 @@ Use Indian product names and brands (Tata Rallis, UPL, Bayer, Syngenta, etc.). R
     };
 
     const activeMode = imageBase64 ? "vision" : (mode || "chat");
-    const systemPrompt = systemPrompts[activeMode] || systemPrompts.chat;
+    const selectedLangName = LANG_NAMES[String(language)] || "English";
+    const languageGuardrail = `\n\nLANGUAGE RULES (MANDATORY):
+- Always answer ONLY in ${selectedLangName}.
+- Do not mix English unless absolutely necessary for technical identifiers or brand names.
+- Keep agricultural terminology clear for farmers in ${selectedLangName}.`;
+    const systemPrompt = (systemPrompts[activeMode] || systemPrompts.chat) + languageGuardrail;
 
     // If we have an image AND Gemini key, use Gemini Vision API
     if (imageBase64 && GEMINI_API_KEY) {
@@ -300,3 +305,28 @@ Use Indian product names and brands (Tata Rallis, UPL, Bayer, Syngenta, etc.). R
     });
   }
 });
+    const LANG_NAMES: Record<string, string> = {
+      en: "English",
+      hi: "Hindi",
+      te: "Telugu",
+      ta: "Tamil",
+      kn: "Kannada",
+      ml: "Malayalam",
+      mr: "Marathi",
+      gu: "Gujarati",
+      bn: "Bengali",
+      pa: "Punjabi",
+      or: "Odia",
+      as: "Assamese",
+      ur: "Urdu",
+      kok: "Konkani",
+      sa: "Sanskrit",
+      mai: "Maithili",
+      doi: "Dogri",
+      ks: "Kashmiri",
+      mni: "Manipuri (Meitei)",
+      ne: "Nepali",
+      brx: "Bodo",
+      sat: "Santali",
+      sd: "Sindhi",
+    };

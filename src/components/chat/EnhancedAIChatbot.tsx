@@ -22,6 +22,7 @@ import { toast } from "sonner";
 import ReactMarkdown from "react-markdown";
 import { VoiceInput } from "@/components/ui/voice-input";
 import { useLanguage } from "@/contexts/LanguageContext";
+import { speechLocaleMap } from "@/i18n/speechLocales";
 
 interface Message {
   id: string;
@@ -30,33 +31,6 @@ interface Message {
   timestamp: Date;
   isTyping?: boolean;
 }
-
-// Text-to-Speech language mapping
-const ttsLanguageMap: Record<string, string> = {
-  en: "en-IN",
-  hi: "hi-IN",
-  bn: "bn-IN",
-  te: "te-IN",
-  ta: "ta-IN",
-  mr: "mr-IN",
-  gu: "gu-IN",
-  kn: "kn-IN",
-  ml: "ml-IN",
-  pa: "pa-IN",
-  or: "or-IN",
-  as: "as-IN",
-  ur: "ur-IN",
-  sa: "sa-IN",
-  ne: "ne-NP",
-  sd: "sd-IN",
-  ks: "ks-IN",
-  kok: "kok-IN",
-  doi: "doi-IN",
-  mai: "mai-IN",
-  mni: "mni-IN",
-  sat: "sat-IN",
-  brx: "brx-IN",
-};
 
 export const EnhancedAIChatbot = () => {
   const { t, language } = useLanguage();
@@ -98,13 +72,13 @@ export const EnhancedAIChatbot = () => {
       .replace(/`/g, '');
     
     const utterance = new SpeechSynthesisUtterance(cleanText);
-    utterance.lang = ttsLanguageMap[language] || "en-IN";
+    utterance.lang = speechLocaleMap[language] || "en-IN";
     utterance.rate = 0.9;
     utterance.pitch = 1;
     
     // Find best matching voice
     const voices = window.speechSynthesis.getVoices();
-    const langCode = ttsLanguageMap[language] || "en-IN";
+    const langCode = speechLocaleMap[language] || "en-IN";
     const matchingVoice = voices.find(v => v.lang === langCode) || 
                           voices.find(v => v.lang.startsWith(langCode.split('-')[0])) ||
                           voices.find(v => v.lang.startsWith('en'));
@@ -167,6 +141,7 @@ export const EnhancedAIChatbot = () => {
     await streamChat({
       messages: history,
       mode: "chat",
+      language,
       onDelta: upsertAssistant,
       onDone: () => {
         setMessages((prev) =>

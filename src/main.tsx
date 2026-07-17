@@ -3,6 +3,7 @@ import * as Sentry from "@sentry/react";
 import App from "./App.tsx";
 import "./index.css";
 import { startOfflineSync } from "@/lib/offlineSync";
+import { initI18n } from "@/i18n";
 
 // Initialize Sentry for error tracking and performance monitoring
 if (import.meta.env.VITE_SENTRY_DSN) {
@@ -79,6 +80,7 @@ if (!rootElement) {
 
 // Render app
 try {
+  await initI18n();
   createRoot(rootElement).render(
     <Sentry.ErrorBoundary fallback={({ error, resetError }) => (
       <div style={{ padding: '20px', color: 'red' }}>

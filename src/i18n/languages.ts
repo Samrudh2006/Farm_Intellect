@@ -3,8 +3,8 @@ export type Language =
   | 'ml' | 'or' | 'as' | 'ur' | 'sa' | 'ne' | 'sd' | 'ks' | 'kok'
   | 'doi' | 'mai' | 'mni' | 'sat' | 'brx';
 
-// RTL languages: Urdu, Sindhi, Kashmiri (Arabic script)
-export const RTL_LANGUAGES: Language[] = ['ur', 'sd', 'ks'];
+// RTL language support required for Urdu only
+export const RTL_LANGUAGES: Language[] = ['ur'];
 
 export const isRTL = (lang: Language): boolean => RTL_LANGUAGES.includes(lang);
 

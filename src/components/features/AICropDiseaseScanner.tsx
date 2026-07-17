@@ -17,6 +17,7 @@ import {
 import { toast } from "sonner";
 import { invokeAI } from "@/lib/aiStream";
 import ReactMarkdown from "react-markdown";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 interface DiseaseResult {
   disease: string;
@@ -28,6 +29,7 @@ interface DiseaseResult {
 }
 
 export const AICropDiseaseScanner = () => {
+  const { language } = useLanguage();
   const [isScanning, setIsScanning] = useState(false);
   const [result, setResult] = useState<DiseaseResult | null>(null);
   const [uploadedImage, setUploadedImage] = useState<string | null>(null);
@@ -56,6 +58,7 @@ ANALYSIS: [detailed analysis in markdown]`;
       const response = await invokeAI({
         messages: [{ role: "user", content: prompt }],
         mode: "disease",
+        language,
       });
 
       // Parse structured response

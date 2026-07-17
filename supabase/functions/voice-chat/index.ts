@@ -8,9 +8,29 @@ const corsHeaders = {
 };
 
 const LANG_NAMES: Record<string, string> = {
-  en: "English", hi: "Hindi", bn: "Bengali", te: "Telugu", ta: "Tamil",
-  mr: "Marathi", gu: "Gujarati", kn: "Kannada", ml: "Malayalam", pa: "Punjabi",
-  or: "Odia", as: "Assamese", ur: "Urdu",
+  en: "English",
+  hi: "Hindi",
+  te: "Telugu",
+  ta: "Tamil",
+  kn: "Kannada",
+  ml: "Malayalam",
+  mr: "Marathi",
+  gu: "Gujarati",
+  bn: "Bengali",
+  pa: "Punjabi",
+  or: "Odia",
+  as: "Assamese",
+  ur: "Urdu",
+  kok: "Konkani",
+  sa: "Sanskrit",
+  mai: "Maithili",
+  doi: "Dogri",
+  ks: "Kashmiri",
+  mni: "Manipuri (Meitei)",
+  ne: "Nepali",
+  brx: "Bodo",
+  sat: "Santali",
+  sd: "Sindhi",
 };
 
 Deno.serve(async (req) => {

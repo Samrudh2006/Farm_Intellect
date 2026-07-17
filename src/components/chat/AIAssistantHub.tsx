@@ -16,6 +16,7 @@ import { toast } from "sonner";
 import ReactMarkdown from "react-markdown";
 import { VoiceInput } from "@/components/ui/voice-input";
 import { useLanguage } from "@/contexts/LanguageContext";
+import { speechLocaleMap } from "@/i18n/speechLocales";
 
 interface Message {
   id: string;
@@ -24,11 +25,6 @@ interface Message {
   timestamp: Date;
   imageUrl?: string;
 }
-
-const ttsLanguageMap: Record<string, string> = {
-  en: "en-IN", hi: "hi-IN", bn: "bn-IN", te: "te-IN", ta: "ta-IN",
-  mr: "mr-IN", gu: "gu-IN", kn: "kn-IN", ml: "ml-IN", pa: "pa-IN",
-};
 
 // Convert file to base64
 const fileToBase64 = (file: File): Promise<string> =>
@@ -77,10 +73,10 @@ export const AIAssistantHub = () => {
     window.speechSynthesis.cancel();
     const clean = text.replace(/\*\*/g, '').replace(/\*/g, '').replace(/#{1,6}\s/g, '').replace(/`/g, '').replace(/\[.*?\]/g, '');
     const utterance = new SpeechSynthesisUtterance(clean);
-    utterance.lang = ttsLanguageMap[language] || "en-IN";
+    utterance.lang = speechLocaleMap[language] || "en-IN";
     utterance.rate = 0.9;
     const voices = window.speechSynthesis.getVoices();
-    const langCode = ttsLanguageMap[language] || "en-IN";
+    const langCode = speechLocaleMap[language] || "en-IN";
     const voice = voices.find(v => v.lang === langCode) || voices.find(v => v.lang.startsWith('en'));
     if (voice) utterance.voice = voice;
     utterance.onstart = () => { setIsSpeaking(true); };
@@ -131,6 +127,7 @@ export const AIAssistantHub = () => {
     await streamChat({
       messages: history,
       mode: imageData ? "vision" : "chat",
+      language,
       imageBase64: imageData?.base64,
       imageMimeType: imageData?.mimeType,
       onDelta: upsertAssistant,

@@ -137,7 +137,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
           village: undefined,
           profile_picture_url: profileData.avatar_url || undefined,
           bio: undefined,
-          language_preference: "en",
+          language_preference: profileData.language_preference || localStorage.getItem("app-language") || "en",
           role: (roleData?.role || "farmer") as 'farmer' | 'merchant' | 'expert' | 'admin',
         };
         setProfile(nextProfile);
