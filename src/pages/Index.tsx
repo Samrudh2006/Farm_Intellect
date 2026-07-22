@@ -522,9 +522,10 @@ const Index = () => {
              <p className="text-muted-foreground">
                {t('landing.footer_tagline')}
              </p>
-             <p className="text-xs text-muted-foreground/70 mt-4">
+             <p className="text-xs text-muted-foreground mt-4">
                {t('landing.footer_copyright')}
              </p>
+
           </motion.div>
         </div>
         <div className="tricolor-bar h-1.5 mt-8" />
