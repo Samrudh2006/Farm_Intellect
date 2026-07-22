@@ -74,7 +74,9 @@ export const publicRoutes: PublicRouteConfig[] = [
   { path: "/launch", component: AppLauncher },
   { path: "/reset-password", component: ResetPassword },
   { path: "/sms-register", component: SmsRegister },
+  { path: "/.lovable/oauth/consent", component: OAuthConsent },
 ];
+
 
 export const protectedRoutes: ProtectedRouteConfig[] = [
   { path: "/farmer/dashboard", component: FarmerDashboard, allowedRoles: ["farmer"] },
