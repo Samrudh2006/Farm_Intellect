@@ -86,6 +86,10 @@ const Login = () => {
   useEffect(() => {
     console.log("[v0] Login page auth check:", { user: !!user, profile: !!profile, userRole: profile?.role });
     if (user && profile) {
+      if (safeNext) {
+        navigate(safeNext, { replace: true });
+        return;
+      }
       const routes: Record<string, string> = {
         farmer: "/farmer/dashboard",
         merchant: "/merchant/dashboard",
@@ -96,7 +100,8 @@ const Login = () => {
       console.log("[v0] Redirecting to:", targetRoute);
       navigate(targetRoute);
     }
-  }, [user, profile, navigate]);
+  }, [user, profile, navigate, safeNext]);
+
 
   useEffect(() => {
     if (resendTimer > 0) {
