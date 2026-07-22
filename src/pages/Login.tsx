@@ -30,7 +30,11 @@ const Login = () => {
   const { t } = useLanguage();
   const { toast } = useToast();
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const nextParam = searchParams.get("next");
+  const safeNext = nextParam && nextParam.startsWith("/") && !nextParam.startsWith("//") ? nextParam : null;
   const { user, profile, signUpWithAadhaar, signInWithAadhaar, signInWithPhoneOTP, verifyPhoneOTP } = useAuth();
+
 
   const [selectedRole, setSelectedRole] = useState<string | null>(null);
   const [isLogin, setIsLogin] = useState(true);
