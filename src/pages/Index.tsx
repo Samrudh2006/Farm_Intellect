@@ -190,8 +190,10 @@ const Index = () => {
         </div>
       </motion.header>
 
+      <main>
       {/* Hero Section with Background Image */}
       <section className="relative py-20 lg:py-32 overflow-hidden min-h-[85vh] flex items-center">
+
         {/* Background Image */}
         <div className="absolute inset-0 z-0 overflow-hidden">
           <motion.img
@@ -502,9 +504,11 @@ const Index = () => {
           </div>
         </div>
       </section>
+      </main>
 
       {/* Footer */}
       <footer className="bg-card border-t border-border py-12">
+
         <div className="container mx-auto px-4 text-center">
           <motion.div
             initial={{ opacity: 0 }}
@@ -518,9 +522,10 @@ const Index = () => {
              <p className="text-muted-foreground">
                {t('landing.footer_tagline')}
              </p>
-             <p className="text-xs text-muted-foreground/70 mt-4">
+             <p className="text-xs text-muted-foreground mt-4">
                {t('landing.footer_copyright')}
              </p>
+
           </motion.div>
         </div>
         <div className="tricolor-bar h-1.5 mt-8" />

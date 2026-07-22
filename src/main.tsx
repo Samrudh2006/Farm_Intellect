@@ -79,22 +79,24 @@ if (!rootElement) {
 }
 
 // Render app
-try {
-  await initI18n();
-  createRoot(rootElement).render(
-    <Sentry.ErrorBoundary fallback={({ error, resetError }) => (
-      <div style={{ padding: '20px', color: 'red' }}>
-        <h1>Application Error</h1>
-        <p>An error occurred: {(error as Error)?.message}</p>
-        <button onClick={resetError}>Try again</button>
-      </div>
-    )} showDialog>
-      <App />
-    </Sentry.ErrorBoundary>
-  );
-  console.log("[v0] React app rendered successfully");
-} catch (err) {
-  console.error("[v0] Failed to render React app:", err);
-  Sentry.captureException(err);
-  rootElement.innerHTML = '<div style="padding: 20px; color: red;"><h1>Application Error</h1><p>Failed to load the application. Please refresh the page or clear your browser cache.</p></div>';
-}
+initI18n()
+  .then(() => {
+    createRoot(rootElement).render(
+      <Sentry.ErrorBoundary fallback={({ error, resetError }) => (
+        <div style={{ padding: '20px', color: 'red' }}>
+          <h1>Application Error</h1>
+          <p>An error occurred: {(error as Error)?.message}</p>
+          <button onClick={resetError}>Try again</button>
+        </div>
+      )} showDialog>
+        <App />
+      </Sentry.ErrorBoundary>
+    );
+    console.log("[v0] React app rendered successfully");
+  })
+  .catch((err) => {
+    console.error("[v0] Failed to render React app:", err);
+    Sentry.captureException(err);
+    rootElement.innerHTML = '<div style="padding: 20px; color: red;"><h1>Application Error</h1><p>Failed to load the application. Please refresh the page or clear your browser cache.</p></div>';
+  });
+
