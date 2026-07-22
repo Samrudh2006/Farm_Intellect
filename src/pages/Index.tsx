@@ -190,8 +190,10 @@ const Index = () => {
         </div>
       </motion.header>
 
+      <main>
       {/* Hero Section with Background Image */}
       <section className="relative py-20 lg:py-32 overflow-hidden min-h-[85vh] flex items-center">
+
         {/* Background Image */}
         <div className="absolute inset-0 z-0 overflow-hidden">
           <motion.img
