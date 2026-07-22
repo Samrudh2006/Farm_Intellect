@@ -58,6 +58,8 @@ const AdminChat = lazy(() => import("@/pages/admin/AdminChat"));
 const AdminAuditLog = lazy(() => import("@/pages/admin/AdminAuditLog"));
 const AdminSms = lazy(() => import("@/pages/admin/AdminSms"));
 const SmsRegister = lazy(() => import("@/pages/SmsRegister"));
+const OAuthConsent = lazy(() => import("@/pages/OAuthConsent"));
+
 
 // Intelligence Center
 const CommandCenter = lazy(() => import("@/pages/admin/intelligence/CommandCenter"));
@@ -72,7 +74,9 @@ export const publicRoutes: PublicRouteConfig[] = [
   { path: "/launch", component: AppLauncher },
   { path: "/reset-password", component: ResetPassword },
   { path: "/sms-register", component: SmsRegister },
+  { path: "/.lovable/oauth/consent", component: OAuthConsent },
 ];
+
 
 export const protectedRoutes: ProtectedRouteConfig[] = [
   { path: "/farmer/dashboard", component: FarmerDashboard, allowedRoles: ["farmer"] },

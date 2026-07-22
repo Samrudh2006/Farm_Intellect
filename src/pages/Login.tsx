@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -30,7 +30,11 @@ const Login = () => {
   const { t } = useLanguage();
   const { toast } = useToast();
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const nextParam = searchParams.get("next");
+  const safeNext = nextParam && nextParam.startsWith("/") && !nextParam.startsWith("//") ? nextParam : null;
   const { user, profile, signUpWithAadhaar, signInWithAadhaar, signInWithPhoneOTP, verifyPhoneOTP } = useAuth();
+
 
   const [selectedRole, setSelectedRole] = useState<string | null>(null);
   const [isLogin, setIsLogin] = useState(true);
@@ -82,6 +86,10 @@ const Login = () => {
   useEffect(() => {
     console.log("[v0] Login page auth check:", { user: !!user, profile: !!profile, userRole: profile?.role });
     if (user && profile) {
+      if (safeNext) {
+        navigate(safeNext, { replace: true });
+        return;
+      }
       const routes: Record<string, string> = {
         farmer: "/farmer/dashboard",
         merchant: "/merchant/dashboard",
@@ -92,7 +100,8 @@ const Login = () => {
       console.log("[v0] Redirecting to:", targetRoute);
       navigate(targetRoute);
     }
-  }, [user, profile, navigate]);
+  }, [user, profile, navigate, safeNext]);
+
 
   useEffect(() => {
     if (resendTimer > 0) {

@@ -3,6 +3,8 @@ import react from "@vitejs/plugin-react-swc";
 import path from "path";
 import { componentTagger } from "lovable-tagger";
 import { visualizer } from "rollup-plugin-visualizer";
+import { mcpPlugin } from "@lovable.dev/mcp-js/stacks/supabase/vite";
+
 
 // Vercel parity: prefer VITE_* env vars (what the client actually reads),
 // fall back to Vercel/Next-style names. Only inject via `define` when we
@@ -96,6 +98,7 @@ export default defineConfig(({ mode }) => ({
       },
     },
     mode === "development" && componentTagger(),
+    mcpPlugin(),
     visualizer({
       filename: "dist/stats.html",
       title: "Bundle Analysis",
@@ -104,6 +107,7 @@ export default defineConfig(({ mode }) => ({
       brotliSize: false,
     }),
   ].filter(Boolean),
+
   resolve: {
     alias: {
       "@": path.resolve(__dirname, "./src"),

@@ -1,0 +1,123 @@
+{
+  "version": 1,
+  "sdk_version": "0.24.0",
+  "path": "/functions/v1/mcp",
+  "auth": {
+    "type": "oauth",
+    "issuer": "https://exynaicvgadoenjfunqz.supabase.co/auth/v1",
+    "accepted_audiences": [
+      "authenticated"
+    ]
+  },
+  "mcp": {
+    "server": {
+      "name": "krishisarthi-mcp",
+      "version": "0.1.0",
+      "title": "KrishiSarthi MCP"
+    },
+    "tools": [
+      {
+        "name": "get_my_profile",
+        "title": "Get my profile",
+        "description": "Return the signed-in KrishiSarthi user's profile (name, phone, location, role).",
+        "annotations": {
+          "readOnlyHint": true,
+          "idempotentHint": true,
+          "openWorldHint": false
+        },
+        "inputSchema": {
+          "$schema": "http://json-schema.org/draft-07/schema#",
+          "type": "object",
+          "properties": {}
+        },
+        "outputSchema": null
+      },
+      {
+        "name": "list_my_notifications",
+        "title": "List my notifications",
+        "description": "List the signed-in user's KrishiSarthi notifications (weather, crop tasks, market alerts). Most recent first.",
+        "annotations": {
+          "readOnlyHint": true,
+          "idempotentHint": true,
+          "openWorldHint": false
+        },
+        "inputSchema": {
+          "$schema": "http://json-schema.org/draft-07/schema#",
+          "type": "object",
+          "properties": {
+            "limit": {
+              "description": "Max notifications to return (default 10).",
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 50
+            },
+            "unread_only": {
+              "description": "If true, return only unread notifications.",
+              "type": "boolean"
+            }
+          }
+        },
+        "outputSchema": null
+      },
+      {
+        "name": "list_my_crop_plans",
+        "title": "List my crop plans",
+        "description": "List the signed-in farmer's crop plans (crop, season, sowing date, expected harvest, area).",
+        "annotations": {
+          "readOnlyHint": true,
+          "idempotentHint": true,
+          "openWorldHint": false
+        },
+        "inputSchema": {
+          "$schema": "http://json-schema.org/draft-07/schema#",
+          "type": "object",
+          "properties": {}
+        },
+        "outputSchema": null
+      },
+      {
+        "name": "log_field_event",
+        "title": "Log a field event",
+        "description": "Record a field activity (irrigation, fertilizer, pesticide, sowing, harvest, observation) for the signed-in farmer.",
+        "annotations": {
+          "readOnlyHint": false,
+          "destructiveHint": false,
+          "openWorldHint": false
+        },
+        "inputSchema": {
+          "$schema": "http://json-schema.org/draft-07/schema#",
+          "type": "object",
+          "properties": {
+            "event_type": {
+              "type": "string",
+              "enum": [
+                "irrigation",
+                "fertilizer",
+                "pesticide",
+                "sowing",
+                "harvest",
+                "observation",
+                "other"
+              ],
+              "description": "Kind of field activity."
+            },
+            "notes": {
+              "type": "string",
+              "minLength": 1,
+              "description": "Short description of what happened."
+            },
+            "crop": {
+              "description": "Optional crop name this event relates to.",
+              "type": "string"
+            }
+          },
+          "required": [
+            "event_type",
+            "notes"
+          ]
+        },
+        "outputSchema": null
+      }
+    ]
+  }
+}
