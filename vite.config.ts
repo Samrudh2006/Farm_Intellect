@@ -98,6 +98,7 @@ export default defineConfig(({ mode }) => ({
       },
     },
     mode === "development" && componentTagger(),
+    mcpPlugin(),
     visualizer({
       filename: "dist/stats.html",
       title: "Bundle Analysis",
@@ -106,6 +107,7 @@ export default defineConfig(({ mode }) => ({
       brotliSize: false,
     }),
   ].filter(Boolean),
+
   resolve: {
     alias: {
       "@": path.resolve(__dirname, "./src"),
