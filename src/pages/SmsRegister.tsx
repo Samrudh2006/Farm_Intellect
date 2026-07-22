@@ -27,7 +27,7 @@ const schema = z.object({
   crop: z.string().min(1, "Select crop"),
   language: z.string().min(1),
   farmerType: z.enum(["self", "sevak_registered"]),
-  consent: z.literal(true, { errorMap: () => ({ message: "Consent is required to send SMS" }) }),
+  consent: z.literal(true, { message: "Consent is required to send SMS" }),
 });
 
 const SmsRegister = () => {
