@@ -211,29 +211,43 @@ router.post('/login', loginValidation, logActivity, async (req, res) => {
   }
 });
 
-// Verify OTP endpoint
-router.post('/verify-otp', otpLimiter, async (req, res) => {
-  try {
-    const { userId, code, purpose } = req.body;
+// Resolve a userId for OTP flows: prefer authenticated session, else a
+// signed otpToken issued at signup. Raw client-supplied userId is rejected.
+async function resolveOtpUserId(req, purpose) {
+  const authHeader = req.headers.authorization;
+  if (authHeader?.startsWith('Bearer ')) {
+    try {
+      const { verifyToken } = await import('../utils/auth.js');
+      const decoded = verifyToken(authHeader.slice(7));
+      if (decoded?.userId) return decoded.userId;
+    } catch { /* fall through */ }
+  }
+  const token = req.body?.otpToken;
+  if (token) return verifyOtpToken(token, purpose);
+  return null;
+}
 
-    if (!userId || !code || !purpose) {
+// Verify OTP endpoint — binds to session or signed otpToken (not raw userId).
+router.post('/verify-otp', otpLimiter, otpAccountLimiter, async (req, res) => {
+  try {
+    const { code, purpose } = req.body;
+    if (!code || !purpose) {
       return res.status(400).json({ error: 'Missing required fields' });
+    }
+    const userId = await resolveOtpUserId(req, purpose);
+    if (!userId) {
+      return res.status(401).json({ error: 'Authentication required for OTP verification' });
     }
 
     const isValid = await verifyOTP(userId, code, purpose);
-    
     if (!isValid) {
       return res.status(400).json({ error: 'Invalid or expired OTP' });
     }
 
-    // Update verification status based on purpose
     if (purpose === 'signup') {
       await prisma.user.update({
         where: { id: userId },
-        data: {
-          isVerified: true,
-          emailVerified: true // Assuming email OTP for signup
-        }
+        data: { isVerified: true, emailVerified: true },
       });
     }
 
@@ -244,29 +258,30 @@ router.post('/verify-otp', otpLimiter, async (req, res) => {
   }
 });
 
-// Resend OTP
-router.post('/resend-otp', otpLimiter, async (req, res) => {
+// Resend OTP — binds to session or signed otpToken.
+router.post('/resend-otp', otpLimiter, otpAccountLimiter, async (req, res) => {
   try {
-    const { userId, type, purpose } = req.body;
+    const { type, purpose } = req.body;
+    const userId = await resolveOtpUserId(req, purpose ?? 'signup');
+    if (!userId) {
+      return res.status(401).json({ error: 'Authentication required to resend OTP' });
+    }
 
-    const user = await prisma.user.findUnique({
-      where: { id: userId }
-    });
-
+    const user = await prisma.user.findUnique({ where: { id: userId } });
     if (!user) {
       return res.status(404).json({ error: 'User not found' });
     }
 
     const contact = type === 'EMAIL' ? user.email : user.phone;
     if (!contact) {
-      return res.status(400).json({ error: `${type.toLowerCase()} not available` });
+      return res.status(400).json({ error: `${String(type).toLowerCase()} not available` });
     }
 
     await sendOTP(userId, contact, type, purpose);
-
-    res.json({ message: `OTP sent to your ${type.toLowerCase()}` });
+    res.json({ message: `OTP sent to your ${String(type).toLowerCase()}` });
   } catch (error) {
     logger.error('Resend OTP error:', error);
+
     res.status(500).json({ error: 'Internal server error' });
   }
 });
