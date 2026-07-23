@@ -228,6 +228,8 @@ async function insertAlerts(alerts: AlertPayload[]) {
 
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response("ok", { headers: corsHeaders });
+  const authFail = await requireAdminOrSecret(req);
+  if (authFail) return authFail;
   try {
     const url = new URL(req.url);
     const kinds = (url.searchParams.get("kinds") ?? "weather,market,crop").split(",");
