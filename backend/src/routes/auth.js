@@ -130,11 +130,17 @@ router.post('/signup', signupValidation, logActivity, async (req, res) => {
     }
 
     const { password: _, ...userWithoutPassword } = user;
-    
+
+    // Short-lived, signed token binds subsequent verify-otp / resend-otp calls
+    // to this specific userId+purpose. Prevents attackers from targeting
+    // arbitrary userIds via public OTP endpoints.
+    const otpToken = signOtpToken(user.id, 'signup');
+
     res.status(201).json({
       message: 'User created successfully. Please verify your email and phone.',
       user: userWithoutPassword,
-      requiresVerification: true
+      requiresVerification: true,
+      otpToken,
     });
   } catch (error) {
     logger.error('Signup error:', error);
