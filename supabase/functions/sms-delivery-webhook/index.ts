@@ -1,5 +1,6 @@
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.0";
 import { toIndianE164 } from "../_shared/phone.ts";
+import { requireWebhookSecret } from "../_shared/auth.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -25,6 +26,8 @@ Deno.serve(async (req) => {
       status: 405, headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
   }
+  const sigFail = requireWebhookSecret(req);
+  if (sigFail) return sigFail;
 
   try {
     const payload = (await req.json().catch(() => ({}))) as DeliveryPayload;

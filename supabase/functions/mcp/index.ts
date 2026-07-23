@@ -9,7 +9,7 @@ import { auth, defineMcp } from "npm:@lovable.dev/mcp-js@0.24.0";
 import { createClient } from "npm:@supabase/supabase-js@^2.98.0";
 import { defineTool } from "npm:@lovable.dev/mcp-js@0.24.0";
 function userClient(ctx) {
-  return createClient(process.env.SUPABASE_URL, process.env.SUPABASE_PUBLISHABLE_KEY, {
+  return createClient("https://exynaicvgadoenjfunqz.supabase.co", "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImV4eW5haWN2Z2Fkb2VuamZ1bnF6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzI3NzUwNjgsImV4cCI6MjA4ODM1MTA2OH0.T-xiyOGqzXkfFrg1FxsRyb6f_ErMMKGH8CmBOyVqgu8", {
     global: { headers: { Authorization: `Bearer ${ctx.getToken()}` } },
     auth: { persistSession: false, autoRefreshToken: false }
   });
@@ -44,7 +44,7 @@ import { createClient as createClient2 } from "npm:@supabase/supabase-js@^2.98.0
 import { defineTool as defineTool2 } from "npm:@lovable.dev/mcp-js@0.24.0";
 import { z } from "npm:zod@^4.4.3";
 function userClient2(ctx) {
-  return createClient2(process.env.SUPABASE_URL, process.env.SUPABASE_PUBLISHABLE_KEY, {
+  return createClient2("https://exynaicvgadoenjfunqz.supabase.co", "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImV4eW5haWN2Z2Fkb2VuamZ1bnF6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzI3NzUwNjgsImV4cCI6MjA4ODM1MTA2OH0.T-xiyOGqzXkfFrg1FxsRyb6f_ErMMKGH8CmBOyVqgu8", {
     global: { headers: { Authorization: `Bearer ${ctx.getToken()}` } },
     auth: { persistSession: false, autoRefreshToken: false }
   });
@@ -77,7 +77,7 @@ var list_notifications_default = defineTool2({
 import { createClient as createClient3 } from "npm:@supabase/supabase-js@^2.98.0";
 import { defineTool as defineTool3 } from "npm:@lovable.dev/mcp-js@0.24.0";
 function userClient3(ctx) {
-  return createClient3(process.env.SUPABASE_URL, process.env.SUPABASE_PUBLISHABLE_KEY, {
+  return createClient3("https://exynaicvgadoenjfunqz.supabase.co", "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImV4eW5haWN2Z2Fkb2VuamZ1bnF6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzI3NzUwNjgsImV4cCI6MjA4ODM1MTA2OH0.T-xiyOGqzXkfFrg1FxsRyb6f_ErMMKGH8CmBOyVqgu8", {
     global: { headers: { Authorization: `Bearer ${ctx.getToken()}` } },
     auth: { persistSession: false, autoRefreshToken: false }
   });
@@ -106,7 +106,7 @@ import { createClient as createClient4 } from "npm:@supabase/supabase-js@^2.98.0
 import { defineTool as defineTool4 } from "npm:@lovable.dev/mcp-js@0.24.0";
 import { z as z2 } from "npm:zod@^4.4.3";
 function userClient4(ctx) {
-  return createClient4(process.env.SUPABASE_URL, process.env.SUPABASE_PUBLISHABLE_KEY, {
+  return createClient4("https://exynaicvgadoenjfunqz.supabase.co", "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImV4eW5haWN2Z2Fkb2VuamZ1bnF6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzI3NzUwNjgsImV4cCI6MjA4ODM1MTA2OH0.T-xiyOGqzXkfFrg1FxsRyb6f_ErMMKGH8CmBOyVqgu8", {
     global: { headers: { Authorization: `Bearer ${ctx.getToken()}` } },
     auth: { persistSession: false, autoRefreshToken: false }
   });

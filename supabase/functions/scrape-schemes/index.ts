@@ -1,5 +1,6 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.0";
+import { requireAdminOrSecret, isAllowedOutboundUrl } from "../_shared/auth.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -44,8 +45,13 @@ Each object must perfectly match this TypeScript interface:
 }
 `;
 
+const ALLOWED_SCHEME_DOMAINS = ["gov.in", "nic.in", "mygov.in", "india.gov.in"];
+
 serve(async (req) => {
   if (req.method === "OPTIONS") return new Response("ok", { headers: corsHeaders });
+
+  const authFail = await requireAdminOrSecret(req);
+  if (authFail) return authFail;
 
   try {
     const { text, url } = await req.json();
@@ -60,11 +66,20 @@ serve(async (req) => {
 
     let rawText = text;
     if (url && !text) {
-        // Fetch raw text from URL (if possible)
-        const r = await fetch(url);
-        rawText = await r.text();
-        // Just take the first 15000 characters to avoid huge payloads
-        rawText = rawText.substring(0, 15000);
+        if (!isAllowedOutboundUrl(url, ALLOWED_SCHEME_DOMAINS)) {
+          return new Response(
+            JSON.stringify({ ok: false, error: "URL not in allow-list (only *.gov.in / *.nic.in)" }),
+            { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } },
+          );
+        }
+        const ctrl = new AbortController();
+        const timer = setTimeout(() => ctrl.abort(), 10000);
+        try {
+          const r = await fetch(url, { signal: ctrl.signal, redirect: "error" });
+          rawText = (await r.text()).substring(0, 15000);
+        } finally {
+          clearTimeout(timer);
+        }
     }
 
     console.log("Sending data to Gemini API...");

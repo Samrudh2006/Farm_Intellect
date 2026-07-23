@@ -2,6 +2,7 @@
 // Triggered by pg_cron (daily) or invoked manually by admins.
 // Uses service_role to bypass RLS on notifications. Respects notification_preferences.
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.0";
+import { requireAdminOrSecret } from "../_shared/auth.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -227,6 +228,8 @@ async function insertAlerts(alerts: AlertPayload[]) {
 
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response("ok", { headers: corsHeaders });
+  const authFail = await requireAdminOrSecret(req);
+  if (authFail) return authFail;
   try {
     const url = new URL(req.url);
     const kinds = (url.searchParams.get("kinds") ?? "weather,market,crop").split(",");

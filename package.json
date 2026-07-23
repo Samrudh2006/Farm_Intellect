@@ -19,7 +19,7 @@
     "start": "npm --prefix backend run start"
   },
   "dependencies": {
-    "@capacitor/cli": "^8.2.0",
+    "@capacitor/cli": "^8.4.2",
     "@capacitor/ios": "^8.2.0",
     "@hookform/resolvers": "^3.10.0",
     "@lovable.dev/mcp-js": "^0.24.0",
