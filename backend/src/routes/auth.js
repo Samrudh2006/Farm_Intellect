@@ -1,5 +1,6 @@
 import express from 'express';
 import rateLimit from 'express-rate-limit';
+import jwt from 'jsonwebtoken';
 import { body, validationResult } from 'express-validator';
 import { authenticate } from '../middleware/auth.js';
 import prisma from '../config/database.js';
@@ -7,6 +8,30 @@ import { generateToken, hashPassword, comparePassword } from '../utils/auth.js';
 import { sendOTP, verifyOTP } from '../utils/otp.js';
 import { logActivity } from '../middleware/activity.js';
 import { logger } from '../utils/logger.js';
+
+const OTP_TOKEN_TTL = '15m';
+const signOtpToken = (userId, purpose) =>
+  jwt.sign({ userId, purpose, kind: 'otp' }, process.env.JWT_SECRET, { expiresIn: OTP_TOKEN_TTL });
+const verifyOtpToken = (token, expectedPurpose) => {
+  try {
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    if (decoded.kind !== 'otp' || decoded.purpose !== expectedPurpose) return null;
+    return decoded.userId;
+  } catch { return null; }
+};
+
+// Per-account limiter for OTP verify/resend (in addition to per-IP `otpLimiter`).
+const otpAccountLimiter = rateLimit({
+  windowMs: 10 * 60 * 1000,
+  max: 8,
+  keyGenerator: (req) => {
+    const token = req.body?.otpToken;
+    const uid = token ? verifyOtpToken(token, req.body?.purpose ?? 'signup') : null;
+    return uid || req.ip;
+  },
+  message: 'Too many OTP attempts for this account. Please try again later.',
+});
+
 
 const router = express.Router();
 
