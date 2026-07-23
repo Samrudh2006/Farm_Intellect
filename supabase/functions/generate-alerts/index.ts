@@ -2,6 +2,7 @@
 // Triggered by pg_cron (daily) or invoked manually by admins.
 // Uses service_role to bypass RLS on notifications. Respects notification_preferences.
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.0";
+import { requireAdminOrSecret } from "../_shared/auth.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
