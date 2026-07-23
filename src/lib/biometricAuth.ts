@@ -196,7 +196,11 @@ const setStore = async (items: StoredBiometric[]) => {
       kind: item.kind,
       label: item.label,
       createdAt: item.createdAt,
-      secure: await encryptPayload({ aadhaar: item.aadhaar, passkey: item.passkey }, active),
+      // Security: never persist the raw passkey/password client-side, even encrypted —
+      // the AES key lives in the same browser storage, so any in-page script could
+      // decrypt it. Store only the aadhaar reference; the user must re-enter their
+      // passkey (or complete a WebAuthn assertion → server session exchange) at login.
+      secure: await encryptPayload({ aadhaar: item.aadhaar, passkey: "" }, active),
     })),
   );
   setEncryptedStore(encryptedItems);
