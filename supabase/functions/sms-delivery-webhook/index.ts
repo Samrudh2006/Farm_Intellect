@@ -26,6 +26,8 @@ Deno.serve(async (req) => {
       status: 405, headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
   }
+  const sigFail = requireWebhookSecret(req);
+  if (sigFail) return sigFail;
 
   try {
     const payload = (await req.json().catch(() => ({}))) as DeliveryPayload;
