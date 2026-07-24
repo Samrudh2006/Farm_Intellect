@@ -21,7 +21,7 @@
   },
   "dependencies": {
     "@prisma/client": "^5.7.1",
-    "@sentry/node": "^8.33.1",
+    "@sentry/node": "^10.67.0",
     "@supabase/supabase-js": "^2.57.4",
     "bcryptjs": "^2.4.3",
     "cors": "^2.8.5",
@@ -43,8 +43,7 @@
     "winston": "^3.11.0"
   },
   "overrides": {
-    "uuid": "$uuid",
-    "@opentelemetry/core": "^2.8.0"
+    "uuid": "$uuid"
   },
   "devDependencies": {
     "cross-env": "^10.1.0",
