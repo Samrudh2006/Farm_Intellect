@@ -68,6 +68,9 @@
 
 <sub>⭐ **Star this repo** if it helps even one farmer feed our nation. ⭐</sub>
 
+
+<p><a href="https://drive.google.com/file/d/1PGjm6dL0FZayHzGJe2D-6sugGCCTvfCu/view">Watch the concept film</a></p>
+
 </div>
 
 <br/>
