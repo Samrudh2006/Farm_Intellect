@@ -5,6 +5,7 @@ import {
   getCalendarBySeason,
   getCalendarByState,
   getCalendarZones,
+  getSeasonFromDate,
 } from '@/data/cropCalendar';
 
 describe('cropCalendar data', () => {
@@ -30,5 +31,11 @@ describe('cropCalendar data', () => {
   it('getCalendarZones returns zone names', () => {
     const zones = getCalendarZones();
     expect(zones.length).toBeGreaterThan(0);
+  });
+
+  it('getSeasonFromDate maps dates to crop seasons', () => {
+    expect(getSeasonFromDate(new Date(2024, 0, 15))).toBe('Rabi');
+    expect(getSeasonFromDate(new Date(2024, 3, 15))).toBe('Zaid');
+    expect(getSeasonFromDate(new Date(2024, 7, 15))).toBe('Kharif');
   });
 });

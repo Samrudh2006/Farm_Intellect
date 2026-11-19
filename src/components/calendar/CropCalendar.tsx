@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -20,10 +20,11 @@ import {
   Trash2,
   Calendar as CalendarIcon,
   BookOpen,
-  CloudRain
+  CloudRain,
+  Sparkles,
 } from "lucide-react";
-import { format } from "date-fns";
-import { getCalendarByCrop, getCalendarBySeason, cropCalendarData } from "@/data/cropCalendar";
+import { format, parseISO } from "date-fns";
+import { getCalendarByCrop, getCalendarBySeason, getSeasonFromDate, cropCalendarData } from "@/data/cropCalendar";
 
 interface CropEntry {
   id: string;
@@ -46,13 +47,14 @@ interface Reminder {
 export const CropCalendar = () => {
   const [entries, setEntries] = useState<CropEntry[]>([]);
   const [showCreateEntry, setShowCreateEntry] = useState(false);
-  const [selectedEntry, setSelectedEntry] = useState<CropEntry | null>(null);
   const [selectedDate, setSelectedDate] = useState<Date>(new Date());
   const [selectedAdvisoryCrop, setSelectedAdvisoryCrop] = useState<string>("");
   
   // AICRPAM calendar lookup
   const advisoryCalendar = selectedAdvisoryCrop ? getCalendarByCrop(selectedAdvisoryCrop) : [];
   const availableCrops = [...new Set(cropCalendarData.map(c => c.crop))];
+  const selectedSeason = useMemo(() => getSeasonFromDate(selectedDate), [selectedDate]);
+  const seasonalAdvisories = useMemo(() => getCalendarBySeason(selectedSeason), [selectedSeason]);
   
   const [newEntry, setNewEntry] = useState({
     cropType: "",
@@ -458,6 +460,69 @@ export const CropCalendar = () => {
           </CardContent>
         </Card>
       )}
+
+      {/* Seasonal planning helper */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <Sparkles className="h-5 w-5 text-green-600" />
+            Smart seasonal planning
+          </CardTitle>
+          <CardDescription>
+            Pick a planning date to surface the most relevant season and advisory calendar.
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div className="grid gap-4 md:grid-cols-2">
+            <div className="space-y-2">
+              <Label htmlFor="calendar-planning-date">Planning date</Label>
+              <Input
+                id="calendar-planning-date"
+                type="date"
+                value={format(selectedDate, "yyyy-MM-dd")}
+                onChange={(event) => {
+                  if (event.target.value) {
+                    setSelectedDate(parseISO(event.target.value));
+                  }
+                }}
+              />
+            </div>
+            <div className="rounded-lg border bg-muted/30 p-4">
+              <p className="text-sm text-muted-foreground">Suggested season</p>
+              <p className="text-xl font-semibold">{selectedSeason}</p>
+              <p className="text-sm text-muted-foreground">
+                {seasonalAdvisories.length} crop calendars match this planning window.
+              </p>
+            </div>
+          </div>
+
+          {seasonalAdvisories.length > 0 ? (
+            <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-3">
+              {seasonalAdvisories.slice(0, 6).map((calendar) => (
+                <div key={calendar.id} className="rounded-lg border p-4">
+                  <div className="flex items-start justify-between gap-3">
+                    <div>
+                      <p className="font-semibold">{calendar.crop}</p>
+                      <p className="text-xs text-muted-foreground">{calendar.zone}</p>
+                    </div>
+                    <Badge variant="outline">{calendar.season}</Badge>
+                  </div>
+                  <p className="mt-3 text-sm text-muted-foreground">
+                    Sowing: {calendar.sowingWindow.optimal}
+                  </p>
+                  <p className="text-sm text-muted-foreground">
+                    Harvest: {calendar.harvestWindow.start} – {calendar.harvestWindow.end}
+                  </p>
+                </div>
+              ))}
+            </div>
+          ) : (
+            <p className="text-sm text-muted-foreground">
+              No advisory calendars found for the selected season.
+            </p>
+          )}
+        </CardContent>
+      </Card>
 
       {/* AICRPAM Crop Advisory Calendar Section */}
       <Card>
